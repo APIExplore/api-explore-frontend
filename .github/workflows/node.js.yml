@@ -31,7 +31,7 @@ jobs:
     - name: Clean install
       run: yarn install --frozen-lockfile
       
-    - run: yarn run build --if-present
+    - run: yarn run build
 
     - name: Run tests
       run: yarn test --if-present
