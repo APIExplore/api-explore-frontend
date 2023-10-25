@@ -24,8 +24,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        - name: Install Yarn
-          run: npm install -g yarn
+        
+    - name: Install Yarn
+      run: npm install -g yarn
         
     - name: Clean install
       run: yarn install --frozen-lockfile
