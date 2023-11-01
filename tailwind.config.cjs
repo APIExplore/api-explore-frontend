@@ -1,7 +1,12 @@
+const {preset, color} = require('@tiller-ds/theme');
 
 module.exports = {
-    content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
-    ],
+    presets: [preset],
+    theme: {
+        extend: {
+            colors: {
+                primary: color("rose"),
+            }
+        }
+    }
 };

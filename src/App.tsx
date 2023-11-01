@@ -1,14 +1,19 @@
 import React from "react";
 
-import react from "./assets/react.svg";
+import BottomPanel from "./components/BottomPanel/BottomPanel";
+import LeftPanel from "./components/LeftPanel/LeftPanel";
+import RightPanel from "./components/RightPanel/RightPanel";
+import VisualisationPanel from "./components/VisualisationPanel/VisualisationPanel";
 
 function App() {
   return (
-    <div className="flex flex-col items-center justify-center mx-auto my-auto max-w-xl h-screen">
-      <img src={react} alt="logo" className="w-64 mb-2" />
-      <div className="flex my-8">
-        <p className="text-2xl font-medium">api-explore</p>
+    <div className="flex flex-col h-screen">
+      <div className="flex flex-row">
+        <LeftPanel />
+        <VisualisationPanel />
+        <RightPanel />
       </div>
+      <BottomPanel />
     </div>
   );
 }

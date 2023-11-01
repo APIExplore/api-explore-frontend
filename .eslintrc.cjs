@@ -3,14 +3,14 @@ module.exports = {
         browser: true,
         es2021: true
     },
-    extends: ["eslint:recommended", "plugin:react/recommended", "plugin:import/recommended", "plugin:import/typescript", "plugin:prettier/recommended", "plugin:@typescript-eslint/recommended", "eslint-config-prettier", "plugin:storybook/recommended", "plugin:eslint-plugin-react-hooks/recommended"],
+    extends: ["plugin:import/errors", "plugin:import/warnings", "eslint:recommended", "plugin:react/recommended", "plugin:import/recommended", "plugin:import/typescript", "plugin:prettier/recommended", "plugin:@typescript-eslint/recommended", "eslint-config-prettier", "plugin:storybook/recommended", "plugin:eslint-plugin-react-hooks/recommended"],
     overrides: [],
     parser: '@typescript-eslint/parser',
     parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module'
     },
-    plugins: ["react", "@typescript-eslint", "unused-imports"],
+    plugins: ["react", "@typescript-eslint", "unused-imports", "import"],
     settings: {
         react: {
             pragma: "React",
@@ -50,8 +50,14 @@ module.exports = {
                 "pattern": "react",
                 "group": "builtin",
                 "position": "before"
+            }, {
+                "pattern": "@tiller-ds/**",
+                "group": "internal"
+            }, {
+                "pattern": "@nrich/**",
+                "group": "internal"
             }],
-            "pathGroupsExcludedImportTypes": ["react"],
+            "pathGroupsExcludedImportTypes": ["react", "@tiller-ds/**"],
             "groups": ["builtin", "external", "internal", ["parent", "sibling"], "index"]
         }]
     }
