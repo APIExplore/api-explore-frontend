@@ -5,44 +5,44 @@ import { Autocomplete } from "@tiller-ds/selectors";
 // import { DragZoneField } from "@tiller-ds/formik-elements";
 import { useRequestsStore } from "../../stores/requestsStore";
 import { useEffect, useState, useRef } from "react";
+import axios from "axios";
 
 export default function RightPanel() {
+  const backendDomain = "http://localhost:3000";
   const setRequests = useRequestsStore((store: any) => store.setRequests);
-  const [apiSchema, setApiSchema] = useState("");
+  const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
+  const allRequests = useRequestsStore((store: any) => store.allRequests);
+  const isMountingRef = useRef(false);
+  const [inputError, setInputError] = useState("");
+  const [apiSchema, setApiSchema] = useState(
+    "http://localhost:8080/swagger.json"
+  );
   const [selectedMethods, setSelectedMethods]: any = useState({
     get: false,
     post: false,
     put: false,
     delete: false,
   });
-  /* DUMMY this will be all selected offers from schema*/
-  const items = [
-    {
-      path: "/products/{productName}",
-      method: "get",
-      parameters: [
-        {
-          name: "productName",
-          in: "path",
-          required: true,
-          type: "string",
-        },
-      ],
-    },
-    {
-      path: "/products/{nesto}",
-      method: "post",
-      parameters: [
-        {
-          name: "nesto",
-          in: "path",
-          required: true,
-          type: "string",
-        },
-      ],
-    },
-  ];
-  const [shownItems, setShownItems] = useState(items);
+
+  const [shownItems, setShownItems] = useState(allRequests);
+
+  function convertSchemaToList(schema: any) {
+    let items = [];
+
+    for (const path in schema.paths) {
+      for (const method in schema.paths[path]) {
+        if (schema.paths[path][method]) {
+          items.push({
+            path: path,
+            method: method,
+            parameters: schema.paths[path][method].parameters,
+          });
+        }
+      }
+    }
+
+    return items;
+  }
 
   // Function when checkbox is selected
   const onCheckboxChange = (val: any) => {
@@ -60,8 +60,23 @@ export default function RightPanel() {
   };
 
   // Submit api adress to backend
-  const submitApiAdress = () => {
-    console.log(apiSchema);
+  const submitApiAdress = async () => {
+    // http://localhost:8080/swagger.json
+    try {
+      const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
+        address: apiSchema,
+      });
+
+      if (data.statusText != "OK") {
+        setInputError(data.data.error);
+      }
+
+      const schemaList = convertSchemaToList(data.data);
+      setAllRequests(schemaList);
+      setShownItems(schemaList);
+    } catch (e: any) {
+      setInputError(e.response.data.error);
+    }
   };
 
   // Filter requests depending on checkboxes
@@ -72,17 +87,26 @@ export default function RightPanel() {
       !selectedMethods.put &&
       !selectedMethods.delete
     ) {
-      setShownItems(items);
+      setShownItems(allRequests);
     } else {
       setShownItems(
-        items.filter((item: any) => selectedMethods[item.method] === true)
+        allRequests.filter((item: any) => selectedMethods[item.method] === true)
       );
     }
   };
 
+  // Create hook from this
+  useEffect(() => {
+    isMountingRef.current = true;
+  }, []);
+
   // On Methods checkboxes change filter items
   useEffect(() => {
-    filterRequests();
+    if (!isMountingRef.current) {
+      filterRequests();
+    } else {
+      isMountingRef.current = false;
+    }
   }, [selectedMethods]);
 
   // Props for autocomplete component
@@ -90,11 +114,11 @@ export default function RightPanel() {
     name: "Endpoints",
     onChange: onEndpointsChange,
     onBlur: () => {},
-    itemToString: (item: any) => `${item.path} - ${item.method.toUpperCase()}`,
+    itemToString: (item: any) => `${item.path} ${item.method.toUpperCase()}`,
     sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
     options: shownItems,
     allowMultiple: true,
-    getOptionValue: (item: any) => item.path,
+    getOptionValue: (item: any) => item.path + "|" + item.method,
     filter: (path: string, option: any) => option.path.toLowerCase(),
   };
 
@@ -111,6 +135,7 @@ export default function RightPanel() {
             /> */}
             <div className="flex flex-col my-2">
               <Input
+                error={inputError}
                 className="my-2"
                 name="test"
                 onChange={onApiSchemaInputChange}

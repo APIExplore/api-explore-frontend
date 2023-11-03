@@ -28,6 +28,11 @@ interface Parameter {
 const store = (set: any) => ({
   allRequests: [],
   selectedRequests: [],
+  setAllRequests: (items: Request[]) => {
+    set((store: any) => ({
+      allRequests: [...items],
+    }));
+  },
   setRequests: (items: Request[]) => {
     set((store: any) => ({
       selectedRequests: [...items],
