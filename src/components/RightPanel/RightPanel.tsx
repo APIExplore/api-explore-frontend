@@ -6,10 +6,13 @@ import { useRequestsStore } from "../../stores/requestsStore";
 import DragDrop from "./DragDrop";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { Item } from "./types/RightPanelTypes";
 
 export default function RightPanel() {
-  const backendDomain = "http://localhost:3000";
-  const setRequests = useRequestsStore((store: any) => store.setRequests);
+  const backendDomain = "http://localhost:3000"; // needs to be global
+  const setSelectedRequests = useRequestsStore(
+    (store: any) => store.setSelectedRequests
+  );
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const allRequests = useRequestsStore((store: any) => store.allRequests);
   const isMountingRef = useRef(false);
@@ -23,6 +26,18 @@ export default function RightPanel() {
     put: false,
     delete: false,
   });
+  const [shownItems, setShownItems] = useState(allRequests);
+  // Props for autocomplete component
+  const frontendProps = {
+    name: "Endpoints",
+    onChange: onEndpointsChange,
+    itemToString: (item: any) => `${item.method.toUpperCase()} ${item.path}`,
+    sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
+    options: shownItems,
+    allowMultiple: true,
+    getOptionValue: (item: any) => item.path + "|" + item.method,
+    filter: (path: string, option: any) => option.path.toLowerCase(),
+  };
 
   const autocompleteText: ComponentTokens<"Autocomplete"> = {
     Item: {
@@ -37,10 +52,8 @@ export default function RightPanel() {
     },
   };
 
-  const [shownItems, setShownItems] = useState(allRequests);
-
   function convertSchemaToList(schema: any) {
-    let items: any = [];
+    let items: Item[] = [];
 
     for (const path in schema.paths) {
       for (const method in schema.paths[path]) {
@@ -48,7 +61,7 @@ export default function RightPanel() {
           items.push({
             path: path,
             method: method,
-            parameters: schema.paths[path][method].parameters,
+            // parameters: schema.paths[path][method].parameters,
           });
         }
       }
@@ -58,29 +71,29 @@ export default function RightPanel() {
   }
 
   // Function when checkbox is selected
-  const onCheckboxChange = (val: any) => {
+  function onCheckboxChange(val: any) {
     setSelectedMethods({ ...val });
-  };
+  }
 
   // Function when new endpoint is selected
-  const onEndpointsChange = (val: any) => {
-    setRequests(val);
-  };
+  function onEndpointsChange(val: Item[]) {
+    setSelectedRequests(val);
+  }
 
   // set value to apischmea string on change
-  const onApiSchemaInputChange = (val: any) => {
+  function onApiSchemaInputChange(val: any) {
     setApiSchema(val.target.value);
-  };
+  }
 
-  const onFileUpload = (event) => {
+  function onFileUpload(event) {
     const data = JSON.parse(event.target.result);
     const schemaList = convertSchemaToList(data);
     setAllRequests(schemaList);
     setShownItems(schemaList);
-  };
+  }
 
   // Submit api adress to backend
-  const submitApiAdress = async () => {
+  async function submitApiAdress() {
     // http://localhost:8080/swagger.json
     try {
       const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
@@ -97,7 +110,7 @@ export default function RightPanel() {
     } catch (e: any) {
       setInputError(e.response.data.error);
     }
-  };
+  }
 
   // Filter requests depending on checkboxes
   const filterRequests = () => {
@@ -115,12 +128,12 @@ export default function RightPanel() {
     }
   };
 
-  // Create hook from this
+  // Simulate initial load
   useEffect(() => {
     isMountingRef.current = true;
   }, []);
 
-  // On Methods checkboxes change filter items
+  // On change for methods checkboxes change filter items
   useEffect(() => {
     if (!isMountingRef.current) {
       filterRequests();
@@ -128,18 +141,6 @@ export default function RightPanel() {
       isMountingRef.current = false;
     }
   }, [selectedMethods]);
-
-  // Props for autocomplete component
-  const frontendProps = {
-    name: "Endpoints",
-    onChange: onEndpointsChange,
-    itemToString: (item: any) => `${item.method.toUpperCase()} ${item.path}`,
-    sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
-    options: shownItems,
-    allowMultiple: true,
-    getOptionValue: (item: any) => item.path + "|" + item.method,
-    filter: (path: string, option: any) => option.path.toLowerCase(),
-  };
 
   return (
     <>

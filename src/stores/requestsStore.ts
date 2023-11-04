@@ -1,29 +1,5 @@
 import { create } from "zustand";
-
-interface Request {
-  path: string;
-  method: string;
-  parameters: Parameter[];
-}
-
-interface Parameter {
-  name: string;
-  in: string;
-  required: boolean;
-  type: string;
-}
-
-/*
-    "path" : "/products/{productName}"
-    "method" : "get"
-    "parameters" : [ {
-        "name" : "productName",
-        "in" : "path",
-        "required" : true,
-        "type" : "string"
-    } ]
-,
-*/
+import { Request } from "../components/RightPanel/types/RightPanelTypes";
 
 const store = (set: any) => ({
   allRequests: [],
@@ -33,7 +9,7 @@ const store = (set: any) => ({
       allRequests: [...items],
     }));
   },
-  setRequests: (items: Request[]) => {
+  setSelectedRequests: (items: Request[]) => {
     set((store: any) => ({
       selectedRequests: [...items],
     }));
