@@ -1,9 +1,9 @@
 import { Tabs, Button } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
+import { ComponentTokens } from "@tiller-ds/theme";
 import { Autocomplete } from "@tiller-ds/selectors";
-// import { useFileUpload } from "./hooks/useFileUpload";
-// import { DragZoneField } from "@tiller-ds/formik-elements";
 import { useRequestsStore } from "../../stores/requestsStore";
+import DragDrop from "./DragDrop";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
@@ -24,10 +24,23 @@ export default function RightPanel() {
     delete: false,
   });
 
+  const autocompleteText: ComponentTokens<"Autocomplete"> = {
+    Item: {
+      base: {
+        regular:
+          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-500 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:text-slate-900 focus:bg-slate-100 break-normal",
+      },
+      active: {
+        regular:
+          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-900 bg-slate-100 focus:outline-none",
+      },
+    },
+  };
+
   const [shownItems, setShownItems] = useState(allRequests);
 
   function convertSchemaToList(schema: any) {
-    let items = [];
+    let items: any = [];
 
     for (const path in schema.paths) {
       for (const method in schema.paths[path]) {
@@ -57,6 +70,13 @@ export default function RightPanel() {
   // set value to apischmea string on change
   const onApiSchemaInputChange = (val: any) => {
     setApiSchema(val.target.value);
+  };
+
+  const onFileUpload = (event) => {
+    const data = JSON.parse(event.target.result);
+    const schemaList = convertSchemaToList(data);
+    setAllRequests(schemaList);
+    setShownItems(schemaList);
   };
 
   // Submit api adress to backend
@@ -113,8 +133,7 @@ export default function RightPanel() {
   const frontendProps = {
     name: "Endpoints",
     onChange: onEndpointsChange,
-    onBlur: () => {},
-    itemToString: (item: any) => `${item.path} ${item.method.toUpperCase()}`,
+    itemToString: (item: any) => `${item.method.toUpperCase()} ${item.path}`,
     sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
     options: shownItems,
     allowMultiple: true,
@@ -127,14 +146,10 @@ export default function RightPanel() {
       <div className="p-5">
         <Tabs className="">
           <Tabs.Tab label="API Schema">
-            {/* <DragZoneField
-              name="API schema"
-              hook={useFileUpload}
-              url=""
-              title={<Intl name="dragZoneTitle" />}
-            /> */}
+            <DragDrop onFileUpload={onFileUpload} />
             <div className="flex flex-col my-2">
               <Input
+                label="Api schema adress"
                 error={inputError}
                 className="my-2"
                 name="test"
@@ -187,7 +202,11 @@ export default function RightPanel() {
                 </div>
               </CheckboxGroup>
               <div className="my-5">
-                <Autocomplete label="Endpoints" {...frontendProps} />
+                <Autocomplete
+                  label="Endpoints"
+                  {...frontendProps}
+                  autocompleteTokens={autocompleteText}
+                />
               </div>
             </div>
           </Tabs.Tab>
