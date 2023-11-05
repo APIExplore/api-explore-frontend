@@ -7,14 +7,17 @@ import DragDrop from "./DragDrop";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Item } from "./types/RightPanelTypes";
+import { backendDomain } from "../../constants/apiConstants";
 
 export default function RightPanel() {
-  const backendDomain = "http://localhost:3000"; // needs to be global
   const setSelectedRequests = useRequestsStore(
     (store: any) => store.setSelectedRequests
   );
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const allRequests = useRequestsStore((store: any) => store.allRequests);
+  const selectedRequests = useRequestsStore(
+    (store: any) => store.selectedRequests
+  );
   const isMountingRef = useRef(false);
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
@@ -27,11 +30,16 @@ export default function RightPanel() {
     delete: false,
   });
   const [shownItems, setShownItems] = useState(allRequests);
+
   // Props for autocomplete component
   const frontendProps = {
     name: "Endpoints",
     onChange: onEndpointsChange,
-    itemToString: (item: any) => `${item.method.toUpperCase()} ${item.path}`,
+    getOptionLabel: (item: any) => (
+      <div>
+        {item.method.toUpperCase()} {item.path}
+      </div>
+    ),
     sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
     options: shownItems,
     allowMultiple: true,
@@ -43,7 +51,7 @@ export default function RightPanel() {
     Item: {
       base: {
         regular:
-          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-500 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:text-slate-900 focus:bg-slate-100 break-normal",
+          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-500 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:text-slate-900 focus:bg-slate-100",
       },
       active: {
         regular:
@@ -94,7 +102,6 @@ export default function RightPanel() {
 
   // Submit api adress to backend
   async function submitApiAdress() {
-    // http://localhost:8080/swagger.json
     try {
       const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
         address: apiSchema,
@@ -108,7 +115,7 @@ export default function RightPanel() {
       setAllRequests(schemaList);
       setShownItems(schemaList);
     } catch (e: any) {
-      setInputError(e.response.data.error);
+      setInputError(e.response ? e.response.data.error : e.message);
     }
   }
 
@@ -142,6 +149,15 @@ export default function RightPanel() {
     }
   }, [selectedMethods]);
 
+  // Filter requests on each selection so it filters out unwanted methods
+  useEffect(() => {
+    if (!isMountingRef.current) {
+      filterRequests();
+    } else {
+      isMountingRef.current = false;
+    }
+  }, [selectedRequests]);
+
   return (
     <>
       <div className="p-5 w-[25rem] h-[31.25rem]">
@@ -163,7 +179,7 @@ export default function RightPanel() {
                 variant="outlined"
                 onClick={submitApiAdress}
               >
-                Button
+                Submit schema
               </Button>
             </div>
             <h2 className="my-3 font-semibold">Or upload schema as json:</h2>
@@ -175,7 +191,7 @@ export default function RightPanel() {
           >
             <div className="my-2">
               <CheckboxGroup
-                label="Methods"
+                label="Filter by method"
                 name="methods"
                 className="my-2"
                 onChange={onCheckboxChange}
