@@ -1,17 +1,17 @@
-export interface Request {
+export type Request = {
   path: string;
   method: string;
   parameters: Parameter[];
-}
+};
 
-export interface Parameter {
+export type Parameter = {
   name: string;
   in: string;
   required: boolean;
   type: string;
-}
+};
 
-export interface Item {
+export type Item = {
   path: string;
   method: string;
-}
+};
