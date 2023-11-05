@@ -1,5 +1,4 @@
-import { Card, Container } from "@tiller-ds/core";
-import { DataTable } from "@tiller-ds/data-display";
+import { DataTable, DescriptionList } from "@tiller-ds/data-display";
 import { all } from "axios";
 import "./overrided-css.css";
 
@@ -60,29 +59,29 @@ export default function Details() {
     // console.log("ApiCall clicked > ", clickedApiCall);
     return (
       // Expanded ApiCall content goes here
-      <div>
-        <div>
-          <p>Timestamp: {JSON.stringify(clickedApiCall?.timestamp)}</p>
-        </div>
-        <div>
-          <p>Method: {clickedApiCall?.method}</p>
-        </div>
-        <div>
-          <p>Endpoint: {clickedApiCall?.endpoint}</p>
-        </div>
-        <div>
-          <p>Parameter: {clickedApiCall?.parameter}</p>
-        </div>
-        <div>
-          <p>Request body: {clickedApiCall?.requestBody}</p>
-        </div>
-        <div>
-          <p>Status code: {clickedApiCall?.statusCode}</p>
-        </div>
-        <div>
-          <p>Response body: {clickedApiCall?.responseBody}</p>
-        </div>
-      </div>
+      <DescriptionList className="" type="clean">
+        <DescriptionList.Item label="Timestamp">
+          {JSON.stringify(clickedApiCall?.timestamp)}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Method">
+          {clickedApiCall?.method}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Endpoint">
+          {clickedApiCall?.endpoint}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Parameter">
+          {clickedApiCall?.parameter}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Request body">
+          {clickedApiCall?.requestBody}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Status code">
+          {clickedApiCall?.statusCode}
+        </DescriptionList.Item>
+        <DescriptionList.Item label="Response body">
+          {clickedApiCall?.responseBody}
+        </DescriptionList.Item>
+      </DescriptionList>
     );
   };
 
