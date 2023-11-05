@@ -74,6 +74,7 @@ export default function DragDropFile({ onFileUpload }) {
 
   return (
     <form
+      className="my-2"
       id="form-file-upload"
       onDragEnter={handleDrag}
       onSubmit={(e) => e.preventDefault()}

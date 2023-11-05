@@ -144,10 +144,10 @@ export default function RightPanel() {
 
   return (
     <>
-      <div className="p-5">
-        <Tabs className="">
+      <div className="p-5 w-[25rem] h-[31.25rem]">
+        <Tabs>
           <Tabs.Tab label="API Schema">
-            <DragDrop onFileUpload={onFileUpload} />
+            <h2 className="my-3 font-semibold">Enter schema adress:</h2>
             <div className="flex flex-col my-2">
               <Input
                 label="Api schema adress"
@@ -166,6 +166,8 @@ export default function RightPanel() {
                 Button
               </Button>
             </div>
+            <h2 className="my-3 font-semibold">Or upload schema as json:</h2>
+            <DragDrop onFileUpload={onFileUpload} />
           </Tabs.Tab>
           <Tabs.Tab
             label="Configuration"
@@ -175,6 +177,7 @@ export default function RightPanel() {
               <CheckboxGroup
                 label="Methods"
                 name="methods"
+                className="my-2"
                 onChange={onCheckboxChange}
                 value={selectedMethods}
                 vertical
