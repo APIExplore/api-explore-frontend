@@ -16,6 +16,7 @@ export default function RightPanel() {
   );
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const allRequests = useRequestsStore((store: any) => store.allRequests);
+  const [isFetched, setIsFetched] = useState(false);
   const selectedRequests = useRequestsStore(
     (store: any) => store.selectedRequests
   );
@@ -115,6 +116,12 @@ export default function RightPanel() {
       const schemaList = convertSchemaToList(data.data);
       setAllRequests(schemaList);
       setShownItems(schemaList);
+
+      // Show confirmation message
+      setIsFetched(true);
+      setTimeout(() => {
+        setIsFetched(false);
+      }, 3000);
     } catch (e: any) {
       setInputError(e.response ? e.response.data.error : e.message);
     }
@@ -165,11 +172,13 @@ export default function RightPanel() {
         <Tabs iconPlacement="trailing">
           <Tabs.Tab
             label="API Schema"
+            className="api-schema-tab"
             icon={<Icon type="file-text" variant="fill" />}
           >
             <h2 className="my-3 font-semibold">Enter schema adress:</h2>
             <div className="flex flex-col my-2">
               <Input
+                id="schema-adress-input"
                 label="Api schema adress"
                 error={inputError}
                 className="my-2"
@@ -178,7 +187,16 @@ export default function RightPanel() {
                 placeholder="API schema adress"
                 value={apiSchema}
               />
+              {isFetched && (
+                <p
+                  id="schema-fetched"
+                  className="text-green-600 mt-2 text-base"
+                >
+                  Schema fetched
+                </p>
+              )}
               <Button
+                id="submit-adress-button"
                 className="my-2 w-100 h-50"
                 variant="outlined"
                 onClick={submitApiAdress}
@@ -192,7 +210,7 @@ export default function RightPanel() {
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
-            className="flex flex-row justify-center"
+            className="config-tab flex flex-row justify-center"
           >
             <div className="my-2">
               <CheckboxGroup
