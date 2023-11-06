@@ -2,6 +2,7 @@ import { Tabs, Button } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { ComponentTokens } from "@tiller-ds/theme";
 import { Autocomplete } from "@tiller-ds/selectors";
+import { Icon } from "@tiller-ds/icons";
 import { useRequestsStore } from "../../stores/requestsStore";
 import DragDrop from "./DragDrop";
 import { useEffect, useState, useRef } from "react";
@@ -161,8 +162,11 @@ export default function RightPanel() {
   return (
     <>
       <div className="p-5 w-[25rem] h-[31.25rem]">
-        <Tabs>
-          <Tabs.Tab label="API Schema">
+        <Tabs iconPlacement="trailing">
+          <Tabs.Tab
+            label="API Schema"
+            icon={<Icon type="file-text" variant="fill" />}
+          >
             <h2 className="my-3 font-semibold">Enter schema adress:</h2>
             <div className="flex flex-col my-2">
               <Input
@@ -186,6 +190,7 @@ export default function RightPanel() {
             <DragDrop onFileUpload={onFileUpload} />
           </Tabs.Tab>
           <Tabs.Tab
+            icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
             className="flex flex-row justify-center"
           >

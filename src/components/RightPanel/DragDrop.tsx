@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
+import axios from "axios";
 import "./css/dragdrop.css";
+import { backendDomain } from "../../constants/apiConstants";
 
 // drag drop file component
 export default function DragDropFile({ onFileUpload }) {
@@ -21,7 +23,7 @@ export default function DragDropFile({ onFileUpload }) {
     }
   };
 
-  const handleRead = (data) => {
+  const handleRead = async (data) => {
     if (data.type != "application/json") {
       // Show wrong type message
       setIsWrong(true);
@@ -32,15 +34,35 @@ export default function DragDropFile({ onFileUpload }) {
     }
 
     // SEND TO BACKEND
+    try {
+      var formData = new FormData();
 
-    // Reading schema
-    let reader = new FileReader();
+      formData.append("file", data);
+      console.log(formData);
 
-    // Closure to capture the file information.
-    reader.onload = onFileUpload;
+      const response = await axios.post(
+        `${backendDomain}/apiSchema/set`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    // Read in the image file as a data URL.
-    reader.readAsText(data);
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+
+    // // Reading schema
+    // let reader = new FileReader();
+
+    // // Closure to capture the file information.
+    // reader.onload = onFileUpload;
+
+    // // Read in the json file as a data URL.
+    // reader.readAsText(data);
 
     // Show confirmation message
     setIsUploaded(true);
