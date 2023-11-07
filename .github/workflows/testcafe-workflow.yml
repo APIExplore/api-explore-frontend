@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install testcafe
+      - name: Install testcafe for testing
         uses: DevExpress/testcafe-action@latest
         with:
           args: '-v'
