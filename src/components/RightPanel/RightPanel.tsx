@@ -2,6 +2,7 @@ import { Tabs, Button } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { ComponentTokens } from "@tiller-ds/theme";
 import { Autocomplete } from "@tiller-ds/selectors";
+import { Icon } from "@tiller-ds/icons";
 import { useRequestsStore } from "../../stores/requestsStore";
 import DragDrop from "./DragDrop";
 import { useEffect, useState, useRef } from "react";
@@ -15,6 +16,7 @@ export default function RightPanel() {
   );
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const allRequests = useRequestsStore((store: any) => store.allRequests);
+  const [isFetched, setIsFetched] = useState(false);
   const selectedRequests = useRequestsStore(
     (store: any) => store.selectedRequests
   );
@@ -37,10 +39,11 @@ export default function RightPanel() {
     onChange: onEndpointsChange,
     getOptionLabel: (item: any) => (
       <div>
-        {item.method.toUpperCase()} {item.path}
+        {item.method.toUpperCase()} {item.operationId}
       </div>
     ),
-    sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
+    sort: (items: any[]) =>
+      items.sort((a, b) => a.operationId.localeCompare(b.operationId)),
     options: shownItems,
     allowMultiple: true,
     getOptionValue: (item: any) => item.path + "|" + item.method,
@@ -63,19 +66,20 @@ export default function RightPanel() {
   function convertSchemaToList(schema: any) {
     let items: Item[] = [];
 
-    for (const path in schema.paths) {
-      for (const method in schema.paths[path]) {
-        if (schema.paths[path][method]) {
+    for (const path in schema) {
+      for (const method in schema[path]) {
+        if (schema[path][method]) {
           items.push({
             path: path,
             method: method,
-            // parameters: schema.paths[path][method].parameters,
+            operationId: schema[path][method].operationId,
           });
         }
       }
     }
 
-    return items;
+    setAllRequests(items);
+    setShownItems(items);
   }
 
   // Function when checkbox is selected
@@ -93,13 +97,6 @@ export default function RightPanel() {
     setApiSchema(val.target.value);
   }
 
-  function onFileUpload(event) {
-    const data = JSON.parse(event.target.result);
-    const schemaList = convertSchemaToList(data);
-    setAllRequests(schemaList);
-    setShownItems(schemaList);
-  }
-
   // Submit api adress to backend
   async function submitApiAdress() {
     try {
@@ -107,13 +104,17 @@ export default function RightPanel() {
         address: apiSchema,
       });
 
-      if (data.statusText != "OK") {
+      if (data.status != 201) {
         setInputError(data.data.error);
       }
 
-      const schemaList = convertSchemaToList(data.data);
-      setAllRequests(schemaList);
-      setShownItems(schemaList);
+      convertSchemaToList(data.data);
+
+      // Show confirmation message
+      setIsFetched(true);
+      setTimeout(() => {
+        setIsFetched(false);
+      }, 3000);
     } catch (e: any) {
       setInputError(e.response ? e.response.data.error : e.message);
     }
@@ -161,11 +162,16 @@ export default function RightPanel() {
   return (
     <>
       <div className="p-5 w-[25rem] h-[31.25rem]">
-        <Tabs>
-          <Tabs.Tab label="API Schema">
+        <Tabs iconPlacement="trailing">
+          <Tabs.Tab
+            label="API Schema"
+            className="api-schema-tab"
+            icon={<Icon type="file-text" variant="fill" />}
+          >
             <h2 className="my-3 font-semibold">Enter schema adress:</h2>
             <div className="flex flex-col my-2">
               <Input
+                id="schema-adress-input"
                 label="Api schema adress"
                 error={inputError}
                 className="my-2"
@@ -174,7 +180,16 @@ export default function RightPanel() {
                 placeholder="API schema adress"
                 value={apiSchema}
               />
+              {isFetched && (
+                <p
+                  id="schema-fetched"
+                  className="text-green-600 mt-2 text-base"
+                >
+                  Schema fetched
+                </p>
+              )}
               <Button
+                id="submit-adress-button"
                 className="my-2 w-100 h-50"
                 variant="outlined"
                 onClick={submitApiAdress}
@@ -183,11 +198,12 @@ export default function RightPanel() {
               </Button>
             </div>
             <h2 className="my-3 font-semibold">Or upload schema as json:</h2>
-            <DragDrop onFileUpload={onFileUpload} />
+            <DragDrop onFileUpload={convertSchemaToList} />
           </Tabs.Tab>
           <Tabs.Tab
+            icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
-            className="flex flex-row justify-center"
+            className="config-tab flex flex-row justify-center"
           >
             <div className="my-2">
               <CheckboxGroup

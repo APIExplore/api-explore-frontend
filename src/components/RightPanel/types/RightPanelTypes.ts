@@ -14,4 +14,5 @@ export type Parameter = {
 export type Item = {
   path: string;
   method: string;
+  operationId: string;
 };
