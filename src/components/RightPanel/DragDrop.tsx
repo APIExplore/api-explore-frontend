@@ -8,7 +8,8 @@ export default function DragDropFile({ onFileUpload }) {
   // drag state
   const [dragActive, setDragActive] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-  const [isWrong, setIsWrong] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   // ref
   const inputRef: any = useRef(null);
 
@@ -26,9 +27,9 @@ export default function DragDropFile({ onFileUpload }) {
   const handleRead = async (data) => {
     if (data.type != "application/json") {
       // Show wrong type message
-      setIsWrong(true);
+      setErrorMsg("File is not json");
       setTimeout(() => {
-        setIsWrong(false);
+        setErrorMsg("");
       }, 3000);
       return;
     }
@@ -38,31 +39,25 @@ export default function DragDropFile({ onFileUpload }) {
       var formData = new FormData();
 
       formData.append("file", data);
-      console.log(formData);
 
       const response = await axios.post(
         `${backendDomain}/apiSchema/set`,
         formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      console.log(response);
-    } catch (e) {
-      console.log(e);
+      if (response.status != 201) {
+        setErrorMsg(response.data.error);
+      }
+
+      onFileUpload(response.data);
+    } catch (e: any) {
+      setErrorMsg(e.response ? e.response.data.error : e.message);
     }
-
-    // // Reading schema
-    // let reader = new FileReader();
-
-    // // Closure to capture the file information.
-    // reader.onload = onFileUpload;
-
-    // // Read in the json file as a data URL.
-    // reader.readAsText(data);
 
     // Show confirmation message
     setIsUploaded(true);
@@ -119,7 +114,7 @@ export default function DragDropFile({ onFileUpload }) {
             Upload a file
           </button>
           {isUploaded && <p className="text-green-600">File Uploaded</p>}
-          {isWrong && <p className="text-red-600">File is not json</p>}
+          {errorMsg && <p className="text-red-600">{errorMsg}</p>}
         </div>
       </label>
       {dragActive && (

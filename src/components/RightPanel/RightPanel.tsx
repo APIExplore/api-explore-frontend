@@ -39,10 +39,11 @@ export default function RightPanel() {
     onChange: onEndpointsChange,
     getOptionLabel: (item: any) => (
       <div>
-        {item.method.toUpperCase()} {item.path}
+        {item.method.toUpperCase()} {item.operationId}
       </div>
     ),
-    sort: (items: any[]) => items.sort((a, b) => a.path.localeCompare(b.path)),
+    sort: (items: any[]) =>
+      items.sort((a, b) => a.operationId.localeCompare(b.operationId)),
     options: shownItems,
     allowMultiple: true,
     getOptionValue: (item: any) => item.path + "|" + item.method,
@@ -65,19 +66,20 @@ export default function RightPanel() {
   function convertSchemaToList(schema: any) {
     let items: Item[] = [];
 
-    for (const path in schema.paths) {
-      for (const method in schema.paths[path]) {
-        if (schema.paths[path][method]) {
+    for (const path in schema) {
+      for (const method in schema[path]) {
+        if (schema[path][method]) {
           items.push({
             path: path,
             method: method,
-            // parameters: schema.paths[path][method].parameters,
+            operationId: schema[path][method].operationId,
           });
         }
       }
     }
 
-    return items;
+    setAllRequests(items);
+    setShownItems(items);
   }
 
   // Function when checkbox is selected
@@ -95,13 +97,6 @@ export default function RightPanel() {
     setApiSchema(val.target.value);
   }
 
-  function onFileUpload(event) {
-    const data = JSON.parse(event.target.result);
-    const schemaList = convertSchemaToList(data);
-    setAllRequests(schemaList);
-    setShownItems(schemaList);
-  }
-
   // Submit api adress to backend
   async function submitApiAdress() {
     try {
@@ -109,13 +104,11 @@ export default function RightPanel() {
         address: apiSchema,
       });
 
-      if (data.statusText != "OK") {
+      if (data.status != 201) {
         setInputError(data.data.error);
       }
 
-      const schemaList = convertSchemaToList(data.data);
-      setAllRequests(schemaList);
-      setShownItems(schemaList);
+      convertSchemaToList(data.data);
 
       // Show confirmation message
       setIsFetched(true);
@@ -205,7 +198,7 @@ export default function RightPanel() {
               </Button>
             </div>
             <h2 className="my-3 font-semibold">Or upload schema as json:</h2>
-            <DragDrop onFileUpload={onFileUpload} />
+            <DragDrop onFileUpload={convertSchemaToList} />
           </Tabs.Tab>
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
