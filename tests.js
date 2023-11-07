@@ -5,10 +5,10 @@ try {
   const runner = testcafe.createRunner();
 
   const failed = await runner
-    .src(["./tests/test-whole-frontend.ts"])
+    .src(["./tests/test-right-panel.ts"])
     .browsers(["chrome"])
     .useProxy("localhost:5173")
-    .run({ speed: 0.1 });
+    .run({ speed: 0.7 });
 
   console.log("Tests failed: " + failed);
 } finally {
