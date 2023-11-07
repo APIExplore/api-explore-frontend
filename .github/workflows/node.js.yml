@@ -31,3 +31,24 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - run: yarn run build
+
+  test:
+    needs: build
+    name: Run TestCafe Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run tests
+        uses: DevExpress/testcafe-action@latest
+        with:
+          args: "yarn run test"
