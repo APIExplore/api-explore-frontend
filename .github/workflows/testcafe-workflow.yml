@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install Yarn
+        run: npm install -g yarn
+
       - name: Run tests
         uses: DevExpress/testcafe-action@latest
         with:
