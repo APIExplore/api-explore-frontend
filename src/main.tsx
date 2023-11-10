@@ -6,6 +6,7 @@ import { ThemeProvider } from "@tiller-ds/theme";
 
 import App from "./App";
 import "./index.css";
+import "./App.css";
 import {
   defaultComponentConfig,
   defaultIconConfig,

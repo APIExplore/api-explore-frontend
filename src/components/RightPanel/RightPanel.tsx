@@ -1,29 +1,43 @@
-import { Tabs, Button } from "@tiller-ds/core";
-import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
-import { ComponentTokens } from "@tiller-ds/theme";
-import { Autocomplete } from "@tiller-ds/selectors";
-import { Icon } from "@tiller-ds/icons";
-import { useRequestsStore } from "../../stores/requestsStore";
-import DragDrop from "./DragDrop";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import axios from "axios";
-import { Item } from "./types/RightPanelTypes";
+import { ResizableBox } from "react-resizable";
+
+import { StatusButton, Tabs, Typography } from "@tiller-ds/core";
+import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
+import { Icon } from "@tiller-ds/icons";
+import { Autocomplete } from "@tiller-ds/selectors";
+import { ComponentTokens } from "@tiller-ds/theme";
+
+import DragDrop from "./DragDrop";
+import { Item, Request } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
+import { useResizeObserver } from "../../hooks/useResizeObserver";
+import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
+import { useRequestsStore } from "../../stores/requestsStore";
 
 export default function RightPanel() {
+  const containerHeight = usePanelDimensionsStore(
+    (store) => store.panels.container.height,
+  );
+  const bottomPanelHeight = usePanelDimensionsStore(
+    (store) => store.panels.bottom.height,
+  );
+
+  const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const setSelectedRequests = useRequestsStore(
-    (store: any) => store.setSelectedRequests
+    (store: any) => store.setSelectedRequests,
   );
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const allRequests = useRequestsStore((store: any) => store.allRequests);
   const [isFetched, setIsFetched] = useState(false);
   const selectedRequests = useRequestsStore(
-    (store: any) => store.selectedRequests
+    (store: any) => store.selectedRequests,
   );
   const isMountingRef = useRef(false);
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json"
+    "http://localhost:8080/swagger.json",
   );
   const [selectedMethods, setSelectedMethods]: any = useState({
     get: false,
@@ -31,24 +45,15 @@ export default function RightPanel() {
     put: false,
     delete: false,
   });
-  const [shownItems, setShownItems] = useState(allRequests);
+  const [shownItems, setShownItems] = useState<Item[] | Request[]>(allRequests);
 
-  // Props for autocomplete component
-  const frontendProps = {
-    name: "Endpoints",
-    onChange: onEndpointsChange,
-    getOptionLabel: (item: any) => (
-      <div>
-        {item.method.toUpperCase()} {item.operationId}
-      </div>
-    ),
-    sort: (items: any[]) =>
-      items.sort((a, b) => a.operationId.localeCompare(b.operationId)),
-    options: shownItems,
-    allowMultiple: true,
-    getOptionValue: (item: any) => item.path + "|" + item.method,
-    filter: (path: string, option: any) => option.path.toLowerCase(),
-  };
+  const ref = useResizeObserver("right", setDimensions);
+
+  useEffect(() => {
+    if (isFetched) {
+      setInputError("");
+    }
+  }, [isFetched]);
 
   const autocompleteText: ComponentTokens<"Autocomplete"> = {
     Item: {
@@ -64,7 +69,7 @@ export default function RightPanel() {
   };
 
   function convertSchemaToList(schema: any) {
-    let items: Item[] = [];
+    const items: Item[] = [];
 
     for (const path in schema) {
       for (const method in schema[path]) {
@@ -131,7 +136,9 @@ export default function RightPanel() {
       setShownItems(allRequests);
     } else {
       setShownItems(
-        allRequests.filter((item: any) => selectedMethods[item.method] === true)
+        allRequests.filter(
+          (item: any) => selectedMethods[item.method] === true,
+        ),
       );
     }
   };
@@ -160,54 +167,79 @@ export default function RightPanel() {
   }, [selectedRequests]);
 
   return (
-    <>
-      <div className="p-5 w-[25rem] h-[31.25rem]">
-        <Tabs iconPlacement="trailing">
+    <ResizableBox
+      width={400}
+      height={containerHeight - bottomPanelHeight - 12}
+      resizeHandles={["w"]}
+    >
+      <div
+        className="flex h-full m-1 p-4 bg-white drop-shadow-md"
+        ref={ref}
+        id="right-panel"
+      >
+        <Tabs iconPlacement="trailing" fullWidth={true}>
           <Tabs.Tab
             label="API Schema"
             className="api-schema-tab"
             icon={<Icon type="file-text" variant="fill" />}
           >
-            <h2 className="my-3 font-semibold">Enter schema adress:</h2>
-            <div className="flex flex-col my-2">
-              <Input
-                id="schema-adress-input"
-                label="Api schema adress"
-                error={inputError}
-                className="my-2"
-                name="test"
-                onChange={onApiSchemaInputChange}
-                placeholder="API schema adress"
-                value={apiSchema}
-              />
-              {isFetched && (
-                <p
-                  id="schema-fetched"
-                  className="text-green-600 mt-2 text-base"
+            <div className="flex flex-col w-full h-full">
+              <div className="py-3 mt-6 text-center">
+                <Typography variant="h6">Enter schema adress:</Typography>
+              </div>
+
+              <div className="flex flex-col my-2">
+                <Input
+                  id="schema-adress-input"
+                  label="Api schema adress"
+                  error={inputError}
+                  className="py-2"
+                  name="test"
+                  onChange={onApiSchemaInputChange}
+                  placeholder="API schema adress"
+                  value={apiSchema}
+                />
+                <StatusButton
+                  status={isFetched ? "success" : inputError ? "error" : "idle"}
+                  id="submit-adress-button"
+                  className="my-2 w-full h-50"
+                  variant="outlined"
+                  onClick={submitApiAdress}
                 >
-                  Schema fetched
-                </p>
-              )}
-              <Button
-                id="submit-adress-button"
-                className="my-2 w-100 h-50"
-                variant="outlined"
-                onClick={submitApiAdress}
-              >
-                Submit schema
-              </Button>
+                  Submit schema
+                </StatusButton>
+                <div className="h-4">
+                  {isFetched && (
+                    <p
+                      id="schema-fetched"
+                      className="text-green-600 mt-2 text-base text-center"
+                    >
+                      Schema fetched
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="py-3 mt-6 text-center">
+                <Typography variant="h6">Or upload schema as json:</Typography>
+              </div>
+              <DragDrop onFileUpload={convertSchemaToList} />
             </div>
-            <h2 className="my-3 font-semibold">Or upload schema as json:</h2>
-            <DragDrop onFileUpload={convertSchemaToList} />
           </Tabs.Tab>
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
             className="config-tab flex flex-row justify-center"
           >
-            <div className="my-2">
+            <div className="py-3 mt-6">
+              <Typography variant="h6">Selected endpoints</Typography>
+            </div>
+            <div className="my-2 text-left">
               <CheckboxGroup
-                label="Filter by method"
+                label={
+                  <Typography className="my-3 font-semibold">
+                    Filter by method:
+                  </Typography>
+                }
                 name="methods"
                 className="my-2"
                 onChange={onCheckboxChange}
@@ -240,7 +272,24 @@ export default function RightPanel() {
               <div className="my-5">
                 <Autocomplete
                   label="Endpoints"
-                  {...frontendProps}
+                  name="Endpoints"
+                  onChange={(v) => Array.isArray(v) && onEndpointsChange(v)}
+                  onReset={() => setSelectedRequests([])}
+                  getOptionLabel={(item) => (
+                    <div className="text-body">
+                      {item.method.toUpperCase()} {item.operationId}
+                    </div>
+                  )}
+                  options={shownItems as Item[]}
+                  allowMultiple={true}
+                  getOptionValue={(item) => item.path + "|" + item.method}
+                  filter={(name: string, option) => {
+                    return (
+                      option.method.toLowerCase() +
+                      " " +
+                      option.operationId.toLowerCase()
+                    ).includes(name.toLowerCase());
+                  }}
                   autocompleteTokens={autocompleteText}
                 />
               </div>
@@ -248,6 +297,6 @@ export default function RightPanel() {
           </Tabs.Tab>
         </Tabs>
       </div>
-    </>
+    </ResizableBox>
   );
 }
