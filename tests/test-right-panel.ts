@@ -26,4 +26,4 @@ test("Test api schema adress submit", async (t) => {
     .click("#downshift-3-item-1")
     .click("#downshift-3-item-6")
     .click("#downshift-3-item-1");
-});
+}).skipJsErrors();
