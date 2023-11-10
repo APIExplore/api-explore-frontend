@@ -1,4 +1,5 @@
 import createTestCafe from "testcafe";
+
 const testcafe = await createTestCafe();
 
 try {

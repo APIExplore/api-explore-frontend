@@ -1,16 +1,17 @@
 import { create } from "zustand";
+
 import { Request } from "../components/RightPanel/types/RightPanelTypes";
 
 const store = (set: any) => ({
   allRequests: [],
   selectedRequests: [],
   setAllRequests: (items: Request[]) => {
-    set((store: any) => ({
+    set(() => ({
       allRequests: [...items],
     }));
   },
   setSelectedRequests: (items: Request[]) => {
-    set((store: any) => ({
+    set(() => ({
       selectedRequests: [...items],
     }));
   },

@@ -1,21 +1,44 @@
-import Details from "./Details";
-import { Icon } from "@tiller-ds/icons";
+import { ResizableBox } from "react-resizable";
+
 import { Tabs } from "@tiller-ds/core";
+import { Icon } from "@tiller-ds/icons";
+
+import Details from "./Details";
+import { useResizeObserver } from "../../hooks/useResizeObserver";
+import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function LeftPanel() {
+  const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
+  const containerHeight = usePanelDimensionsStore(
+    (store) => store.panels.container.height,
+  );
+  const bottomPanelHeight = usePanelDimensionsStore(
+    (store) => store.panels.bottom.height,
+  );
+  const ref = useResizeObserver("left", setDimensions);
   return (
-    <div>
-      <Tabs iconPlacement="trailing">
-        <Tabs.Tab
-          label="Details"
-          icon={<Icon type="magnifying-glass" variant="fill" />}
-        >
-          <Details></Details>
-        </Tabs.Tab>
-        <Tabs.Tab label="Metrics" icon={<Icon type="list" variant="fill" />}>
-          Metrics
-        </Tabs.Tab>
-      </Tabs>
-    </div>
+    <ResizableBox
+      width={400}
+      height={containerHeight - bottomPanelHeight - 12}
+      resizeHandles={["e"]}
+    >
+      <div
+        className="h-full m-1 p-4 bg-white drop-shadow-md"
+        ref={ref}
+        id="left-panel"
+      >
+        <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
+          <Tabs.Tab
+            label="Details"
+            icon={<Icon type="magnifying-glass" variant="fill" />}
+          >
+            <Details />
+          </Tabs.Tab>
+          <Tabs.Tab label="Metrics" icon={<Icon type="list" variant="fill" />}>
+            Metrics
+          </Tabs.Tab>
+        </Tabs>
+      </div>
+    </ResizableBox>
   );
 }
