@@ -185,13 +185,13 @@ export default function RightPanel() {
           >
             <div className="flex flex-col w-full h-full">
               <div className="py-3 mt-6 text-center">
-                <Typography variant="h6">Enter schema adress:</Typography>
+                <Typography variant="h6">Enter Schema Address:</Typography>
               </div>
 
               <div className="flex flex-col my-2">
                 <Input
                   id="schema-adress-input"
-                  label="Api schema adress"
+                  label="Api schema address"
                   error={inputError}
                   className="py-2"
                   name="test"
@@ -220,7 +220,7 @@ export default function RightPanel() {
                 </div>
               </div>
               <div className="py-3 mt-6 text-center">
-                <Typography variant="h6">Or upload schema as json:</Typography>
+                <Typography variant="h6">Or Upload Schema as JSON:</Typography>
               </div>
               <DragDrop onFileUpload={convertSchemaToList} />
             </div>
@@ -230,8 +230,8 @@ export default function RightPanel() {
             label="Configuration"
             className="config-tab flex flex-row justify-center"
           >
-            <div className="py-3 mt-6">
-              <Typography variant="h6">Selected endpoints</Typography>
+            <div className="py-3 mt-6 text-center">
+              <Typography variant="h6">Selected Endpoints</Typography>
             </div>
             <div className="my-2 text-left">
               <CheckboxGroup
