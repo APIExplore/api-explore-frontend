@@ -6,7 +6,7 @@ try {
   const runner = testcafe.createRunner();
 
   const failed = await runner
-    .src(["./tests/test-right-panel.ts"])
+    .src(["./tests/test-right-panel.ts", "./tests/test-controller.ts"])
     .browsers(["chrome"])
     .useProxy("localhost:5173")
     .run({ speed: 0.7 });
