@@ -28,6 +28,7 @@
     "zustand": "^4.4.5"
   },
   "devDependencies": {
+    "@tiller-ds/menu": "^1.7.2",
     "@tiller-ds/alert": "^1.7.2",
     "@tiller-ds/core": "^1.7.2",
     "@tiller-ds/data-display": "^1.7.2",
