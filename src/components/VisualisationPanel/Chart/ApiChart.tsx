@@ -133,7 +133,7 @@ export default function ApiChart() {
         />
       ) : (
         <div className="w-full h-full">
-          <div className="absolute top-0 flex justify-center items-center w-full h-full pr-12 z-40">
+          <div className="absolute top-0 flex justify-center items-center w-full h-full pr-12 z-30">
             <Alert
               icon={<Icon className="text-info text-2xl" type="info" />}
               title="Simulation not started"

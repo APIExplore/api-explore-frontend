@@ -16,7 +16,7 @@ export default function SimulationControls() {
   };
 
   return (
-    <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-6 z-50">
+    <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-6 z-40">
       <ButtonGroups className="" tokens={{ base: "" }}>
         <ButtonGroups.Button variant="text">
           <Icon type="pause" />
