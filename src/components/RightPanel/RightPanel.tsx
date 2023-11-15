@@ -40,6 +40,8 @@ export default function RightPanel() {
   const setSelectedRequests = useRequestsStore(
     (store: any) => store.setSelectedRequests
   );
+  /* Modal operation */
+  const [modalOperation, setModalOperation] = useState("");
   /* Set all possible requests on initial fetch */
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   /* Array of all requests */
@@ -87,7 +89,13 @@ export default function RightPanel() {
             path: path,
             method: method,
             operationId: schema[path][method].operationId,
-            param: 100,
+            params: schema[path][method].parameters.map((param) => {
+              return {
+                type: param.type,
+                name: param.name,
+                value: "",
+              };
+            }),
           });
         }
       }
@@ -110,10 +118,40 @@ export default function RightPanel() {
   /* Check what param of item was changed and update it */
   function onParamChange(val: any, paramName: string) {
     const tempItem = { ...clickedItem };
-    tempItem[paramName] = val.target.value;
+    tempItem.params.forEach((param) => {
+      if (param.name === paramName) {
+        param.value = val.target.value;
+      }
+    });
 
     setClickedItem(tempItem);
   }
+
+  /* Select item from drop down or edit one */
+  const selectItem = () => {
+    if (modalOperation === "add") {
+      /* Add new item at end of the array */
+      setSelectedRequests([...selectedRequests, clickedItem]);
+    } else if (modalOperation === "edit") {
+      /* Edit item at its index */
+      const { index, ...realItem } = clickedItem;
+      selectedRequests.splice(index, 1, realItem);
+      setSelectedRequests([...selectedRequests]);
+    }
+    setClickedItem(null);
+    setModalOperation("");
+    modal.onClose();
+  };
+
+  /* Remove item by its array index */
+  const removeItem = (index) => {
+    const tempItems = selectedRequests?.length ? [...selectedRequests] : [];
+    if (tempItems?.length > index) {
+      tempItems.splice(index, 1);
+    }
+
+    setSelectedRequests(tempItems);
+  };
 
   /* Submit api adress to backend */
   async function submitApiAdress() {
@@ -152,23 +190,6 @@ export default function RightPanel() {
         allRequests.filter((item: any) => selectedMethods[item.method] === true)
       );
     }
-  };
-
-  /* Select item from drop down */
-  const selectItem = () => {
-    setSelectedRequests([...selectedRequests, clickedItem]);
-    setClickedItem(null);
-    modal.onClose();
-  };
-
-  /* Remove item by its array index */
-  const removeItem = (index) => {
-    const tempItems = selectedRequests?.length ? [...selectedRequests] : [];
-    if (tempItems?.length > index) {
-      tempItems.splice(index, 1);
-    }
-
-    setSelectedRequests(tempItems);
   };
 
   /* On modal close */
@@ -233,25 +254,30 @@ export default function RightPanel() {
       >
         {(state: any) => (
           <>
-            <Modal.Content title={"Edit params"}>
-              {state.operationId}
-              <Input
-                id="schema-adress-input"
-                label="Item param"
-                className="py-2"
-                name="test"
-                onChange={(e) => onParamChange(e, "param")}
-                placeholder="API schema adress"
-              />
+            <Modal.Content title={"Endpoint name: " + state.operationId}>
+              {"Edit params"}
+              {state.params.length === 0 && <p>No params for this endpoint</p>}
+              {state.params.map((item, index) => (
+                <Input
+                  id="schema-adress-input"
+                  label={<p className="font-semibold">{item.name}</p>}
+                  className="py-2"
+                  name="test"
+                  onChange={(e) => onParamChange(e, item.name)}
+                  value={item.value}
+                />
+              ))}
             </Modal.Content>
 
             <Modal.Footer>
               <Button
                 variant="filled"
                 color="success"
-                onClick={() => selectItem()}
+                onClick={() => {
+                  selectItem();
+                }}
               >
-                {"submit"}
+                {"add endpoint"}
               </Button>
               <Button variant="text" color="white" onClick={() => closeModal()}>
                 {"cancel"}
@@ -363,7 +389,8 @@ export default function RightPanel() {
                     <DropdownMenu.Item
                       key={index}
                       onSelect={() => {
-                        setClickedItem(item);
+                        setModalOperation("add");
+                        setClickedItem(JSON.parse(JSON.stringify(item)));
                       }}
                     >
                       <div className="text-body">
@@ -374,85 +401,58 @@ export default function RightPanel() {
                 </DropdownMenu>
               </div>
               <DataTable data={selectedRequests} className="w-[300px]">
-                <DataTable.PrimaryRow>
-                  <DataTable.Column
-                    header="Method"
-                    id="method"
-                    className="max-w-md"
-                  >
-                    {(item: Item) => <>{item.method}</>}
-                  </DataTable.Column>
-                  <DataTable.Column
-                    header="Operation Id"
-                    id="operationId"
-                    className="max-w-md"
-                  >
-                    {(item: Item) => <>{item.operationId}</>}
-                  </DataTable.Column>
-                  <DataTable.Column
-                    header="View info"
-                    id="view"
-                    className="max-w-md"
-                    canSort={false}
-                  >
-                    {(item: Item) => (
+                <DataTable.Column
+                  header="Method"
+                  id="method"
+                  className="max-w-md"
+                >
+                  {(item: Item) => <>{item.method}</>}
+                </DataTable.Column>
+                <DataTable.Column
+                  header="Operation Id"
+                  id="operationId"
+                  className="max-w-md"
+                >
+                  {(item: Item) => <>{item.operationId}</>}
+                </DataTable.Column>
+                <DataTable.Column
+                  header="Edit"
+                  id="edit"
+                  className="max-w-md"
+                  canSort={false}
+                >
+                  {(item: Item, index) => (
+                    <div className="flex justify-start items-center space-x-1">
                       <IconButton
                         icon={
                           <Icon
-                            type="eye"
+                            type="pencil-simple"
                             variant="fill"
                             className="text-gray-500"
                           />
                         }
-                        label="View"
+                        onClick={() => {
+                          setModalOperation("edit");
+                          setClickedItem(
+                            JSON.parse(JSON.stringify({ ...item, index }))
+                          );
+                        }}
+                        label="Edit"
                       />
-                    )}
-                  </DataTable.Column>
-                  <DataTable.Column
-                    header="Edit"
-                    id="edit"
-                    className="max-w-md"
-                    canSort={false}
-                  >
-                    {(item: Item, index) => (
-                      <div className="flex justify-start items-center space-x-1">
-                        <IconButton
-                          icon={
-                            <Icon
-                              type="pencil-simple"
-                              variant="fill"
-                              className="text-gray-500"
-                            />
-                          }
-                          onClick={() =>
-                            console.log("open edit/submit modal for parameters")
-                          }
-                          label="Edit"
-                        />
-                        <IconButton
-                          icon={
-                            <Icon
-                              type="trash"
-                              variant="fill"
-                              className="text-gray-500"
-                            />
-                          }
-                          onClick={() => removeItem(index)}
-                          label="Delete"
-                        />
-                      </div>
-                    )}
-                  </DataTable.Column>
-                </DataTable.PrimaryRow>
-                <DataTable.SecondaryRow>
-                  <DataTable.Column
-                    header="Param"
-                    id="param"
-                    className="max-w-md"
-                  >
-                    {(item: any) => <>{item.param}</>}
-                  </DataTable.Column>
-                </DataTable.SecondaryRow>
+                      <IconButton
+                        icon={
+                          <Icon
+                            type="trash"
+                            variant="fill"
+                            className="text-gray-500"
+                          />
+                        }
+                        onClick={() => removeItem(index)}
+                        label="Delete"
+                      />
+                    </div>
+                  )}
+                </DataTable.Column>
               </DataTable>
             </div>
           </Tabs.Tab>
