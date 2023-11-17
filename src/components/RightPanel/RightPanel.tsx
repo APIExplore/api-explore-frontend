@@ -456,6 +456,13 @@ export default function RightPanel() {
               </DataTable>
             </div>
           </Tabs.Tab>
+          <Tabs.Tab
+            label="History"
+            className="history-tab"
+            icon={<Icon type="folder" variant="fill" />}
+          >
+            <h1>History</h1>
+          </Tabs.Tab>
         </Tabs>
       </div>
     </ResizableBox>
