@@ -259,10 +259,10 @@ export default function RightPanel() {
               {state.params.length === 0 && <p>No params for this endpoint</p>}
               {state.params.map((item, index) => (
                 <Input
-                  id="schema-adress-input"
+                  id="params-input"
                   label={<p className="font-semibold">{item.name}</p>}
                   className="py-2"
-                  name="test"
+                  name="params"
                   onChange={(e) => onParamChange(e, item.name)}
                   value={item.value}
                 />
@@ -277,7 +277,7 @@ export default function RightPanel() {
                   selectItem();
                 }}
               >
-                {"add endpoint"}
+                {"Submit endpoint"}
               </Button>
               <Button variant="text" color="white" onClick={() => closeModal()}>
                 {"cancel"}
@@ -416,13 +416,13 @@ export default function RightPanel() {
                   {(item: Item) => <>{item.operationId}</>}
                 </DataTable.Column>
                 <DataTable.Column
-                  header="Edit"
+                  header="Edit/View"
                   id="edit"
                   className="max-w-md"
                   canSort={false}
                 >
                   {(item: Item, index) => (
-                    <div className="flex justify-start items-center space-x-1">
+                    <div className="flex justify-center">
                       <IconButton
                         icon={
                           <Icon
@@ -439,6 +439,17 @@ export default function RightPanel() {
                         }}
                         label="Edit"
                       />
+                    </div>
+                  )}
+                </DataTable.Column>
+                <DataTable.Column
+                  header="Delete"
+                  id="delete"
+                  className="max-w-md"
+                  canSort={false}
+                >
+                  {(item: Item, index) => (
+                    <div className="flex justify-center">
                       <IconButton
                         icon={
                           <Icon
