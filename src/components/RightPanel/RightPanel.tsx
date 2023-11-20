@@ -3,11 +3,18 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ResizableBox } from "react-resizable";
 
-import { StatusButton, Tabs, Typography } from "@tiller-ds/core";
+import {
+  StatusButton,
+  Tabs,
+  Typography,
+  IconButton,
+  Button,
+} from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
-import { Autocomplete } from "@tiller-ds/selectors";
-import { ComponentTokens } from "@tiller-ds/theme";
+import { DropdownMenu } from "@tiller-ds/menu";
+import { Modal, useModal } from "@tiller-ds/alert";
+import { DataTable } from "@tiller-ds/data-display";
 
 import DragDrop from "./DragDrop";
 import { Item, Request } from "./types/RightPanelTypes";
@@ -17,34 +24,50 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import { useRequestsStore } from "../../stores/requestsStore";
 
 export default function RightPanel() {
+  const modal = useModal();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height,
+    (store) => store.panels.container.height
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height,
+    (store) => store.panels.bottom.height
   );
 
+  const [clickedItem, setClickedItem]: any = useState(null);
+
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
+
+  /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
-    (store: any) => store.setSelectedRequests,
+    (store: any) => store.setSelectedRequests
   );
+  /* Modal operation */
+  const [modalOperation, setModalOperation] = useState("");
+  /* Set all possible requests on initial fetch */
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
+  /* Array of all requests */
   const allRequests = useRequestsStore((store: any) => store.allRequests);
-  const [isFetched, setIsFetched] = useState(false);
+  /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
-    (store: any) => store.selectedRequests,
+    (store: any) => store.selectedRequests
   );
+  /* Is fetching done */
+  const [isFetched, setIsFetched] = useState(false);
+  /* Initial ref */
   const isMountingRef = useRef(false);
+  /* Error or input of schema adress */
   const [inputError, setInputError] = useState("");
+  /* Schema adress*/
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json",
+    "http://localhost:8080/swagger.json"
   );
+  /* Methods that can be selected */
   const [selectedMethods, setSelectedMethods]: any = useState({
     get: false,
     post: false,
     put: false,
     delete: false,
   });
+  /* Items to show in drop down */
   const [shownItems, setShownItems] = useState<Item[] | Request[]>(allRequests);
 
   const ref = useResizeObserver("right", setDimensions);
@@ -55,21 +78,9 @@ export default function RightPanel() {
     }
   }, [isFetched]);
 
-  const autocompleteText: ComponentTokens<"Autocomplete"> = {
-    Item: {
-      base: {
-        regular:
-          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-500 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:text-slate-900 focus:bg-slate-100",
-      },
-      active: {
-        regular:
-          "w-full text-sm px-4 py-2 block leading-5 cursor-pointer text-slate-900 bg-slate-100 focus:outline-none",
-      },
-    },
-  };
-
+  /* Set all requests and shown items after initial fetch */
   function convertSchemaToList(schema: any) {
-    const items: Item[] = [];
+    const items: any[] = [];
 
     for (const path in schema) {
       for (const method in schema[path]) {
@@ -78,6 +89,13 @@ export default function RightPanel() {
             path: path,
             method: method,
             operationId: schema[path][method].operationId,
+            params: schema[path][method].parameters.map((param) => {
+              return {
+                type: param.type,
+                name: param.name,
+                value: "",
+              };
+            }),
           });
         }
       }
@@ -87,22 +105,55 @@ export default function RightPanel() {
     setShownItems(items);
   }
 
-  // Function when checkbox is selected
+  /* Function when checkbox is selected */
   function onCheckboxChange(val: any) {
     setSelectedMethods({ ...val });
   }
 
-  // Function when new endpoint is selected
-  function onEndpointsChange(val: Item[]) {
-    setSelectedRequests(val);
-  }
-
-  // set value to apischmea string on change
+  /* set value to apischmea string on change */
   function onApiSchemaInputChange(val: any) {
     setApiSchema(val.target.value);
   }
 
-  // Submit api adress to backend
+  /* Check what param of item was changed and update it */
+  function onParamChange(val: any, paramName: string) {
+    const tempItem = { ...clickedItem };
+    tempItem.params.forEach((param) => {
+      if (param.name === paramName) {
+        param.value = val.target.value;
+      }
+    });
+
+    setClickedItem(tempItem);
+  }
+
+  /* Select item from drop down or edit one */
+  const selectItem = () => {
+    if (modalOperation === "add") {
+      /* Add new item at end of the array */
+      setSelectedRequests([...selectedRequests, clickedItem]);
+    } else if (modalOperation === "edit") {
+      /* Edit item at its index */
+      const { index, ...realItem } = clickedItem;
+      selectedRequests.splice(index, 1, realItem);
+      setSelectedRequests([...selectedRequests]);
+    }
+    setClickedItem(null);
+    setModalOperation("");
+    modal.onClose();
+  };
+
+  /* Remove item by its array index */
+  const removeItem = (index) => {
+    const tempItems = selectedRequests?.length ? [...selectedRequests] : [];
+    if (tempItems?.length > index) {
+      tempItems.splice(index, 1);
+    }
+
+    setSelectedRequests(tempItems);
+  };
+
+  /* Submit api adress to backend */
   async function submitApiAdress() {
     try {
       const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
@@ -115,7 +166,7 @@ export default function RightPanel() {
 
       convertSchemaToList(data.data);
 
-      // Show confirmation message
+      /* Show confirmation message */
       setIsFetched(true);
       setTimeout(() => {
         setIsFetched(false);
@@ -125,7 +176,7 @@ export default function RightPanel() {
     }
   }
 
-  // Filter requests depending on checkboxes
+  /* Filter requests depending on checkboxes */
   const filterRequests = () => {
     if (
       !selectedMethods.get &&
@@ -136,19 +187,34 @@ export default function RightPanel() {
       setShownItems(allRequests);
     } else {
       setShownItems(
-        allRequests.filter(
-          (item: any) => selectedMethods[item.method] === true,
-        ),
+        allRequests.filter((item: any) => selectedMethods[item.method] === true)
       );
     }
   };
 
-  // Simulate initial load
+  /* On modal close */
+  const closeModal = () => {
+    setClickedItem(null);
+    modal.onClose();
+  };
+
+  /* Simulate initial load */
   useEffect(() => {
     isMountingRef.current = true;
   }, []);
 
-  // On change for methods checkboxes change filter items
+  /* Watch when item is selected */
+  useEffect(() => {
+    if (!isMountingRef.current) {
+      if (clickedItem != null) {
+        modal.onOpen(clickedItem);
+      }
+    } else {
+      isMountingRef.current = false;
+    }
+  }, [clickedItem]);
+
+  /* On change for methods checkboxes change filter items */
   useEffect(() => {
     if (!isMountingRef.current) {
       filterRequests();
@@ -157,7 +223,7 @@ export default function RightPanel() {
     }
   }, [selectedMethods]);
 
-  // Filter requests on each selection so it filters out unwanted methods
+  /* Filter requests on each selection so it filters out unwanted methods */
   useEffect(() => {
     if (!isMountingRef.current) {
       filterRequests();
@@ -172,6 +238,54 @@ export default function RightPanel() {
       height={containerHeight - bottomPanelHeight - 12}
       resizeHandles={["w"]}
     >
+      <Modal
+        {...modal}
+        icon={
+          <Modal.Icon
+            icon={<Icon type="lock-open" variant="bold" />}
+            tokens={{
+              Icon: {
+                backgroundColor: "bg-primary",
+              },
+            }}
+            className="text-white"
+          />
+        }
+      >
+        {(state: any) => (
+          <>
+            <Modal.Content title={"Endpoint name: " + state.operationId}>
+              {"Edit params"}
+              {state.params.length === 0 && <p>No params for this endpoint</p>}
+              {state.params.map((item, index) => (
+                <Input
+                  id="params-input"
+                  label={<p className="font-semibold">{item.name}</p>}
+                  className="py-2"
+                  name="params"
+                  onChange={(e) => onParamChange(e, item.name)}
+                  value={item.value}
+                />
+              ))}
+            </Modal.Content>
+
+            <Modal.Footer>
+              <Button
+                variant="filled"
+                color="success"
+                onClick={() => {
+                  selectItem();
+                }}
+              >
+                {"Submit endpoint"}
+              </Button>
+              <Button variant="text" color="white" onClick={() => closeModal()}>
+                {"cancel"}
+              </Button>
+            </Modal.Footer>
+          </>
+        )}
+      </Modal>
       <div
         className="flex h-full m-1 p-4 bg-white drop-shadow-md"
         ref={ref}
@@ -270,30 +384,84 @@ export default function RightPanel() {
                 </div>
               </CheckboxGroup>
               <div className="my-5">
-                <Autocomplete
-                  label="Endpoints"
-                  name="Endpoints"
-                  onChange={(v) => Array.isArray(v) && onEndpointsChange(v)}
-                  onReset={() => setSelectedRequests([])}
-                  getOptionLabel={(item) => (
-                    <div className="text-body">
-                      {item.method.toUpperCase()} {item.operationId}
+                <DropdownMenu title="Endpoints">
+                  {shownItems.map((item, index) => (
+                    <DropdownMenu.Item
+                      key={index}
+                      onSelect={() => {
+                        setModalOperation("add");
+                        setClickedItem(JSON.parse(JSON.stringify(item)));
+                      }}
+                    >
+                      <div className="text-body">
+                        {item.method.toUpperCase()} {item.operationId}
+                      </div>
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu>
+              </div>
+              <DataTable data={selectedRequests} className="w-[300px]">
+                <DataTable.Column
+                  header="Method"
+                  id="method"
+                  className="max-w-md"
+                >
+                  {(item: Item) => <>{item.method}</>}
+                </DataTable.Column>
+                <DataTable.Column
+                  header="Operation Id"
+                  id="operationId"
+                  className="max-w-md"
+                >
+                  {(item: Item) => <>{item.operationId}</>}
+                </DataTable.Column>
+                <DataTable.Column
+                  header="Actions"
+                  id="actions"
+                  className="max-w-md"
+                  canSort={false}
+                >
+                  {(item: Item, index) => (
+                    <div className="flex justify-center items-center space-x-1">
+                      <IconButton
+                        icon={
+                          <Icon
+                            type="pencil-simple"
+                            variant="fill"
+                            className="text-gray-500"
+                          />
+                        }
+                        onClick={() => {
+                          setModalOperation("edit");
+                          setClickedItem(
+                            JSON.parse(JSON.stringify({ ...item, index }))
+                          );
+                        }}
+                        label="Edit"
+                      />
+                      <IconButton
+                        icon={
+                          <Icon
+                            type="trash"
+                            variant="fill"
+                            className="text-gray-500"
+                          />
+                        }
+                        onClick={() => removeItem(index)}
+                        label="Delete"
+                      />
                     </div>
                   )}
-                  options={shownItems as Item[]}
-                  allowMultiple={true}
-                  getOptionValue={(item) => item.path + "|" + item.method}
-                  filter={(name: string, option) => {
-                    return (
-                      option.method.toLowerCase() +
-                      " " +
-                      option.operationId.toLowerCase()
-                    ).includes(name.toLowerCase());
-                  }}
-                  autocompleteTokens={autocompleteText}
-                />
-              </div>
+                </DataTable.Column>
+              </DataTable>
             </div>
+          </Tabs.Tab>
+          <Tabs.Tab
+            label="History"
+            className="history-tab"
+            icon={<Icon type="folder" variant="fill" />}
+          >
+            <h1>History</h1>
           </Tabs.Tab>
         </Tabs>
       </div>
