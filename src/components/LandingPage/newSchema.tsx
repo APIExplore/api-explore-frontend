@@ -82,6 +82,21 @@ export default function NewSchema() {
   return (
     <div className="flex flex-col w-full h-full">
       <div className="py-3 mt-6 text-center">
+        <Typography variant="h6">Enter Schema Name:</Typography>
+      </div>
+       <div className="flex flex-col my-2">
+        <Input
+          id="schema-adress-input"
+          label="Api schema name"
+          error={inputError}
+          className="py-2"
+          name="test"
+          onChange={onApiSchemaInputChange}
+          placeholder="API schema name"
+          value={apiSchema}
+        />
+        </div>
+      <div className="py-3 mt-6 text-center">
         <Typography variant="h6">Enter Schema Address:</Typography>
       </div>
 
