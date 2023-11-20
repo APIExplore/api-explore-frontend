@@ -416,13 +416,13 @@ export default function RightPanel() {
                   {(item: Item) => <>{item.operationId}</>}
                 </DataTable.Column>
                 <DataTable.Column
-                  header="Edit/View"
-                  id="edit"
+                  header="Actions"
+                  id="actions"
                   className="max-w-md"
                   canSort={false}
                 >
                   {(item: Item, index) => (
-                    <div className="flex justify-center">
+                    <div className="flex justify-center items-center space-x-1">
                       <IconButton
                         icon={
                           <Icon
@@ -439,17 +439,6 @@ export default function RightPanel() {
                         }}
                         label="Edit"
                       />
-                    </div>
-                  )}
-                </DataTable.Column>
-                <DataTable.Column
-                  header="Delete"
-                  id="delete"
-                  className="max-w-md"
-                  canSort={false}
-                >
-                  {(item: Item, index) => (
-                    <div className="flex justify-center">
                       <IconButton
                         icon={
                           <Icon
