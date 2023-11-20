@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Item } from "../RightPanel/types/RightPanelTypes";
 import { StatusButton, Typography } from "@tiller-ds/core";
 import { Input } from "@tiller-ds/form-elements";
@@ -23,8 +23,9 @@ export default function NewSchema() {
     setApiSchema(val.target.value);
   }
 
+  /* Set all requests and shown items after initial fetch */
   function convertSchemaToList(schema: any) {
-    const items: Item[] = [];
+    const items: any[] = [];
 
     for (const path in schema) {
       for (const method in schema[path]) {
@@ -33,11 +34,17 @@ export default function NewSchema() {
             path: path,
             method: method,
             operationId: schema[path][method].operationId,
+            params: schema[path][method].parameters.map((param) => {
+              return {
+                type: param.type,
+                name: param.name,
+                value: "",
+              };
+            }),
           });
         }
       }
     }
-    console.log("Items > ", items);
 
     setAllRequests(items);
     setAllShownItems(items);
@@ -65,6 +72,12 @@ export default function NewSchema() {
       setInputError(e.response ? e.response.data.error : e.message);
     }
   }
+
+  useEffect(() => {
+    if (isFetched) {
+      setInputError("");
+    }
+  }, [isFetched]);
 
   return (
     <div className="flex flex-col w-full h-full">
