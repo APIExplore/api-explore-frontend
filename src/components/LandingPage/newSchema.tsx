@@ -38,6 +38,7 @@ export default function NewSchema() {
               return {
                 type: param.type,
                 name: param.name,
+                in: param.in,
                 value: "",
               };
             }),
@@ -84,7 +85,7 @@ export default function NewSchema() {
       <div className="py-3 mt-6 text-center">
         <Typography variant="h6">Enter Schema Name:</Typography>
       </div>
-       <div className="flex flex-col my-2">
+      <div className="flex flex-col my-2">
         <Input
           id="schema-adress-input"
           label="Api schema name"
@@ -95,7 +96,7 @@ export default function NewSchema() {
           placeholder="API schema name"
           value={apiSchema}
         />
-        </div>
+      </div>
       <div className="py-3 mt-6 text-center">
         <Typography variant="h6">Enter Schema Address:</Typography>
       </div>
