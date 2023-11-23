@@ -15,20 +15,22 @@ export default function LandingPage() {
 
   return (
     <Modal {...modal} isOpen={!isReady} state={undefined} canDismiss={false}>
-      <div style={{ height: "500px", overflowY: "auto" }}>
+      <div style={{ height: "700px", overflowY: "auto" }}>
         <Modal.Content title="">
-
-           <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
-          <Tabs.Tab
-            label="New schema"
-            icon={<Icon type="magnifying-glass" variant="fill" />}
-          >
-           <NewSchema />
-           </Tabs.Tab>
-          <Tabs.Tab label="Existing schema" icon={<Icon type="list" variant="fill" />}>
-            <ExistingSchema />
-          </Tabs.Tab>
-        </Tabs>
+          <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
+            <Tabs.Tab
+              label="New schema"
+              icon={<Icon type="magnifying-glass" variant="fill" />}
+            >
+              <NewSchema />
+            </Tabs.Tab>
+            <Tabs.Tab
+              label="Existing schema"
+              icon={<Icon type="list" variant="fill" />}
+            >
+              <ExistingSchema />
+            </Tabs.Tab>
+          </Tabs>
         </Modal.Content>
       </div>
       <Modal.Footer>

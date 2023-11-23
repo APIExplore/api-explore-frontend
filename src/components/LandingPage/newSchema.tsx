@@ -12,6 +12,8 @@ export default function NewSchema() {
   const [apiSchema, setApiSchema] = useState(
     "http://localhost:8080/swagger.json"
   );
+  const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [isFetched, setIsFetched] = useState(false);
   const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   const setAllShownItems = useRequestsStore(
@@ -20,11 +22,30 @@ export default function NewSchema() {
 
   // set value to apischmea string on change
   function onApiSchemaInputChange(val: any) {
+    if (val.target.value.length === 0) {
+      setInputError("Address not provided in request data");
+    } else {
+      setInputError("");
+    }
     setApiSchema(val.target.value);
+  }
+
+  function onApiSchemaNameChange(val: any) {
+    setName(val.target.value);
+    if (val.target.value.length === 0) {
+      setNameError("No API schema name specified");
+    } else {
+      setNameError("");
+    }
+  }
+
+  function fun() {
+    setNameError("No API schema name specified");
   }
 
   /* Set all requests and shown items after initial fetch */
   function convertSchemaToList(schema: any) {
+    console.log("aaaa");
     const items: any[] = [];
 
     for (const path in schema) {
@@ -54,13 +75,19 @@ export default function NewSchema() {
   // Submit api adress to backend
   async function submitApiAdress() {
     try {
+      if (name.length == 0 || apiSchema.length == 0) {
+        if (name.length == 0) {
+          setNameError("No API schema name specified");
+        } else if (apiSchema.length == 0) {
+          setInputError("Address not provided in request data");
+        }
+        return;
+      }
+
       const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
         address: apiSchema,
+        name: name,
       });
-
-      if (data.status != 201) {
-        setInputError(data.data.error);
-      }
 
       convertSchemaToList(data.data);
 
@@ -70,41 +97,40 @@ export default function NewSchema() {
         setIsFetched(false);
       }, 3000);
     } catch (e: any) {
-      setInputError(e.response ? e.response.data.error : e.message);
+      console.log(e.response);
     }
   }
 
   useEffect(() => {
     if (isFetched) {
       setInputError("");
+      setNameError("");
     }
   }, [isFetched]);
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="py-3 mt-6 text-center">
-        <Typography variant="h6">Enter Schema Name:</Typography>
-      </div>
       <div className="flex flex-col my-2">
+        <div className="py-3 mt-6 text-center">
+          <Typography variant="h6">Api Schema Name:</Typography>
+        </div>
         <Input
-          id="schema-adress-input"
-          label="Api schema name"
-          error={inputError}
+          id="schema-name-input"
+          error={nameError}
           className="py-2"
           name="test"
-          onChange={onApiSchemaInputChange}
+          onChange={onApiSchemaNameChange}
           placeholder="API schema name"
-          value={apiSchema}
+          value={name}
         />
-      </div>
-      <div className="py-3 mt-6 text-center">
-        <Typography variant="h6">Enter Schema Address:</Typography>
       </div>
 
       <div className="flex flex-col my-2">
+        <div className="py-3 mt-6 text-center">
+          <Typography variant="h6">Api Schema Address:</Typography>
+        </div>
         <Input
           id="schema-adress-input"
-          label="Api schema address"
           error={inputError}
           className="py-2"
           name="test"
@@ -121,21 +147,21 @@ export default function NewSchema() {
         >
           Submit schema
         </StatusButton>
-        <div className="h-4">
-          {isFetched && (
-            <p
-              id="schema-fetched"
-              className="text-green-600 mt-2 text-base text-center"
-            >
-              Schema fetched
-            </p>
-          )}
+
+        {isFetched && (
+          <p
+            id="schema-fetched"
+            className="text-green-600 mt-2 text-base text-center"
+          >
+            Schema fetched
+          </p>
+        )}
+
+        <div className="py-3 mt-6 text-center">
+          <Typography variant="h6">Or Upload Schema as JSON:</Typography>
         </div>
+        <DragDrop onFileUpload={convertSchemaToList} />
       </div>
-      <div className="py-3 mt-6 text-center">
-        <Typography variant="h6">Or Upload Schema as JSON:</Typography>
-      </div>
-      <DragDrop onFileUpload={convertSchemaToList} />
     </div>
   );
 }
