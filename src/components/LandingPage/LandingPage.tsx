@@ -6,15 +6,15 @@ import { Icon } from "@tiller-ds/icons";
 import ExistingSchema from "./existingSchema";
 
 export default function LandingPage() {
-  const [isReady, setIsReady] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
   const modal = useModal();
 
   const close = () => {
-    setIsReady(true);
+    setIsClosed(true);
   };
 
   return (
-    <Modal {...modal} isOpen={!isReady} state={undefined} canDismiss={false}>
+    <Modal {...modal} isOpen={!isClosed} state={undefined} canDismiss={false}>
       <div style={{ height: "700px", overflowY: "auto" }}>
         <Modal.Content title="">
           <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
@@ -22,7 +22,7 @@ export default function LandingPage() {
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
             >
-              <NewSchema />
+              <NewSchema setIsClosed={setIsClosed} />
             </Tabs.Tab>
             <Tabs.Tab
               label="Existing schema"

@@ -10,10 +10,12 @@ export default function DragDropFile({
   onFileUpload,
   name,
   setNameError,
+  setIsClosed,
 }: {
   onFileUpload: (data: any) => void;
   name: String;
   setNameError: (data: any) => void;
+  setIsClosed: (data: any) => void;
 }) {
   // drag state
   const [dragActive, setDragActive] = useState(false);
@@ -74,7 +76,8 @@ export default function DragDropFile({
     setIsUploaded(true);
     setTimeout(() => {
       setIsUploaded(false);
-    }, 3000);
+      setIsClosed(true);
+    }, 1000);
   };
 
   // triggers when file is dropped

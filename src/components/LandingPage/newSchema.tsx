@@ -7,7 +7,11 @@ import axios from "axios";
 import { backendDomain } from "../../constants/apiConstants";
 import { useRequestsStore } from "../../stores/requestsStore";
 
-export default function NewSchema() {
+export default function NewSchema({
+  setIsClosed,
+}: {
+  setIsClosed: (data: any) => void;
+}) {
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
     "http://localhost:8080/swagger.json"
@@ -94,7 +98,8 @@ export default function NewSchema() {
       setIsFetched(true);
       setTimeout(() => {
         setIsFetched(false);
-      }, 3000);
+        setIsClosed(true);
+      }, 1000);
     } catch (e: any) {
       setInputError(e.response ? e.response.data.error : e.message);
     }
@@ -163,6 +168,7 @@ export default function NewSchema() {
           onFileUpload={convertSchemaToList}
           name={name}
           setNameError={setNameError}
+          setIsClosed={setIsClosed}
         />
       </div>
     </div>
