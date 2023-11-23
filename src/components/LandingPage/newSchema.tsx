@@ -45,7 +45,6 @@ export default function NewSchema() {
 
   /* Set all requests and shown items after initial fetch */
   function convertSchemaToList(schema: any) {
-    console.log("aaaa");
     const items: any[] = [];
 
     for (const path in schema) {
@@ -97,7 +96,7 @@ export default function NewSchema() {
         setIsFetched(false);
       }, 3000);
     } catch (e: any) {
-      console.log(e.response);
+      setInputError(e.response ? e.response.data.error : e.message);
     }
   }
 
@@ -160,7 +159,11 @@ export default function NewSchema() {
         <div className="py-3 mt-6 text-center">
           <Typography variant="h6">Or Upload Schema as JSON:</Typography>
         </div>
-        <DragDrop onFileUpload={convertSchemaToList} />
+        <DragDrop
+          onFileUpload={convertSchemaToList}
+          name={name}
+          setNameError={setNameError}
+        />
       </div>
     </div>
   );
