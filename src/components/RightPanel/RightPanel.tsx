@@ -259,7 +259,7 @@ export default function RightPanel() {
                 </div>
               </CheckboxGroup>
               <div className="my-5">
-                <DropdownMenu title="Endpoints">
+                <DropdownMenu title="Endpoints" visibleItemCount={8}>
                   {allShownItems.map((item, index) => (
                     <DropdownMenu.Item
                       key={index}

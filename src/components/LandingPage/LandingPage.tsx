@@ -42,19 +42,24 @@ export default function LandingPage() {
     for (const path in schema) {
       for (const method in schema[path]) {
         if (schema[path][method]) {
-          items.push({
-            path: path,
-            method: method,
-            operationId: schema[path][method].operationId,
-            params: schema[path][method].parameters.map((param: any) => {
-              return {
-                type: param.type,
-                name: param.name,
-                in: param.in,
-                value: "",
-              };
-            }),
-          });
+          const itemObj: any = {};
+          itemObj.path = path;
+          itemObj.method = method;
+          itemObj.operationId = schema[path][method].operationId;
+          if (schema[path][method].parameters) {
+            itemObj.params = schema[path][method].parameters.map(
+              (param: any) => {
+                return {
+                  type: param.type,
+                  name: param.name,
+                  in: param.in,
+                  value: "",
+                };
+              }
+            );
+          }
+
+          items.push(itemObj);
         }
       }
     }
