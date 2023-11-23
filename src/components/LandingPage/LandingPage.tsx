@@ -1,17 +1,67 @@
 import { Modal, useModal } from "@tiller-ds/alert";
 import { Button, Tabs } from "@tiller-ds/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NewSchema from "./newSchema";
 import { Icon } from "@tiller-ds/icons";
 import ExistingSchema from "./existingSchema";
+import axios from "axios";
+import { backendDomain } from "../../constants/apiConstants";
+import { useRequestsStore } from "../../stores/requestsStore";
 
 export default function LandingPage() {
   const [isClosed, setIsClosed] = useState(false);
+  const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
+  const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
+  const setAllShownItems = useRequestsStore(
+    (store: any) => store.setAllShownItems
+  );
+
   const modal = useModal();
 
   const close = () => {
     setIsClosed(true);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${backendDomain}/apiSchema/fetch`); // Fetch all existing schemas
+        setExistingApiSchemasNames(response.data);
+      } catch (error) {
+        console.error("Error fetching API schemas from the backend:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  /* Set all requests and shown items after initial fetch */
+  function convertSchemaToList(schema: any) {
+    const items: any[] = [];
+
+    for (const path in schema) {
+      for (const method in schema[path]) {
+        if (schema[path][method]) {
+          items.push({
+            path: path,
+            method: method,
+            operationId: schema[path][method].operationId,
+            params: schema[path][method].parameters.map((param: any) => {
+              return {
+                type: param.type,
+                name: param.name,
+                in: param.in,
+                value: "",
+              };
+            }),
+          });
+        }
+      }
+    }
+
+    setAllRequests(items);
+    setAllShownItems(items);
+  }
 
   return (
     <Modal {...modal} isOpen={!isClosed} state={undefined} canDismiss={false}>
@@ -22,13 +72,22 @@ export default function LandingPage() {
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
             >
-              <NewSchema setIsClosed={setIsClosed} />
+              <NewSchema
+                setIsClosed={setIsClosed}
+                convertSchemaToList={convertSchemaToList}
+              />
             </Tabs.Tab>
             <Tabs.Tab
               label="Existing schema"
               icon={<Icon type="list" variant="fill" />}
             >
-              <ExistingSchema />
+              {existingApiSchemasNames?.length && (
+                <ExistingSchema
+                  existingApiSchemasNames={existingApiSchemasNames}
+                  setIsClosed={setIsClosed}
+                  convertSchemaToList={convertSchemaToList}
+                />
+              )}
             </Tabs.Tab>
           </Tabs>
         </Modal.Content>

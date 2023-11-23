@@ -5,12 +5,13 @@ import { Input } from "@tiller-ds/form-elements";
 import DragDrop from "../RightPanel/DragDrop";
 import axios from "axios";
 import { backendDomain } from "../../constants/apiConstants";
-import { useRequestsStore } from "../../stores/requestsStore";
 
 export default function NewSchema({
   setIsClosed,
+  convertSchemaToList,
 }: {
   setIsClosed: (data: any) => void;
+  convertSchemaToList: (data: any) => void;
 }) {
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
@@ -19,10 +20,6 @@ export default function NewSchema({
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
   const [isFetched, setIsFetched] = useState(false);
-  const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
-  const setAllShownItems = useRequestsStore(
-    (store: any) => store.setAllShownItems
-  );
 
   // set value to apischmea string on change
   function onApiSchemaInputChange(val: any) {
@@ -36,49 +33,17 @@ export default function NewSchema({
 
   function onApiSchemaNameChange(val: any) {
     setName(val.target.value);
-    if (val.target.value.length === 0) {
+    if (val.target.value.trim().length === 0) {
       setNameError("No API schema name specified");
     } else {
       setNameError("");
     }
   }
 
-  function fun() {
-    setNameError("No API schema name specified");
-  }
-
-  /* Set all requests and shown items after initial fetch */
-  function convertSchemaToList(schema: any) {
-    const items: any[] = [];
-
-    for (const path in schema) {
-      for (const method in schema[path]) {
-        if (schema[path][method]) {
-          items.push({
-            path: path,
-            method: method,
-            operationId: schema[path][method].operationId,
-            params: schema[path][method].parameters.map((param) => {
-              return {
-                type: param.type,
-                name: param.name,
-                in: param.in,
-                value: "",
-              };
-            }),
-          });
-        }
-      }
-    }
-
-    setAllRequests(items);
-    setAllShownItems(items);
-  }
-
   // Submit api adress to backend
   async function submitApiAdress() {
     try {
-      if (name.length == 0 || apiSchema.length == 0) {
+      if (name.trim().length == 0 || apiSchema.trim().length == 0) {
         if (name.length == 0) {
           setNameError("No API schema name specified");
         } else if (apiSchema.length == 0) {

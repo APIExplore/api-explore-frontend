@@ -100,7 +100,7 @@ export default function DragDropFile({
 
   // triggers the input when the button is clicked
   const onButtonClick = () => {
-    if (name.length == 0) {
+    if (name.trim().length == 0) {
       setNameError("No API schema name specified");
       return;
     }
