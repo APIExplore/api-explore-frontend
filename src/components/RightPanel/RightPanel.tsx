@@ -1,24 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-
-import axios from "axios";
 import { ResizableBox } from "react-resizable";
 
-import {
-  StatusButton,
-  Tabs,
-  Typography,
-  IconButton,
-  Button,
-} from "@tiller-ds/core";
+import { Tabs, Typography, IconButton, Button } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 import { Modal, useModal } from "@tiller-ds/alert";
 import { DataTable } from "@tiller-ds/data-display";
 
-import DragDrop from "./DragDrop";
-import { Item, Request } from "./types/RightPanelTypes";
-import { backendDomain } from "../../constants/apiConstants";
+import { Item } from "./types/RightPanelTypes";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import { useRequestsStore } from "../../stores/requestsStore";
@@ -36,30 +26,25 @@ export default function RightPanel() {
 
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
 
+  const allShownItems = useRequestsStore((store: any) => store.allShownItems);
+  const setAllShownItems = useRequestsStore(
+    (store: any) => store.setAllShownItems
+  );
+
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
     (store: any) => store.setSelectedRequests
   );
   /* Modal operation */
   const [modalOperation, setModalOperation] = useState("");
-  /* Set all possible requests on initial fetch */
-  const setAllRequests = useRequestsStore((store: any) => store.setAllRequests);
   /* Array of all requests */
   const allRequests = useRequestsStore((store: any) => store.allRequests);
   /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
     (store: any) => store.selectedRequests
   );
-  /* Is fetching done */
-  const [isFetched, setIsFetched] = useState(false);
   /* Initial ref */
   const isMountingRef = useRef(false);
-  /* Error or input of schema adress */
-  const [inputError, setInputError] = useState("");
-  /* Schema adress*/
-  const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json"
-  );
   /* Methods that can be selected */
   const [selectedMethods, setSelectedMethods]: any = useState({
     get: false,
@@ -67,52 +52,12 @@ export default function RightPanel() {
     put: false,
     delete: false,
   });
-  /* Items to show in drop down */
-  const [shownItems, setShownItems] = useState<Item[] | Request[]>(allRequests);
 
   const ref = useResizeObserver("right", setDimensions);
-
-  useEffect(() => {
-    if (isFetched) {
-      setInputError("");
-    }
-  }, [isFetched]);
-
-  /* Set all requests and shown items after initial fetch */
-  function convertSchemaToList(schema: any) {
-    const items: any[] = [];
-
-    for (const path in schema) {
-      for (const method in schema[path]) {
-        if (schema[path][method]) {
-          items.push({
-            path: path,
-            method: method,
-            operationId: schema[path][method].operationId,
-            params: schema[path][method].parameters.map((param) => {
-              return {
-                type: param.type,
-                name: param.name,
-                value: "",
-              };
-            }),
-          });
-        }
-      }
-    }
-
-    setAllRequests(items);
-    setShownItems(items);
-  }
 
   /* Function when checkbox is selected */
   function onCheckboxChange(val: any) {
     setSelectedMethods({ ...val });
-  }
-
-  /* set value to apischmea string on change */
-  function onApiSchemaInputChange(val: any) {
-    setApiSchema(val.target.value);
   }
 
   /* Check what param of item was changed and update it */
@@ -153,29 +98,6 @@ export default function RightPanel() {
     setSelectedRequests(tempItems);
   };
 
-  /* Submit api adress to backend */
-  async function submitApiAdress() {
-    try {
-      const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
-        address: apiSchema,
-      });
-
-      if (data.status != 201) {
-        setInputError(data.data.error);
-      }
-
-      convertSchemaToList(data.data);
-
-      /* Show confirmation message */
-      setIsFetched(true);
-      setTimeout(() => {
-        setIsFetched(false);
-      }, 3000);
-    } catch (e: any) {
-      setInputError(e.response ? e.response.data.error : e.message);
-    }
-  }
-
   /* Filter requests depending on checkboxes */
   const filterRequests = () => {
     if (
@@ -184,9 +106,9 @@ export default function RightPanel() {
       !selectedMethods.put &&
       !selectedMethods.delete
     ) {
-      setShownItems(allRequests);
+      setAllShownItems(allRequests);
     } else {
-      setShownItems(
+      setAllShownItems(
         allRequests.filter((item: any) => selectedMethods[item.method] === true)
       );
     }
@@ -293,53 +215,6 @@ export default function RightPanel() {
       >
         <Tabs iconPlacement="trailing" fullWidth={true}>
           <Tabs.Tab
-            label="API Schema"
-            className="api-schema-tab"
-            icon={<Icon type="file-text" variant="fill" />}
-          >
-            <div className="flex flex-col w-full h-full">
-              <div className="py-3 mt-6 text-center">
-                <Typography variant="h6">Enter Schema Address:</Typography>
-              </div>
-
-              <div className="flex flex-col my-2">
-                <Input
-                  id="schema-adress-input"
-                  label="Api schema address"
-                  error={inputError}
-                  className="py-2"
-                  name="test"
-                  onChange={onApiSchemaInputChange}
-                  placeholder="API schema adress"
-                  value={apiSchema}
-                />
-                <StatusButton
-                  status={isFetched ? "success" : inputError ? "error" : "idle"}
-                  id="submit-adress-button"
-                  className="my-2 w-full h-50"
-                  variant="outlined"
-                  onClick={submitApiAdress}
-                >
-                  Submit schema
-                </StatusButton>
-                <div className="h-4">
-                  {isFetched && (
-                    <p
-                      id="schema-fetched"
-                      className="text-green-600 mt-2 text-base text-center"
-                    >
-                      Schema fetched
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="py-3 mt-6 text-center">
-                <Typography variant="h6">Or Upload Schema as JSON:</Typography>
-              </div>
-              <DragDrop onFileUpload={convertSchemaToList} />
-            </div>
-          </Tabs.Tab>
-          <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
             className="config-tab flex flex-row justify-center"
@@ -384,8 +259,8 @@ export default function RightPanel() {
                 </div>
               </CheckboxGroup>
               <div className="my-5">
-                <DropdownMenu title="Endpoints">
-                  {shownItems.map((item, index) => (
+                <DropdownMenu title="Endpoints" visibleItemCount={8}>
+                  {allShownItems.map((item, index) => (
                     <DropdownMenu.Item
                       key={index}
                       onSelect={() => {

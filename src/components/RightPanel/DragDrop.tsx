@@ -1,15 +1,21 @@
-import {useRef, useState} from "react";
+import { useRef, useState } from "react";
 
 import axios from "axios";
 
 import "./css/dragdrop.css";
-import {backendDomain} from "../../constants/apiConstants";
+import { backendDomain } from "../../constants/apiConstants";
 
 // drag drop file component
 export default function DragDropFile({
   onFileUpload,
+  name,
+  setNameError,
+  setIsClosed,
 }: {
   onFileUpload: (data: any) => void;
+  name: String;
+  setNameError: (data: any) => void;
+  setIsClosed: (data: any) => void;
 }) {
   // drag state
   const [dragActive, setDragActive] = useState(false);
@@ -45,6 +51,7 @@ export default function DragDropFile({
       const formData = new FormData();
 
       formData.append("file", data);
+      formData.append("name", name as string);
 
       const response = await axios.post(
         `${backendDomain}/apiSchema/set`,
@@ -53,7 +60,7 @@ export default function DragDropFile({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
       if (response.status != 201) {
@@ -69,7 +76,8 @@ export default function DragDropFile({
     setIsUploaded(true);
     setTimeout(() => {
       setIsUploaded(false);
-    }, 3000);
+      setIsClosed(true);
+    }, 1000);
   };
 
   // triggers when file is dropped
@@ -92,6 +100,10 @@ export default function DragDropFile({
 
   // triggers the input when the button is clicked
   const onButtonClick = () => {
+    if (name.trim().length == 0) {
+      setNameError("No API schema name specified");
+      return;
+    }
     inputRef.current.click();
   };
 
