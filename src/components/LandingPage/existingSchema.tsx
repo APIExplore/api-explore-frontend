@@ -1,7 +1,7 @@
 import { Typography } from "@tiller-ds/core";
 import { DropdownMenu } from "@tiller-ds/menu";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { backendDomain } from "../../constants/apiConstants";
 
 export default function ExistingSchema({
@@ -16,22 +16,35 @@ export default function ExistingSchema({
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
   const [title, setTitle] = useState("");
   const [isFetched, setIsFetched] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isFetched) {
+      setError("");
+    }
+  }, [isFetched]);
 
   async function selectApiSchema(item) {
     setSelectedApiSchema(item.name);
     setTitle(item.name);
-    const data = await axios.get(
-      `${backendDomain}/apiSchema/fetch/` + item.name
-    );
+    try {
+      const data = await axios.get(
+        `${backendDomain}/apiSchema/fetch/` + item.name
+      );
 
-    convertSchemaToList(data.data);
+      convertSchemaToList(data.data);
 
-    setIsFetched(true);
+      setIsFetched(true);
 
-    setTimeout(() => {
-      setIsFetched(false);
-      setIsClosed(true);
-    }, 1000);
+      setTimeout(() => {
+        setIsFetched(false);
+        setIsClosed(true);
+      }, 1000);
+    } catch (e: any) {
+      setError(e.response ? e.response.data.error : e.message);
+
+      console.log("error: ", e.response.data.error);
+    }
   }
   return (
     <div className="flex flex-col w-full h-full">
@@ -59,6 +72,14 @@ export default function ExistingSchema({
                 className="text-green-600 mt-2 text-base text-center"
               >
                 {"Schema " + selectedApiSchema + " fetched"}
+              </p>
+            )}
+            {error?.length > 0 && (
+              <p
+                id="schema-fetched"
+                className="text-red-600 mt-2 text-base text-center"
+              >
+                {error}
               </p>
             )}
           </div>
