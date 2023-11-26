@@ -12,6 +12,7 @@ import { Item } from "./types/RightPanelTypes";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import { useRequestsStore } from "../../stores/requestsStore";
+import CallSequences from "./CallSequences";
 
 export default function RightPanel() {
   const modal = useModal();
@@ -332,11 +333,11 @@ export default function RightPanel() {
             </div>
           </Tabs.Tab>
           <Tabs.Tab
-            label="History"
-            className="history-tab"
+            label="Sequences"
+            className="sequences-tab"
             icon={<Icon type="folder" variant="fill" />}
           >
-            <h1>History</h1>
+            <CallSequences></CallSequences>
           </Tabs.Tab>
         </Tabs>
       </div>
