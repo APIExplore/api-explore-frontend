@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { Request } from "../components/RightPanel/types/RightPanelTypes";
+import { Item, Request } from "../components/RightPanel/types/RightPanelTypes";
 
 const store = (set: any) => ({
   allRequests: [],
@@ -13,6 +13,12 @@ const store = (set: any) => ({
   setSelectedRequests: (items: Request[]) => {
     set(() => ({
       selectedRequests: [...items],
+    }));
+  },
+  allShownItems: [],
+  setAllShownItems: (items: Item[]) => {
+    set(() => ({
+      allShownItems: [...items],
     }));
   },
 });
