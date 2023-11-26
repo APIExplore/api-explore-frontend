@@ -25,6 +25,7 @@ const useApiCallsStore = create<ApiStore>((set) => ({
       set({ fetching: true });
       const data = await axios.post(`${backendDomain}/explore/random`, {
         callSequence: selectedRequests,
+        name: "test"
       });
 
       set({ apiCalls: data.data.callSequence });
