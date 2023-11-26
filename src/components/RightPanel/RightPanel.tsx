@@ -181,7 +181,7 @@ export default function RightPanel() {
               {state.params.length === 0 && <p>No params for this endpoint</p>}
               {state.params.map((item, index) => (
                 <Input
-                  id="params-input"
+                  id={"params-input-" + String(index)}
                   label={<p className="font-semibold">{item.name}</p>}
                   className="py-2"
                   name="params"
@@ -193,6 +193,7 @@ export default function RightPanel() {
 
             <Modal.Footer>
               <Button
+                id="submit-endpoint"
                 variant="filled"
                 color="success"
                 onClick={() => {
@@ -239,27 +240,43 @@ export default function RightPanel() {
                   <CheckboxGroup.Item
                     className="col-span-1"
                     label="GET"
+                    tokens={{
+                      GroupItem: { content: "static h-5 flex items-center" },
+                    }}
                     value="get"
                   />
                   <CheckboxGroup.Item
                     className="col-span-1"
                     label="POST"
                     value="post"
+                    tokens={{
+                      GroupItem: { content: "static h-5 flex items-center" },
+                    }}
                   />
                   <CheckboxGroup.Item
                     className="col-span-1"
                     label="PUT"
                     value="put"
+                    tokens={{
+                      GroupItem: { content: "static h-5 flex items-center" },
+                    }}
                   />
                   <CheckboxGroup.Item
                     className="col-span-1"
                     label="DELETE"
                     value="delete"
+                    tokens={{
+                      GroupItem: { content: "static h-5 flex items-center" },
+                    }}
                   />
                 </div>
               </CheckboxGroup>
               <div className="my-5">
-                <DropdownMenu title="Endpoints" visibleItemCount={8}>
+                <DropdownMenu
+                  title="Endpoints"
+                  id="endpoints"
+                  visibleItemCount={8}
+                >
                   {allShownItems.map((item, index) => (
                     <DropdownMenu.Item
                       key={index}
@@ -299,6 +316,7 @@ export default function RightPanel() {
                   {(item: Item, index) => (
                     <div className="flex justify-center items-center space-x-1">
                       <IconButton
+                        id={"edit-" + String(index)}
                         icon={
                           <Icon
                             type="pencil-simple"
@@ -315,6 +333,7 @@ export default function RightPanel() {
                         label="Edit"
                       />
                       <IconButton
+                        id={"delete-" + String(index)}
                         icon={
                           <Icon
                             type="trash"
