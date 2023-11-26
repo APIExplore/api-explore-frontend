@@ -132,7 +132,11 @@ export default function DragDropFile({
             <button className="upload-button" onClick={onButtonClick}>
               Upload a file
             </button>
-            {isUploaded && <p className="text-green-600">File Uploaded</p>}
+            {isUploaded && (
+              <p id="file-uploaded" className="text-green-600">
+                File Uploaded
+              </p>
+            )}
             {errorMsg && <p className="text-red-600">{errorMsg}</p>}
           </div>
         </label>

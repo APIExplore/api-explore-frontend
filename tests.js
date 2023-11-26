@@ -6,8 +6,8 @@ try {
   const runner = testcafe.createRunner();
 
   const failed = await runner
-    .src(["./tests/test-right-panel.ts"])
-    .browsers(["chrome"])
+    .src(["./tests/test-all.ts"])
+    .browsers(["chrome --start-fullscreen"])
     .useProxy("localhost:5173")
     .run({ speed: 0.7 });
 
