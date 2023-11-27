@@ -1,13 +1,38 @@
 import { create } from "zustand";
 
-import { Item, Request } from "../components/RightPanel/types/RightPanelTypes";
+import {
+  Definition,
+  Item,
+  Request,
+} from "../components/RightPanel/types/RightPanelTypes";
 
-const store = (set: any) => ({
+export type RequestsStore = {
+  allRequests: Request[];
+  allShownItems: Item[];
+  selectedRequests: Request[];
+  callSequenceName: string;
+  definitions: Definition[];
+  setAllRequests: (items: Request[]) => void;
+  setSelectedRequests: (items: Request[]) => void;
+  setDefinitions: (items: Definition[]) => void;
+  setAllShownItems: (items: Item[]) => void;
+  setCallSequenceName: (name: string) => void;
+};
+
+const useRequestsStore = create<RequestsStore>((set) => ({
   allRequests: [],
+  allShownItems: [],
   selectedRequests: [],
+  callSequenceName: "",
+  definitions: [],
   setAllRequests: (items: Request[]) => {
     set(() => ({
       allRequests: [...items],
+    }));
+  },
+  setAllShownItems: (items: Item[]) => {
+    set(() => ({
+      allShownItems: [...items],
     }));
   },
   setSelectedRequests: (items: Request[]) => {
@@ -15,12 +40,16 @@ const store = (set: any) => ({
       selectedRequests: [...items],
     }));
   },
-  allShownItems: [],
-  setAllShownItems: (items: Item[]) => {
+  setDefinitions: (items: Definition[]) => {
     set(() => ({
-      allShownItems: [...items],
+      definitions: [...items],
     }));
   },
-});
+  setCallSequenceName: (name: string) => {
+    set(() => ({
+      callSequenceName: name,
+    }));
+  },
+}));
 
-export const useRequestsStore = create(store);
+export default useRequestsStore;

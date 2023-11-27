@@ -10,13 +10,14 @@ export function displayTooltip(
 ) {
   const timestamps =
     configuration.config.series[seriesIndex].data[dataPointIndex].y;
+  const operation = findOperationByPosition(timestamps, configuration);
   const beginTimestamp = prettifyTimestamp(timestamps[0]);
   const endTimestamp = prettifyTimestamp(timestamps[1]);
 
   return (
     '<div class="p-2 bg-primary-light opacity-50 text-center">' +
     '<span class="text-body-dark font-medium">' +
-    configuration.globals.labels[seriesIndex] +
+    operation.operationId +
     "<br />" +
     beginTimestamp +
     " - " +
@@ -38,13 +39,24 @@ export function selectDataPoint(
       selectedDataSeries.push(dataSeries[index].data[point]);
     });
   });
+  const selectedSeriesIds = selectedDataSeries.map((data) => data.timestamp);
+  return apiCalls.filter((call) => selectedSeriesIds.includes(call.date));
+}
 
-  const selectedSeriesIds = selectedDataSeries.map((data) => data.operationId);
-
-  return apiCalls.filter((call) =>
-    selectedSeriesIds.includes(call.operationId),
+export function prettifyDataLabel(val: string | number | number[], opts?: any) {
+  const operation = findOperationByPosition(val, opts);
+  return (
+    operation.operationId.substring(0, operation.y[1] - operation.y[0]) + "..."
   );
 }
+
+const findOperationByPosition = (
+  val: string | number | number[],
+  conf: ApexConfiguration,
+) =>
+  conf.config.series
+    .flatMap((s) => s.data)
+    .find((d) => d["y"][0] === val[0] && d["y"][1] === val[1]) as ApexData;
 
 export enum MethodColorMappings {
   GET = "green",

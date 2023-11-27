@@ -1,40 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { backendDomain } from '../../constants/apiConstants';
+import React, { useEffect, useState } from "react";
 
-interface ApiCall {
-  date: string;
-  duration: number;
-  endpoint: string;
-  method: string;
-  requestBody: any;
-  response: {
-    date: string;
-    data: any[];
-    status: number;
-  };
-  operationId: string;
-  parameters: Array<{
-    in: string;
-    name: string;
-    type: string;
-    value: string;
-  }>;
-  sequenceId: string;
-}
+import axios from "axios";
+import ReactJson from "react-json-view";
 
-interface CallSequence {
-  name: string;
-  sequenceId: string;
-  favorite: boolean;
-  details?: ApiCall[];
-  expanded?: boolean;
-  selectedApiCall?: ApiCall | null;
-}
+import { Modal, useModal } from "@tiller-ds/alert";
+import { Button, Typography } from "@tiller-ds/core";
+import { Toggle } from "@tiller-ds/form-elements";
+import { Icon, LoadingIcon } from "@tiller-ds/icons";
+
+import CallSequenceCard from "./CallSequenceCard";
+import { CallSequence } from "./types/RightPanelTypes";
+import { backendDomain } from "../../constants/apiConstants";
+import useApiCallsStore from "../../stores/apiCallsStore";
+import { ApiCall } from "../../types/apiCallTypes";
 
 export default function CallSequences() {
+  const apiCalls = useApiCallsStore((state) => state.apiCalls);
+  const modal = useModal<{ apiCall: ApiCall | null; sequenceName: string }>();
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
-  const [showMore, setShowMore] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -42,30 +25,35 @@ export default function CallSequences() {
     async function fetchCallSequences() {
       try {
         const response = await axios.get(`${backendDomain}/callsequence/fetch`);
-        const sequencesFromApi: CallSequence[] = response.data.map((seq: any) => ({
-          ...seq,
-          favorite: false,
-          details: [],
-          expanded: false,
-          selectedApiCall: null,
-        }));
+        const sequencesFromApi: CallSequence[] = response.data.map(
+          (seq: any) => ({
+            ...seq,
+            favorite: false,
+            details: [],
+            expanded: false,
+            selectedApiCall: null,
+          }),
+        );
 
         setCallSequences(sequencesFromApi);
         setLoading(false);
       } catch (error: any) {
-        console.error('Error fetching call sequences:', error.response?.data?.error || 'Unknown error');
+        console.error(
+          "Error fetching call sequences:",
+          error.response?.data?.error || "Unknown error",
+        );
         setLoading(false);
       }
     }
 
     fetchCallSequences();
-  }, []);
+  }, [apiCalls]);
 
   const toggleFavorite = async (sequenceName: string) => {
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq
-      )
+        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq,
+      ),
     );
   };
 
@@ -74,38 +62,38 @@ export default function CallSequences() {
 
     if (sequence && !sequence.details?.length) {
       try {
-        const response = await axios.get(`${backendDomain}/callsequence/fetch/${sequenceName}`);
+        const response = await axios.get(
+          `${backendDomain}/callsequence/fetch/${sequenceName}`,
+        );
         const details = response.data;
         setCallSequences((prevSequences) =>
           prevSequences.map((seq) =>
-            seq.name === sequenceName ? { ...seq, details } : seq
-          )
+            seq.name === sequenceName ? { ...seq, details } : seq,
+          ),
         );
       } catch (error: any) {
-        console.error('Error fetching call sequence details:', error.response?.data?.error || 'Unknown error');
+        console.error(
+          "Error fetching call sequence details:",
+          error.response?.data?.error || "Unknown error",
+        );
       }
     }
 
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, expanded: !seq.expanded, selectedApiCall: null } : seq
-      )
+        seq.name === sequenceName
+          ? { ...seq, expanded: !seq.expanded, selectedApiCall: null }
+          : seq,
+      ),
     );
   };
 
-  const selectApiCall = (sequenceName: string, apiCall: ApiCall | null) => {
+  const selectApiCall = (sequence: CallSequence, apiCall: ApiCall | null) => {
+    modal.onOpen({ apiCall: apiCall, sequenceName: sequence.name });
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, selectedApiCall: apiCall } : seq
-      )
-    );
-  };
-
-  const hideSelectedApiCall = (sequenceName: string) => {
-    setCallSequences((prevSequences) =>
-      prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, selectedApiCall: null } : seq
-      )
+        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq,
+      ),
     );
   };
 
@@ -118,93 +106,86 @@ export default function CallSequences() {
     : callSequences;
 
   return (
-    <div className="p-4" style={{
-      maxHeight: '500px',
-      overflowY: 'auto',
-    }}>
-      <h2 className="text-xl font-semibold mb-4">Call Sequences</h2>
-      <div className="mb-4">
-        <button
-          onClick={showOnlyFavorites}
-          className={`p-2 bg-${showFavorites ? 'green' : 'gray'}-500 text-white rounded hover:bg-${showFavorites ? 'green' : 'gray'}-600`}
-        >
-          {showFavorites ? 'Show All' : 'Show Favorites Only'}
-        </button>
+    <div className="p-4">
+      <div className="flex justify-between">
+        <Typography variant="h5">Call Sequences</Typography>
+        <div className="mb-4">
+          <Toggle
+            label={
+              <span className="text-sm leading-5 font-medium text-gray-900">
+                Only favorites
+              </span>
+            }
+            reverse={true}
+            checkedIcon={
+              <div className="flex ml-3">
+                <Icon
+                  type="star"
+                  variant="fill"
+                  className="text-yellow-500"
+                  fill="yellow"
+                  size={3}
+                  style={{ paddingLeft: "0.5px" }}
+                />
+              </div>
+            }
+            uncheckedIcon={<Icon type="star" />}
+            checked={showFavorites}
+            onClick={showOnlyFavorites}
+          />
+        </div>
       </div>
       {loading ? (
-        <p>Loading...</p>
+        <LoadingIcon size={6} />
       ) : (
-        <ul className="space-y-4">
-          {filteredSequences.slice(0, showMore ? filteredSequences.length : 3).map((sequence, index) => (
-            <li key={index} className="border p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">{sequence.name}</span>
-                <button
-                  onClick={() => toggleFavorite(sequence.name)}
-                  className={`text-yellow-500 ${sequence.favorite ? 'opacity-100' : 'opacity-50'}`}
-                >
-                  ⭐ Star
-                </button>
-              </div>
-              <button
-                onClick={() => toggleDetails(sequence.name)}
-                className="text-blue-500 hover:underline mt-2"
-              >
-                {sequence.expanded ? 'Collapse Details' : 'Expand Details'}
-              </button>
-              {sequence.expanded && (
-                <div className="mt-2">
-                  <h3 className="text-lg font-semibold">Details:</h3>
-                  <ul className="list-disc pl-6 mt-2">
-                    {sequence.details?.map((apiCall, apiIndex) => (
-                      <li key={apiIndex} className="mb-2">
-                        <button
-                          className={`text-blue-500 hover:underline mr-2 ${sequence.selectedApiCall === apiCall ? 'font-bold' : ''}`}
-                          onClick={() => selectApiCall(sequence.name, apiCall)}
-                        >
-                          {apiCall.method} - {apiCall.endpoint}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {sequence.selectedApiCall && (
-                <div className="mt-2">
-                  <button
-                  className="text-red-500 hover:underline"
-                  onClick={() => hideSelectedApiCall(sequence.name)}
-                >
-                  Clear
-                </button>
-                  <h3 className="text-lg font-semibold">Selected API Call:</h3>
-                  <pre className="bg-gray-100 p-2 overflow-auto whitespace-pre-line" style={{
-                    display: 'table',
-                    tableLayout: 'fixed',
-                    width: '100%',
-                  }}>
-                    {JSON.stringify(sequence.selectedApiCall, null, 2)}
-                  </pre>
-                  <button
-                    className="text-blue-500 hover:underline mt-2"
-                    onClick={() => hideSelectedApiCall(sequence.name)}
-                  >
-                    Collapse Details
-                  </button>
-                </div>
-              )}
-            </li>
+        <div className="space-y-4">
+          {filteredSequences.map((sequence, index) => (
+            <CallSequenceCard
+              key={index}
+              sequence={sequence}
+              toggleFavorite={toggleFavorite}
+              selectApiCall={selectApiCall}
+              toggleDetails={toggleDetails}
+            />
           ))}
-        </ul>
+        </div>
       )}
-      {filteredSequences.length > 3 && (
-        <button
-          onClick={() => setShowMore(!showMore)}
-          className="mt-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          {showMore ? 'Show Less' : 'Show More'}
-        </button>
-      )}
+      <Modal
+        {...modal}
+        icon={
+          <Modal.Icon
+            icon={<Icon type="info" variant="bold" />}
+            className="text-white bg-info"
+          />
+        }
+      >
+        <Modal.Content title={`Details - ${modal.state?.sequenceName}`}>
+          <Typography variant="subtitle">
+            {modal.state?.apiCall?.operationId}
+          </Typography>
+          <div
+            style={{ height: "700px", overflowY: "auto" }}
+            className="scrollbar pt-4"
+          >
+            {modal.state ? (
+              <ReactJson
+                src={modal.state.apiCall as ApiCall}
+                name={false}
+                collapsed={1}
+                style={{ backgroundColor: "#FFFF" }}
+              />
+            ) : (
+              <LoadingIcon size={6} />
+            )}
+          </div>
+        </Modal.Content>
+
+        <Modal.Footer>
+          <Button variant="text" color="white" onClick={modal.onClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

@@ -66,6 +66,24 @@ body {
     height: 100%;
 }
 
+[data-reach-tab-panel]::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+[data-reach-tab-panel]::-webkit-scrollbar-track {
+    border-radius: 100vh;
+}
+
+[data-reach-tab-panel]::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 100vh;
+}
+
+[data-reach-tab-panel]::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
 .ag-center-cols-container, .ag-header-container, .ag-header-row {
     width: 100% !important;
 }
@@ -80,4 +98,8 @@ body {
 
 .apexcharts-toolbar {
     z-index: 50 !important;
+}
+
+.string-value {
+    overflow-wrap: anywhere;
 }

@@ -1,21 +1,26 @@
-import { useState, useEffect } from "react";
-import { Item } from "../RightPanel/types/RightPanelTypes";
+import { useEffect, useState } from "react";
+
+import axios from "axios";
+
 import { StatusButton, Typography } from "@tiller-ds/core";
 import { Input } from "@tiller-ds/form-elements";
-import DragDrop from "../RightPanel/DragDrop";
-import axios from "axios";
+
 import { backendDomain } from "../../constants/apiConstants";
+import useSchemaModalStore from "../../stores/schemaModalStore";
+import DragDrop from "../RightPanel/DragDrop";
 
 export default function NewSchema({
-  setIsClosed,
-  convertSchemaToList,
+  convertSchemaPathsToList,
+  convertSchemaDefinitionsToList,
 }: {
-  setIsClosed: (data: any) => void;
-  convertSchemaToList: (data: any) => void;
+  convertSchemaPathsToList: (data: any) => void;
+  convertSchemaDefinitionsToList: (data: any) => void;
 }) {
+  const setModalOpened = useSchemaModalStore((store) => store.setOpened);
+
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json"
+    "http://localhost:8080/swagger.json",
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -57,18 +62,23 @@ export default function NewSchema({
         name: name,
       });
 
-      convertSchemaToList(data.data);
+      extractDataFromSchema(data.data);
 
       // Show confirmation message
       setIsFetched(true);
       setTimeout(() => {
         setIsFetched(false);
-        setIsClosed(true);
+        setModalOpened(false);
       }, 1000);
     } catch (e: any) {
       setInputError(e.response ? e.response.data.error : e.message);
     }
   }
+
+  const extractDataFromSchema = (schema: any) => {
+    convertSchemaPathsToList(schema);
+    convertSchemaDefinitionsToList(schema);
+  };
 
   useEffect(() => {
     if (isFetched) {
@@ -130,10 +140,9 @@ export default function NewSchema({
           <Typography variant="h6">Or Upload Schema as JSON:</Typography>
         </div>
         <DragDrop
-          onFileUpload={convertSchemaToList}
+          onFileUpload={extractDataFromSchema}
           name={name}
           setNameError={setNameError}
-          setIsClosed={setIsClosed}
         />
       </div>
     </div>
