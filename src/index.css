@@ -1,2 +1,4 @@
 @import "@tiller-ds/theme/styles/tiller.css";
 @import "react-resizable/css/styles.css";
+@import 'reactflow/dist/style.css';
+@import 'reactflow/dist/base.css';

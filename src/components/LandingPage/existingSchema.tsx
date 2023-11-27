@@ -1,60 +1,80 @@
-import { Typography } from "@tiller-ds/core";
-import { DropdownMenu } from "@tiller-ds/menu";
-import axios from "axios";
 import { useEffect, useState } from "react";
+
+import axios from "axios";
+import ReactJson from "react-json-view";
+
+import { Typography } from "@tiller-ds/core";
+import { Icon, LoadingIcon } from "@tiller-ds/icons";
+import { DropdownMenu } from "@tiller-ds/menu";
+
 import { backendDomain } from "../../constants/apiConstants";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 export default function ExistingSchema({
   existingApiSchemasNames,
-  setIsClosed,
-  convertSchemaToList,
+  convertSchemaPathsToList,
+  convertSchemaDefinitionsToList,
 }: {
   existingApiSchemasNames: Array<any>;
-  setIsClosed: (data: any) => void;
-  convertSchemaToList: (data: any) => void;
+  convertSchemaPathsToList: (data: any) => void;
+  convertSchemaDefinitionsToList: (data: any) => void;
 }) {
+  const allRequests = useRequestsStore(
+    (store: RequestsStore) => store.allRequests,
+  );
+  const definitions = useRequestsStore(
+    (store: RequestsStore) => store.definitions,
+  );
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("Choose a schema");
+  const [isFetching, setIsFetching] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isFetched) {
+    if (isFetching) {
       setError("");
     }
-  }, [isFetched]);
+  }, [isFetching]);
 
   async function selectApiSchema(item) {
     setSelectedApiSchema(item.name);
     setTitle(item.name);
+    setIsFetching(true);
+    setIsFetched(false); // Reset isFetched when a new schema is selected
+    setError("");
+
     try {
       const data = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name
+        `${backendDomain}/apiSchema/fetch/` + item.name,
       );
 
-      convertSchemaToList(data.data);
+      convertSchemaPathsToList(data.data);
+      convertSchemaDefinitionsToList(data.data);
 
+      setIsFetching(false);
       setIsFetched(true);
 
       setTimeout(() => {
         setIsFetched(false);
-        setIsClosed(true);
-      }, 1000);
+      }, 3000); // Display the "Schema fetched" message for 3 seconds
     } catch (e: any) {
       setError(e.response ? e.response.data.error : e.message);
-
-      console.log("error: ", e.response.data.error);
+      setIsFetching(false);
+      setIsFetched(false);
+      console.log("error: ", e.response?.data.error);
     }
   }
+
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex flex-col my-2">
+    <div className="flex flex-col w-full h-full items-center">
+      <div className="flex flex-col my-2 w-full">
         <div className="py-3 mt-6 text-center">
-          <Typography variant="h6">Select Api Schema Name:</Typography>
+          <Typography variant="h6">Select API Schema Name:</Typography>
         </div>
         <div className="flex flex-col my-2">
           <div className="py-3 mt-6 text-center">
-            <DropdownMenu title={title} className="w-48">
+            <DropdownMenu title={title}>
               {existingApiSchemasNames.map((item, index) => (
                 <DropdownMenu.Item
                   key={index}
@@ -66,25 +86,49 @@ export default function ExistingSchema({
                 </DropdownMenu.Item>
               ))}
             </DropdownMenu>
-            {isFetched && (
-              <p
-                id="schema-fetched"
-                className="text-green-600 mt-2 text-base text-center"
-              >
-                {"Schema " + selectedApiSchema + " fetched"}
-              </p>
-            )}
-            {error?.length > 0 && (
-              <p
-                id="schema-fetched"
-                className="text-red-600 mt-2 text-base text-center"
-              >
-                {error}
-              </p>
-            )}
+            <p
+              id="schema-fetched"
+              className={`text-${
+                isFetched ? "green" : error?.length > 0 ? "red" : undefined
+              }-600 mt-2 text-base text-center h-2`}
+            >
+              {isFetched && "Schema " + selectedApiSchema + " fetched"}
+              {error?.length > 0 && error}
+            </p>
           </div>
         </div>
       </div>
+      {selectedApiSchema && !isFetching && (
+        <div className="bg-slate-400/10 w-full h-full p-2 rounded-md">
+          <p id="schema-fetched" className="mt-2 text-base">
+            <Typography
+              variant="subtitle"
+              className="my-3"
+              icon={<Icon type="path" />}
+            >
+              Schema paths
+            </Typography>
+            <ReactJson src={allRequests} name="Paths" collapsed={true} />
+            {definitions.length > 0 && (
+              <>
+                <Typography
+                  variant="subtitle"
+                  className="my-3"
+                  icon={<Icon type="key" />}
+                >
+                  Schema definitions
+                </Typography>
+                <ReactJson
+                  src={definitions}
+                  name="Definitions"
+                  collapsed={true}
+                />
+              </>
+            )}
+          </p>
+        </div>
+      )}
+      {isFetching && <LoadingIcon size={6} />}
     </div>
   );
 }

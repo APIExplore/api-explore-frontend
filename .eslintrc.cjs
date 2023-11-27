@@ -32,6 +32,7 @@ module.exports = {
         "prettier/prettier": ["warn", {
             "endOfLine": "auto"
         }],
+        "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/explicit-function-return-type": 0,
         "@typescript-eslint/explicit-member-accessibility": 0,
         "@typescript-eslint/indent": "off",

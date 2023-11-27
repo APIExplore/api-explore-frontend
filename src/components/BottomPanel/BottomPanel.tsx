@@ -1,27 +1,37 @@
 import React, { useMemo, useRef } from "react";
 
-import { ColDef, GetRowIdFunc, GetRowIdParams } from "ag-grid-community";
+import {
+  ColDef,
+  GetRowIdFunc,
+  GetRowIdParams,
+  SelectionChangedEvent,
+} from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ResizableBox } from "react-resizable";
-import colors from "tailwindcss/colors";
 
 import { Tooltip } from "@tiller-ds/core";
 
 import { ITemporary } from "./types";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import useApiCallsStore from "../../stores/apiCallsStore";
+import useApiConfigStore from "../../stores/apiConfigStore";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import { ApiCall } from "../../types/apiCallTypes";
-import { MethodColorMappings } from "../VisualisationPanel/Chart/apiChartUtils";
+import MethodBadge from "../MethodBadge";
 
 export default function BottomPanel() {
+  const apiCalls = useApiCallsStore((state) => state.apiCalls);
+  const setSelectedApiCalls = useApiCallsStore(
+    (state) => state.setSelectedApiCalls,
+  );
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const containerWidth = usePanelDimensionsStore(
     (store) => store.panels.container.width,
   );
   const fetchedApiCalls = useApiCallsStore((store) => store.apiCalls);
+  const apexConfig = useApiConfigStore((store) => store.apexConfig);
 
   const gridRef = useRef<AgGridReact<ApiCall>>(null);
 
@@ -31,16 +41,7 @@ export default function BottomPanel() {
     if (field === "method") {
       return (
         <Tooltip label={value.toUpperCase()}>
-          <span
-            style={{
-              backgroundColor:
-                colors[MethodColorMappings[value.toUpperCase()]]["200"],
-              color: colors[MethodColorMappings[value.toUpperCase()]]["800"],
-            }}
-            className="px-2 py-0.5 rounded-full"
-          >
-            {params.value.toUpperCase()}
-          </span>
+          <MethodBadge method={value} />
         </Tooltip>
       );
     }
@@ -60,6 +61,42 @@ export default function BottomPanel() {
         <div className="truncate">{params.value}</div>
       </Tooltip>
     );
+  };
+
+  const unselectRef = useRef<any>(null);
+  const toggleRowSelected = (event: SelectionChangedEvent) => {
+    const selectedRows = event.api.getSelectedRows();
+    const selectedCalls: ApiCall[] = [];
+    selectedRows.forEach((row) => {
+      console.log(row);
+      const foundApiCall = apiCalls.find((call) => call.date === row.date);
+      if (foundApiCall) {
+        selectedCalls.push(foundApiCall);
+      }
+    });
+
+    const chart = ApexCharts.getChartByID("api-simulator");
+
+    apexConfig?.config.series.forEach((series, seriesIndex) => {
+      series.data.forEach((dataPoint, dataPointIndex) => {
+        const timestamp = dataPoint.timestamp;
+        const isSelected = selectedRows.some((c) => c.date === timestamp);
+        const isUnselected =
+          unselectRef.current &&
+          unselectRef.current.some((c) => c.date === timestamp);
+
+        if (chart && isSelected && !isUnselected) {
+          chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
+        }
+
+        if (chart && !isSelected && isUnselected) {
+          chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
+        }
+      });
+    });
+
+    setSelectedApiCalls(selectedCalls);
+    unselectRef.current = selectedRows;
   };
 
   const columnDefs: ColDef[] = [
@@ -122,8 +159,10 @@ export default function BottomPanel() {
               rowData={fetchedApiCalls}
               columnDefs={columnDefs}
               rowSelection={"multiple"}
+              rowMultiSelectWithClick={true}
               getRowId={getRowId}
               context={context}
+              onSelectionChanged={toggleRowSelected}
             />
           </div>
         </div>

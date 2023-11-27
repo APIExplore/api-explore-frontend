@@ -8,49 +8,30 @@ export default function Details() {
   const selectedApiCalls = useApiCallsStore((state) => state.selectedApiCalls);
   const fetching = useApiCallsStore((state) => state.fetching);
 
-  const ExpandedApiCall = ({ id }: { id: string }) => {
+  const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
-      (elem) => elem.operationId === id,
+      (elem) => elem.date === timestamp,
     );
-    const tokens = {
-      padding: "p-0 border-md",
-      Type: { clean: { master: "flex flex-row max-w-full" } },
-      Item: {
-        type: {
-          default: {
-            itemColumnContainer: "flex p-2 w-full",
-          },
-        },
-      },
-    };
 
     return (
       // Expanded ApiCall content goes here
-      <DescriptionList type="clean" tokens={tokens}>
+      <DescriptionList type="clean">
         <div style={{ overflowWrap: "anywhere" }}>
-          <DescriptionList.Item
-            label="Timestamp"
-            type="default"
-            tokens={tokens}
-          >
+          <DescriptionList.Item label="Timestamp" type="default">
             {clickedApiCall?.date}
           </DescriptionList.Item>
-          <DescriptionList.Item label="Method" tokens={tokens}>
+          <DescriptionList.Item label="Method">
             {clickedApiCall?.method.toUpperCase()}
           </DescriptionList.Item>
-          <DescriptionList.Item label="URL" tokens={tokens}>
+          <DescriptionList.Item label="URL">
             <span className="text-ellipsis"> {clickedApiCall?.url}</span>
           </DescriptionList.Item>
-          <DescriptionList.Item label="Status code" tokens={tokens}>
+          <DescriptionList.Item label="Status code">
             {clickedApiCall?.response.status}
           </DescriptionList.Item>
           {clickedApiCall?.parameters &&
             clickedApiCall?.parameters.length > 0 && (
-              <DescriptionList.Item
-                label="Parameters"
-                type="same-column"
-                tokens={tokens}
-              >
+              <DescriptionList.Item label="Parameters" type="same-column">
                 <DataTable data={clickedApiCall.parameters}>
                   <DataTable.Column id="name" accessor="name" header="Name" />
                   <DataTable.Column accessor="type" header="Type" />
@@ -58,7 +39,7 @@ export default function Details() {
                 </DataTable>
               </DescriptionList.Item>
             )}
-          <DescriptionList.Item label="Response body" tokens={tokens}>
+          <DescriptionList.Item label="Response body">
             {(clickedApiCall?.response.data &&
             typeof clickedApiCall.response.data === "string"
               ? clickedApiCall?.response.data
@@ -70,6 +51,7 @@ export default function Details() {
     );
   };
 
+  console.log(selectedApiCalls);
   return (
     <div className="w-full max-w-full h-full">
       {selectedApiCalls.length > 0 && !fetching ? (
@@ -85,8 +67,8 @@ export default function Details() {
             className="font-extrabold"
           />
           <DataTable.Expander>
-            {({ operationId }: { operationId: string }) => (
-              <ExpandedApiCall id={operationId} />
+            {({ date }: { date: string }) => (
+              <ExpandedApiCall timestamp={date} />
             )}
           </DataTable.Expander>
         </DataTable>

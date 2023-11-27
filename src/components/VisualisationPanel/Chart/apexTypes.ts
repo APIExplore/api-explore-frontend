@@ -1,4 +1,6 @@
 export type ApexData = {
+  timestamp: string;
+  url: string;
   operationId: string;
   x: any;
   y: any;
