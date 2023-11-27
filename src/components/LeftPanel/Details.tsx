@@ -51,7 +51,6 @@ export default function Details() {
     );
   };
 
-  console.log(selectedApiCalls);
   return (
     <div className="w-full max-w-full h-full">
       {selectedApiCalls.length > 0 && !fetching ? (

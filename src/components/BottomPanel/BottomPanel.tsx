@@ -68,7 +68,6 @@ export default function BottomPanel() {
     const selectedRows = event.api.getSelectedRows();
     const selectedCalls: ApiCall[] = [];
     selectedRows.forEach((row) => {
-      console.log(row);
       const foundApiCall = apiCalls.find((call) => call.date === row.date);
       if (foundApiCall) {
         selectedCalls.push(foundApiCall);
