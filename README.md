@@ -50,8 +50,17 @@ To get started with the API Exploration and Testing Demonstrator, follow these s
 3. Run the application using `npm run dev`.
 4. Start exploring and interacting!
 
+## Testing
+
+- To test you must run SUT, backend and frontend application
+
+After runing every application just run:
+
+```bash
+yarn run test
+```
+
 ## License
 
 This project is licensed under the **MIT License**. You are free to use, modify, and distribute it, with appropriate
 attribution and subject to the terms and conditions of the license.
-
