@@ -4,19 +4,20 @@ import axios from "axios";
 
 import "./css/dragdrop.css";
 import { backendDomain } from "../../constants/apiConstants";
+import useSchemaModalStore from "../../stores/schemaModalStore";
 
 // drag drop file component
 export default function DragDropFile({
   onFileUpload,
   name,
   setNameError,
-  setIsClosed,
 }: {
   onFileUpload: (data: any) => void;
-  name: String;
+  name: string;
   setNameError: (data: any) => void;
-  setIsClosed: (data: any) => void;
 }) {
+  const setModalOpened = useSchemaModalStore((store) => store.setOpened);
+
   // drag state
   const [dragActive, setDragActive] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
@@ -60,7 +61,7 @@ export default function DragDropFile({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.status != 201) {
@@ -76,7 +77,7 @@ export default function DragDropFile({
     setIsUploaded(true);
     setTimeout(() => {
       setIsUploaded(false);
-      setIsClosed(true);
+      setModalOpened(false);
     }, 1000);
   };
 

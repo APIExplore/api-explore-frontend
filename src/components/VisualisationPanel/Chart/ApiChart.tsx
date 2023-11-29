@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import Chart from "react-apexcharts";
 import colors from "tailwindcss/colors";
@@ -6,14 +6,16 @@ import colors from "tailwindcss/colors";
 import { Alert } from "@tiller-ds/alert";
 import { Icon } from "@tiller-ds/icons";
 
+import { ApexData } from "./apexTypes";
 import {
   displayTooltip,
   MethodColorMappings,
+  prettifyDataLabel,
   selectDataPoint,
 } from "./apiChartUtils";
 import useApiCallsStore from "../../../stores/apiCallsStore";
+import useApiConfigStore from "../../../stores/apiConfigStore";
 import usePanelDimensionsStore from "../../../stores/panelDimensionsStore";
-import { ApexData } from "./apexTypes";
 import { ApiCall } from "../../../types/apiCallTypes";
 import { prettifyTimestamp } from "../../../util/dateUtils";
 
@@ -27,6 +29,7 @@ export default function ApiChart() {
     (store) => store.panels.middle.height,
   );
 
+  const setApexConfig = useApiConfigStore((state) => state.setApexConfig);
   const [apexData, setApexData] = useState<ApexData[]>([]);
 
   useEffect(() => {
@@ -34,6 +37,8 @@ export default function ApiChart() {
     apiCalls.forEach((call: ApiCall) => {
       const timestampMs = new Date(call.date).getTime();
       apexData.push({
+        timestamp: call.date,
+        url: call.url,
         operationId: call.operationId,
         x: call.method.toUpperCase(),
         y: [timestampMs, timestampMs + call.duration],
@@ -82,6 +87,7 @@ export default function ApiChart() {
     },
     labels: ["GET", "POST", "PUT", "DELETE"],
     chart: {
+      id: "api-simulator",
       redrawOnParentResize: true,
       redrawOnWindowResize: true,
       toolbar: {
@@ -89,10 +95,23 @@ export default function ApiChart() {
       },
       events: {
         dataPointSelection: selectDataPoints,
+        updated(chart: any, options?: any) {
+          setApexConfig(options);
+        },
       },
     },
     stroke: { width: 1, curve: "smooth" },
-    dataLabels: { enabled: false },
+    dataLabels: {
+      enabled: true,
+      formatter: prettifyDataLabel,
+      dropShadow: {
+        enabled: true,
+        left: 1,
+        top: 1,
+        opacity: 0.5,
+        blur: 1,
+      },
+    },
     xaxis: {
       axisBorder: { show: true },
       labels: {
@@ -103,6 +122,9 @@ export default function ApiChart() {
       bar: {
         rangeBarOverlap: false,
         horizontal: true,
+        dataLabels: {
+          hideOverflowingLabels: false,
+        },
       },
     },
     yaxis: {
@@ -120,7 +142,7 @@ export default function ApiChart() {
         displayTooltip(series, seriesIndex, dataPointIndex, w),
     },
   };
-
+  const chartRef = useRef(null);
   return (
     <div className="pr-4">
       {apiCalls.length > 0 && !fetching ? (
@@ -130,20 +152,23 @@ export default function ApiChart() {
           height={`${visualisationPanelHeight - 110}px`}
           series={apiSeries}
           options={apexOptions}
+          ref={chartRef}
         />
       ) : (
         <div className="w-full h-full">
-          <div className="absolute top-0 flex justify-center items-center w-full h-full pr-12 z-30">
-            <Alert
-              icon={<Icon className="text-info text-2xl" type="info" />}
-              title="Simulation not started"
-              variant="info"
-              className="text-info-dark drop-shadow-md"
-            >
-              Select endpoints from <br />
-              the configuration tab to see the results
-            </Alert>
-          </div>
+          {apiCalls.length === 0 && (
+            <div className="absolute top-0 flex justify-center items-center w-full h-full pr-12 z-30">
+              <Alert
+                icon={<Icon className="text-info text-2xl" type="info" />}
+                title="Simulation not started"
+                variant="info"
+                className="text-info-dark drop-shadow-md"
+              >
+                Select endpoints from <br />
+                the configuration tab to see the results
+              </Alert>
+            </div>
+          )}
           <Chart
             type="rangeBar"
             width="100%"

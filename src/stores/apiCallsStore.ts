@@ -11,7 +11,10 @@ type ApiStore = {
   selectedApiCalls: ApiCall[];
   setSelectedApiCalls: (apiCalls: ApiCall[]) => void;
   fetching: boolean;
-  fetchData: (selectedRequests: Request[]) => Promise<void>;
+  fetchData: (
+    callSequenceName: string,
+    selectedRequests: Request[],
+  ) => Promise<void>;
 };
 
 const useApiCallsStore = create<ApiStore>((set) => ({
@@ -20,11 +23,12 @@ const useApiCallsStore = create<ApiStore>((set) => ({
   selectedApiCalls: [],
   setSelectedApiCalls: (apiCalls) => set({ selectedApiCalls: apiCalls }),
   fetching: false,
-  fetchData: async (selectedRequests) => {
+  fetchData: async (callSequenceName, selectedRequests) => {
     try {
       set({ fetching: true });
       const data = await axios.post(`${backendDomain}/explore/random`, {
         callSequence: selectedRequests,
+        name: callSequenceName,
       });
 
       set({ apiCalls: data.data.callSequence });

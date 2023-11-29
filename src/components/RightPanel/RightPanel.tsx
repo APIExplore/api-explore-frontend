@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
+
 import { ResizableBox } from "react-resizable";
 
-import { Tabs, Typography, IconButton, Button } from "@tiller-ds/core";
+import { Modal, useModal } from "@tiller-ds/alert";
+import { Button, IconButton, Tabs, Typography } from "@tiller-ds/core";
+import { DataTable } from "@tiller-ds/data-display";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
-import { Modal, useModal } from "@tiller-ds/alert";
-import { DataTable } from "@tiller-ds/data-display";
 
+import CallSequences from "./CallSequences";
 import { Item } from "./types/RightPanelTypes";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
-import { useRequestsStore } from "../../stores/requestsStore";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 export default function RightPanel() {
   const modal = useModal();
@@ -31,17 +33,27 @@ export default function RightPanel() {
     (store: any) => store.setAllShownItems
   );
 
+  const callSequenceName = useRequestsStore(
+    (store: any) => store.callSequenceName
+  );
+  const setCallSequenceName = useRequestsStore(
+    (store: any) => store.setCallSequenceName
+  );
+  const [inputError, setInputError] = useState("");
+
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
-    (store: any) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests
   );
   /* Modal operation */
   const [modalOperation, setModalOperation] = useState("");
   /* Array of all requests */
-  const allRequests = useRequestsStore((store: any) => store.allRequests);
+  const allRequests = useRequestsStore(
+    (store: RequestsStore) => store.allRequests
+  );
   /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
-    (store: any) => store.selectedRequests
+    (store: RequestsStore) => store.selectedRequests
   );
   /* Initial ref */
   const isMountingRef = useRef(false);
@@ -154,6 +166,15 @@ export default function RightPanel() {
     }
   }, [selectedRequests]);
 
+  const validateInputLength = (value?: string) => {
+    if (
+      (value && value?.length === 0) ||
+      (!value && callSequenceName.length === 0)
+    )
+      setInputError("You must enter a name for your sequence");
+    else setInputError("");
+  };
+
   return (
     <ResizableBox
       width={400}
@@ -178,9 +199,10 @@ export default function RightPanel() {
           <>
             <Modal.Content title={"Endpoint name: " + state.operationId}>
               {"Edit params"}
-              {state.params.length === 0 && <p>No params for this endpoint</p>}
-              {state.params.map((item, index) => (
+              {state.params?.length === 0 && <p>No params for this endpoint</p>}
+              {state.params?.map((item, index) => (
                 <Input
+                  key={index}
                   id={"params-input-" + String(index)}
                   label={<p className="font-semibold">{item.name}</p>}
                   className="py-2"
@@ -200,10 +222,10 @@ export default function RightPanel() {
                   selectItem();
                 }}
               >
-                {"Submit endpoint"}
+                Submit Endpoint
               </Button>
               <Button variant="text" color="white" onClick={() => closeModal()}>
-                {"cancel"}
+                Cancel
               </Button>
             </Modal.Footer>
           </>
@@ -220,9 +242,22 @@ export default function RightPanel() {
             label="Configuration"
             className="config-tab flex flex-row justify-center"
           >
-            <div className="py-3 mt-6 text-center">
-              <Typography variant="h6">Selected Endpoints</Typography>
+            <div className="py-8 text-center">
+              <Typography variant="h5">Call Sequence Configuration</Typography>
             </div>
+            <Input
+              name="sequenceName"
+              label="Call Sequence Name"
+              placeholder="Call sequence to be stored in the history tab"
+              value={callSequenceName}
+              onChange={(event) => {
+                setCallSequenceName(event.target.value);
+                validateInputLength(event.target.value);
+              }}
+              onBlur={() => validateInputLength()}
+              error={inputError}
+              className="px-0.5"
+            />
             <div className="my-2 text-left">
               <CheckboxGroup
                 label={
@@ -275,7 +310,7 @@ export default function RightPanel() {
                 <DropdownMenu
                   title="Endpoints"
                   id="endpoints"
-                  visibleItemCount={8}
+                  visibleItemCount={5}
                 >
                   {allShownItems.map((item, index) => (
                     <DropdownMenu.Item
@@ -292,11 +327,15 @@ export default function RightPanel() {
                   ))}
                 </DropdownMenu>
               </div>
-              <DataTable data={selectedRequests} className="w-[300px]">
+              <DataTable
+                data={selectedRequests}
+                className="w-[300px]"
+                lastColumnFixed={true}
+              >
                 <DataTable.Column
                   header="Method"
                   id="method"
-                  className="max-w-md"
+                  className="max-w-md uppercase"
                 >
                   {(item: Item) => <>{item.method}</>}
                 </DataTable.Column>
@@ -351,11 +390,11 @@ export default function RightPanel() {
             </div>
           </Tabs.Tab>
           <Tabs.Tab
-            label="History"
-            className="history-tab"
-            icon={<Icon type="folder" variant="fill" />}
+            label="Sequences"
+            className="sequences-tab"
+            icon={<Icon type="clock-counter-clockwise" variant="fill" />}
           >
-            <h1>History</h1>
+            <CallSequences />
           </Tabs.Tab>
         </Tabs>
       </div>
