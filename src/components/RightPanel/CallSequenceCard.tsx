@@ -31,7 +31,7 @@ export default function CallSequenceCard({
               onClick={() => toggleFavorite(sequence.name)}
               className={`text-yellow-500 ${
                 sequence.favorite ? "opacity-100" : "opacity-50"
-              }`}
+              } favourite-button`}
               icon={
                 <Icon
                   type="star"
@@ -47,6 +47,7 @@ export default function CallSequenceCard({
               icon={
                 <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
               }
+              id="expand-sequence"
               label="Toggle Favorite"
             />
           </div>
@@ -94,6 +95,7 @@ function SequenceDetails({
               >
                 {/* Render API call details */}
                 <button
+                  id="view-details"
                   className="text-blue-500 hover:underline mr-2"
                   onClick={() => selectApiCall(sequence, apiCall)}
                 >

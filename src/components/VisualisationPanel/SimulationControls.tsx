@@ -28,6 +28,7 @@ export default function SimulationControls() {
     <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-6 z-40">
       <ButtonGroups tokens={{ base: "" }}>
         <ButtonGroups.Button
+          id="choose-schema"
           variant="text"
           leadingIcon={<Icon type="files" />}
           onClick={openLandingPage}

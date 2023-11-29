@@ -224,7 +224,12 @@ export default function RightPanel() {
               >
                 Submit Endpoint
               </Button>
-              <Button variant="text" color="white" onClick={() => closeModal()}>
+              <Button
+                id="cancel-params"
+                variant="text"
+                color="white"
+                onClick={() => closeModal()}
+              >
                 Cancel
               </Button>
             </Modal.Footer>
@@ -247,6 +252,7 @@ export default function RightPanel() {
             </div>
             <Input
               name="sequenceName"
+              id="sequence-name-input"
               label="Call Sequence Name"
               placeholder="Call sequence to be stored in the history tab"
               value={callSequenceName}
