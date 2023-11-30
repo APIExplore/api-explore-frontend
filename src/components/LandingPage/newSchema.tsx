@@ -5,8 +5,9 @@ import axios from "axios";
 import { StatusButton, Typography } from "@tiller-ds/core";
 import { Input } from "@tiller-ds/form-elements";
 
-import { backendDomain } from "../../constants/apiConstants";
+import { backendDomain, agentDomain } from "../../constants/apiConstants";
 import useSchemaModalStore from "../../stores/schemaModalStore";
+import useAgentStore from "../../stores/agentStore";
 import DragDrop from "../RightPanel/DragDrop";
 
 export default function NewSchema({
@@ -18,9 +19,16 @@ export default function NewSchema({
 }) {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
+  /* Get agent id and pid*/
+  const agentId = useAgentStore((store: any) => store.agentId);
+  const agentPid = useAgentStore((store: any) => store.agentPid);
+
+  /* Function for setting new agent pid */
+  const setAgentPid = useAgentStore((store: any) => store.setAgentPid);
+
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json",
+    "http://localhost:8080/swagger.json"
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -57,12 +65,20 @@ export default function NewSchema({
         return;
       }
 
-      const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
+      const backendData = await axios.post(`${backendDomain}/apiSchema/fetch`, {
         address: apiSchema,
         name: name,
       });
 
-      extractDataFromSchema(data.data);
+      const agentData = await axios.post(`${agentDomain}/api/restart-api`, {
+        id: agentId,
+        pid: agentPid,
+      });
+
+      console.info(agentData.data.message);
+      setAgentPid(agentData.data.PID);
+
+      extractDataFromSchema(backendData.data);
 
       // Show confirmation message
       setIsFetched(true);

@@ -7,7 +7,8 @@ import { Typography } from "@tiller-ds/core";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 
-import { backendDomain } from "../../constants/apiConstants";
+import { backendDomain, agentDomain } from "../../constants/apiConstants";
+import useAgentStore from "../../stores/agentStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 export default function ExistingSchema({
@@ -31,6 +32,13 @@ export default function ExistingSchema({
   const [isFetched, setIsFetched] = useState(false);
   const [error, setError] = useState("");
 
+  /* Get agent id and pid*/
+  const agentId = useAgentStore((store: any) => store.agentId);
+  const agentPid = useAgentStore((store: any) => store.agentPid);
+
+  /* Function for setting new agent pid */
+  const setAgentPid = useAgentStore((store: any) => store.setAgentPid);
+
   useEffect(() => {
     if (isFetching) {
       setError("");
@@ -48,6 +56,14 @@ export default function ExistingSchema({
       const data = await axios.get(
         `${backendDomain}/apiSchema/fetch/` + item.name
       );
+
+      const agentData = await axios.post(`${agentDomain}/api/restart-api`, {
+        id: agentId,
+        pid: agentPid,
+      });
+
+      console.info(agentData.data.message);
+      setAgentPid(agentData.data.PID);
 
       convertSchemaPathsToList(data.data);
       convertSchemaDefinitionsToList(data.data);
