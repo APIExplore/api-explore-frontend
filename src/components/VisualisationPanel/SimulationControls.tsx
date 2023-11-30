@@ -11,7 +11,7 @@ import { Request } from "../RightPanel/types/RightPanelTypes";
 export default function SimulationControls() {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests,
+    (store) => store.selectedRequests
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
   const fetchData = useApiCallsStore((store) => store.fetchData);
@@ -28,6 +28,7 @@ export default function SimulationControls() {
     <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-6 z-40">
       <ButtonGroups tokens={{ base: "" }}>
         <ButtonGroups.Button
+          id="choose-schema"
           variant="text"
           leadingIcon={<Icon type="files" />}
           onClick={openLandingPage}

@@ -10,7 +10,7 @@ export default function Details() {
 
   const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
-      (elem) => elem.date === timestamp,
+      (elem) => elem.date === timestamp
     );
 
     return (

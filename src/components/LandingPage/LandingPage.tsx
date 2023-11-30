@@ -18,13 +18,13 @@ export default function LandingPage() {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests,
+    (store: RequestsStore) => store.setAllRequests
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions,
+    (store: RequestsStore) => store.setDefinitions
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems,
+    (store: RequestsStore) => store.setAllShownItems
   );
 
   const modal = useModal();
@@ -67,7 +67,7 @@ export default function LandingPage() {
                   in: param.in,
                   value: "",
                 };
-              },
+              }
             );
           }
 
@@ -110,6 +110,7 @@ export default function LandingPage() {
         <Modal.Content title="">
           <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
             <Tabs.Tab
+              className="new-schema-tab"
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
             >
@@ -119,6 +120,7 @@ export default function LandingPage() {
               />
             </Tabs.Tab>
             <Tabs.Tab
+              className="existing-schema-tab"
               label="Existing schema"
               icon={<Icon type="list" variant="fill" />}
             >
@@ -137,6 +139,7 @@ export default function LandingPage() {
       </div>
       <Modal.Footer>
         <Button
+          id="close-landing-page"
           variant="filled"
           onClick={close}
           trailingIcon={<Icon type="sign-in" />}

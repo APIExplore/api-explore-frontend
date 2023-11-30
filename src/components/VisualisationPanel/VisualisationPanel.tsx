@@ -11,17 +11,17 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function VisualisationPanel() {
   const leftPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.left.width,
+    (store) => store.panels.left.width
   );
   const rightPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.right.width,
+    (store) => store.panels.right.width
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height,
+    (store) => store.panels.bottom.height
   );
 
   const containerDimensions = usePanelDimensionsStore(
-    (store) => store.panels.container,
+    (store) => store.panels.container
   );
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const [position, setPosition] = useState<number>(leftPanelWidth);
@@ -44,10 +44,15 @@ export default function VisualisationPanel() {
       id="middle-panel"
     >
       <Tabs iconPlacement="trailing">
-        <Tabs.Tab label="Timeline" icon={<Icon type="rows" variant="light" />}>
+        <Tabs.Tab
+          label="Timeline"
+          className="timeline-tab"
+          icon={<Icon type="rows" variant="light" />}
+        >
           <ApiChart />
         </Tabs.Tab>
         <Tabs.Tab
+          className="dependency-graph-tab"
           label="Dependency Graph"
           icon={<Icon type="tree-structure" variant="light" />}
         >

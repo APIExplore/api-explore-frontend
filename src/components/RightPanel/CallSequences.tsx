@@ -32,7 +32,7 @@ export default function CallSequences() {
             details: [],
             expanded: false,
             selectedApiCall: null,
-          }),
+          })
         );
 
         setCallSequences(sequencesFromApi);
@@ -40,7 +40,7 @@ export default function CallSequences() {
       } catch (error: any) {
         console.error(
           "Error fetching call sequences:",
-          error.response?.data?.error || "Unknown error",
+          error.response?.data?.error || "Unknown error"
         );
         setLoading(false);
       }
@@ -52,8 +52,8 @@ export default function CallSequences() {
   const toggleFavorite = async (sequenceName: string) => {
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq,
-      ),
+        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq
+      )
     );
   };
 
@@ -63,18 +63,18 @@ export default function CallSequences() {
     if (sequence && !sequence.details?.length) {
       try {
         const response = await axios.get(
-          `${backendDomain}/callsequence/fetch/${sequenceName}`,
+          `${backendDomain}/callsequence/fetch/${sequenceName}`
         );
         const details = response.data;
         setCallSequences((prevSequences) =>
           prevSequences.map((seq) =>
-            seq.name === sequenceName ? { ...seq, details } : seq,
-          ),
+            seq.name === sequenceName ? { ...seq, details } : seq
+          )
         );
       } catch (error: any) {
         console.error(
           "Error fetching call sequence details:",
-          error.response?.data?.error || "Unknown error",
+          error.response?.data?.error || "Unknown error"
         );
       }
     }
@@ -83,8 +83,8 @@ export default function CallSequences() {
       prevSequences.map((seq) =>
         seq.name === sequenceName
           ? { ...seq, expanded: !seq.expanded, selectedApiCall: null }
-          : seq,
-      ),
+          : seq
+      )
     );
   };
 
@@ -92,8 +92,8 @@ export default function CallSequences() {
     modal.onOpen({ apiCall: apiCall, sequenceName: sequence.name });
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq,
-      ),
+        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq
+      )
     );
   };
 
@@ -132,6 +132,10 @@ export default function CallSequences() {
             uncheckedIcon={<Icon type="star" />}
             checked={showFavorites}
             onClick={showOnlyFavorites}
+            tokens={{
+              toggle:
+                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+            }}
           />
         </div>
       </div>
@@ -181,7 +185,12 @@ export default function CallSequences() {
         </Modal.Content>
 
         <Modal.Footer>
-          <Button variant="text" color="white" onClick={modal.onClose}>
+          <Button
+            id="close-details-modal"
+            variant="text"
+            color="white"
+            onClick={modal.onClose}
+          >
             Close
           </Button>
         </Modal.Footer>

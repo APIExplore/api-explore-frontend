@@ -20,10 +20,10 @@ export default function ExistingSchema({
   convertSchemaDefinitionsToList: (data: any) => void;
 }) {
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests,
+    (store: RequestsStore) => store.allRequests
   );
   const definitions = useRequestsStore(
-    (store: RequestsStore) => store.definitions,
+    (store: RequestsStore) => store.definitions
   );
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
   const [title, setTitle] = useState("Choose a schema");
@@ -46,7 +46,7 @@ export default function ExistingSchema({
 
     try {
       const data = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name,
+        `${backendDomain}/apiSchema/fetch/` + item.name
       );
 
       convertSchemaPathsToList(data.data);
@@ -74,7 +74,7 @@ export default function ExistingSchema({
         </div>
         <div className="flex flex-col my-2">
           <div className="py-3 mt-6 text-center">
-            <DropdownMenu title={title}>
+            <DropdownMenu title={title} id="dropdown-existing-schemas">
               {existingApiSchemasNames.map((item, index) => (
                 <DropdownMenu.Item
                   key={index}
@@ -82,7 +82,9 @@ export default function ExistingSchema({
                     selectApiSchema(item);
                   }}
                 >
-                  <div className="text-body">{item.name}</div>
+                  <div id={"schema-" + index} className="text-body">
+                    {item.name}
+                  </div>
                 </DropdownMenu.Item>
               ))}
             </DropdownMenu>
