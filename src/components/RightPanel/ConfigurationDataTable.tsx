@@ -45,40 +45,6 @@ export default function ConfigurationDataTable({
       lastColumnFixed={true}
     >
       <DataTable.Column
-        header="Order"
-        id="order"
-        className="max-w-md uppercase"
-      >
-        {(item: Item, index) => (
-          <div className="flex flex-col gap-0">
-            <IconButton
-              id={"move-up-" + String(index)}
-              icon={
-                <Icon
-                  type="caret-up"
-                  variant="fill"
-                  className="text-gray-500 cursor-pointer"
-                />
-              }
-              onClick={() => handleMoveUp(index)}
-              label="Move Up"
-            />
-            <IconButton
-              id={"move-down-" + String(index)}
-              icon={
-                <Icon
-                  type="caret-down"
-                  variant="fill"
-                  className="text-gray-500 cursor-pointer"
-                />
-              }
-              onClick={() => handleMoveDown(index)}
-              label="Move Down"
-            />
-          </div>
-        )}
-      </DataTable.Column>
-      <DataTable.Column
         header="Method"
         id="method"
         className="max-w-md uppercase"
@@ -123,6 +89,32 @@ export default function ConfigurationDataTable({
               onClick={() => removeItem(index)}
               label="Delete"
             />
+            <div className="flex flex-col gap-0">
+              <IconButton
+                id={"move-up-" + String(index)}
+                icon={
+                  <Icon
+                    type="caret-up"
+                    variant="fill"
+                    className="text-gray-500 cursor-pointer p-0"
+                  />
+                }
+                onClick={() => handleMoveUp(index)}
+                label="Move Up"
+              />
+              <IconButton
+                id={"move-down-" + String(index)}
+                icon={
+                  <Icon
+                    type="caret-down"
+                    variant="fill"
+                    className="text-gray-500 cursor-pointer p-0"
+                  />
+                }
+                onClick={() => handleMoveDown(index)}
+                label="Move Down"
+              />
+            </div>
           </div>
         )}
       </DataTable.Column>
