@@ -331,6 +331,7 @@ export default function RightPanel() {
               </div>
               <ConfigurationDataTable
                 selectedRequests={selectedRequests}
+                setSelectedRequests={setSelectedRequests}
                 setModalOperation={setModalOperation}
                 setClickedItem={setClickedItem}
                 removeItem={removeItem}
