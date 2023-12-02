@@ -44,9 +44,13 @@ export default function ConfigurationDataTable({
       className="w-[300px]"
       lastColumnFixed={true}
     >
-      <DataTable.Column header="Order" id="order" className="uppercase">
+      <DataTable.Column
+        header="Order"
+        id="order"
+        className="max-w-md uppercase"
+      >
         {(item: Item, index) => (
-          <div className="flex justify-center items-center space-x-1">
+          <div className="flex flex-col gap-0">
             <IconButton
               id={"move-up-" + String(index)}
               icon={
@@ -74,20 +78,24 @@ export default function ConfigurationDataTable({
           </div>
         )}
       </DataTable.Column>
-      <DataTable.Column header="Method" id="method" className="uppercase">
+      <DataTable.Column
+        header="Method"
+        id="method"
+        className="max-w-md uppercase"
+      >
         {(item: Item) => <>{item.method}</>}
       </DataTable.Column>
       <DataTable.Column
         header="Operation Id"
         id="operationId"
-        className="uppercase"
+        className="max-w-md"
       >
         {(item: Item) => <>{item.operationId}</>}
       </DataTable.Column>
       <DataTable.Column
         header="Actions"
         id="actions"
-        className=""
+        className="max-w-md"
         canSort={false}
       >
         {(item: Item, index) => (
