@@ -174,30 +174,21 @@ export default function RightPanel() {
   };
 
   const extractDataFromCallSequence = (event: any) => {
-    console.log("exstract data from > ", event.target);
     const file = event.target.files[0];
-    // convertSchemaPathsToList(callSequence);
-    // convertSchemaDefinitionsToList(callSequence);
 
     if (file) {
-      // Kreiranje FileReader objekta za čitanje sadržaja datoteke
       const reader = new FileReader();
-      console.log("lalalal >", reader.readAsText(file));
-
-      // Postavljanje funkcije koja će se pozvati nakon čitanja datoteke
       reader.onload = (e) => {
         try {
-          // Parsiranje JSON-a iz pročitanog sadržaja
-          // const jsonData = JSON.parse(event.target.result);
-          // console.log("jsonData > ", jsonData);
-          // Pozivanje funkcije koja je prenesena kao prop, a koja će obraditi uvezeni JSON
-          // onImport(jsonData);
+          const fileContent = e.target?.result ? e.target.result : {};
+          const fileContentInJsonFormat = JSON.parse(fileContent as string);
+
+          console.log("DATA = ", fileContentInJsonFormat);
+          setSelectedRequests(fileContentInJsonFormat);
         } catch (error) {
-          console.error("Greška prilikom parsiranja JSON-a", error);
+          console.error("Error while parsing JSON file", error);
         }
       };
-
-      // Čitanje sadržaja datoteke kao tekst
       reader.readAsText(file);
     }
   };
@@ -339,7 +330,7 @@ export default function RightPanel() {
                   />
                 </div>
               </CheckboxGroup>
-              <div className="my-5">
+              <div className="my-5 flex items-center">
                 <DropdownMenu
                   title="Endpoints"
                   id="endpoints"
@@ -359,10 +350,13 @@ export default function RightPanel() {
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu>
-                <input
+                <Input
                   type="file"
                   accept=".json"
                   onChange={extractDataFromCallSequence}
+                  placeholder="Test placeholder"
+                  name={"Choose seq"}
+                  className="ml-2"
                 />
               </div>
               <ConfigurationDataTable
