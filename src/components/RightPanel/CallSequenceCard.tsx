@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Card, IconButton, Typography } from "@tiller-ds/core";
 import { DescriptionList } from "@tiller-ds/data-display";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
-
 import { CallSequence } from "./types/RightPanelTypes";
 import { ApiCall } from "../../types/apiCallTypes";
+import { saveAs } from "file-saver";
 
 type CallSequenceCardProps = {
   sequence: CallSequence;
@@ -23,7 +23,9 @@ export default function CallSequenceCard({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const exportSequenceToJsonFile = (sequence) => {
-    console.log("export seq to JSON file > ", sequence);
+    const jsonDataForExport = JSON.stringify(sequence.details);
+    const blob = new Blob([jsonDataForExport], { type: "application/json" });
+    saveAs(blob, `${sequence.name}.json`);
   };
 
   return (
@@ -48,14 +50,6 @@ export default function CallSequenceCard({
               }
             />
             <IconButton
-              onClick={() => {
-                exportSequenceToJsonFile(sequence);
-              }}
-              icon={<Icon type={"paperclip"} size={2} />}
-              id="export-to-json"
-              label="Export to JSON file"
-            />
-            <IconButton
               onClick={() => setIsExpanded(!isExpanded)}
               icon={
                 <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
@@ -72,6 +66,15 @@ export default function CallSequenceCard({
             sequence={sequence}
             selectApiCall={selectApiCall}
             toggleDetails={toggleDetails}
+          />
+          <IconButton
+            onClick={() => {
+              exportSequenceToJsonFile(sequence);
+            }}
+            icon={<Icon type={"paperclip"} size={2} />}
+            id="export-to-json"
+            label="Export to JSON file"
+            className="float-right"
           />
         </Card.Body>
       )}
