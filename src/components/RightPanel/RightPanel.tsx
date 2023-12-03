@@ -10,6 +10,7 @@ import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import ConfigurationDataTable from "./ConfigurationDataTable";
+import DragDrop from "./DragDrop";
 
 export default function RightPanel() {
   const modal = useModal();
@@ -36,6 +37,7 @@ export default function RightPanel() {
     (store: any) => store.setCallSequenceName
   );
   const [inputError, setInputError] = useState("");
+  const [nameError, setNameError] = useState("default name error");
 
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
@@ -169,6 +171,35 @@ export default function RightPanel() {
     )
       setInputError("You must enter a name for your sequence");
     else setInputError("");
+  };
+
+  const extractDataFromCallSequence = (event: any) => {
+    console.log("exstract data from > ", event.target);
+    const file = event.target.files[0];
+    // convertSchemaPathsToList(callSequence);
+    // convertSchemaDefinitionsToList(callSequence);
+
+    if (file) {
+      // Kreiranje FileReader objekta za čitanje sadržaja datoteke
+      const reader = new FileReader();
+      console.log("lalalal >", reader.readAsText(file));
+
+      // Postavljanje funkcije koja će se pozvati nakon čitanja datoteke
+      reader.onload = (e) => {
+        try {
+          // Parsiranje JSON-a iz pročitanog sadržaja
+          // const jsonData = JSON.parse(event.target.result);
+          // console.log("jsonData > ", jsonData);
+          // Pozivanje funkcije koja je prenesena kao prop, a koja će obraditi uvezeni JSON
+          // onImport(jsonData);
+        } catch (error) {
+          console.error("Greška prilikom parsiranja JSON-a", error);
+        }
+      };
+
+      // Čitanje sadržaja datoteke kao tekst
+      reader.readAsText(file);
+    }
   };
 
   return (
@@ -328,6 +359,11 @@ export default function RightPanel() {
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={extractDataFromCallSequence}
+                />
               </div>
               <ConfigurationDataTable
                 selectedRequests={selectedRequests}
