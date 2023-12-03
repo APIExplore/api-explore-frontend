@@ -71,7 +71,7 @@ export default function CallSequenceCard({
             onClick={() => {
               exportSequenceToJsonFile(sequence);
             }}
-            icon={<Icon type={"paperclip"} size={2} />}
+            icon={<Icon type={"paperclip"} />}
             id="export-to-json"
             label="Export to JSON file"
             className="float-right"
