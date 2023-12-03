@@ -21,6 +21,11 @@ export default function CallSequenceCard({
   toggleDetails,
 }: CallSequenceCardProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const exportSequenceToJsonFile = (sequence) => {
+    console.log("export seq to JSON file > ", sequence);
+  };
+
   return (
     <Card className="p-4">
       <Card.Header removeSpacing>
@@ -41,6 +46,14 @@ export default function CallSequenceCard({
               label={
                 sequence.favorite ? "Remove from Favorites" : "Add to Favorites"
               }
+            />
+            <IconButton
+              onClick={() => {
+                exportSequenceToJsonFile(sequence);
+              }}
+              icon={<Icon type={"paperclip"} size={2} />}
+              id="export-to-json"
+              label="Export to JSON file"
             />
             <IconButton
               onClick={() => setIsExpanded(!isExpanded)}
