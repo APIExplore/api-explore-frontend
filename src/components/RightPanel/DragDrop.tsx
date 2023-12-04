@@ -4,8 +4,7 @@ import axios from "axios";
 
 import "./css/dragdrop.css";
 import useSchemaModalStore from "../../stores/schemaModalStore";
-import { backendDomain, agentDomain } from "../../constants/apiConstants";
-import useAgentStore from "../../stores/agentStore";
+import { backendDomain } from "../../constants/apiConstants";
 
 // drag drop file component
 export default function DragDropFile({
@@ -23,12 +22,6 @@ export default function DragDropFile({
   const [dragActive, setDragActive] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  /* Get agent id and pid*/
-  const agentId = useAgentStore((store: any) => store.agentId);
-  const agentPid = useAgentStore((store: any) => store.agentPid);
-
-  /* Function for setting new agent pid */
-  const setAgentPid = useAgentStore((store: any) => store.setAgentPid);
 
   // ref
   const inputRef: any = useRef(null);
@@ -74,14 +67,6 @@ export default function DragDropFile({
       if (response.status != 201) {
         setErrorMsg(response.data.error);
       }
-
-      const agentData = await axios.post(`${agentDomain}/api/restart-api`, {
-        id: agentId,
-        pid: agentPid,
-      });
-
-      console.info(agentData.data.message);
-      setAgentPid(agentData.data.PID);
 
       onFileUpload(response.data);
     } catch (e: any) {

@@ -11,7 +11,7 @@ import NewSchema from "./newSchema";
 import { backendDomain } from "../../constants/apiConstants";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
-import { CallSequence, Definition } from "../RightPanel/types/RightPanelTypes";
+import { Definition } from "../RightPanel/types/RightPanelTypes";
 
 export default function LandingPage() {
   const modalOpened = useSchemaModalStore((store) => store.opened);
@@ -76,7 +76,6 @@ export default function LandingPage() {
       }
     }
 
-    console.log("hereeee");
     setAllRequests(items);
     setAllShownItems(items);
   }
