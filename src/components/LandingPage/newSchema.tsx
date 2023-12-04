@@ -20,7 +20,7 @@ export default function NewSchema({
 
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json",
+    "http://localhost:8080/swagger.json"
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -57,12 +57,12 @@ export default function NewSchema({
         return;
       }
 
-      const data = await axios.post(`${backendDomain}/apiSchema/fetch`, {
+      const backendData = await axios.post(`${backendDomain}/apiSchema/fetch`, {
         address: apiSchema,
         name: name,
       });
 
-      extractDataFromSchema(data.data);
+      extractDataFromSchema(backendData.data);
 
       // Show confirmation message
       setIsFetched(true);

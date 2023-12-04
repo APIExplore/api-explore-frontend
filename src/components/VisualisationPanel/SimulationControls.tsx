@@ -7,8 +7,16 @@ import useApiCallsStore from "../../stores/apiCallsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { Request } from "../RightPanel/types/RightPanelTypes";
+import useAgentStore from "../../stores/agentStore";
 
 export default function SimulationControls() {
+  /* Get agent id and pid*/
+  const agentPid = useAgentStore((store: any) => store.agentPid);
+  const agentId = useAgentStore((store: any) => store.agentId);
+
+  /* Function for setting new agent pid */
+  const restoreAgent = useAgentStore((store: any) => store.restoreAgent);
+
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
     (store) => store.selectedRequests
@@ -55,6 +63,14 @@ export default function SimulationControls() {
           onClick={openLandingPage}
         >
           Choose Schema
+        </ButtonGroups.Button>
+        <ButtonGroups.Button
+          onClick={() => restoreAgent(agentId, agentPid)}
+          disabled={!agentPid}
+          variant="text"
+          id="restart-button"
+        >
+          <Icon type="arrow-counter-clockwise" />
         </ButtonGroups.Button>
         <ButtonGroups.Button variant="text" id="pause-button">
           <Icon type="pause" />
