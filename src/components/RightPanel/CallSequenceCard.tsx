@@ -6,6 +6,7 @@ import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { CallSequence } from "./types/RightPanelTypes";
 import { ApiCall } from "../../types/apiCallTypes";
 import { saveAs } from "file-saver";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 type CallSequenceCardProps = {
   sequence: CallSequence;
@@ -21,11 +22,14 @@ export default function CallSequenceCard({
   toggleDetails,
 }: CallSequenceCardProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const selectedRequests = useRequestsStore(
+    (store: RequestsStore) => store.selectedRequests
+  );
 
-  const exportSequenceToJsonFile = (sequence) => {
-    const jsonDataForExport = JSON.stringify(sequence.details);
+  const exportSequenceToJsonFile = (name) => {
+    const jsonDataForExport = JSON.stringify(selectedRequests);
     const blob = new Blob([jsonDataForExport], { type: "application/json" });
-    saveAs(blob, `${sequence.name}.json`);
+    saveAs(blob, `${name}.json`);
   };
 
   return (
@@ -68,9 +72,7 @@ export default function CallSequenceCard({
             toggleDetails={toggleDetails}
           />
           <IconButton
-            onClick={() => {
-              exportSequenceToJsonFile(sequence);
-            }}
+            onClick={() => exportSequenceToJsonFile(sequence.name)}
             icon={<Icon type={"paperclip"} />}
             id="export-to-json"
             label="Export to JSON file"

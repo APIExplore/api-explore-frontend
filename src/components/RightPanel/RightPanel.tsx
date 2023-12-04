@@ -182,8 +182,6 @@ export default function RightPanel() {
         try {
           const fileContent = e.target?.result ? e.target.result : {};
           const fileContentInJsonFormat = JSON.parse(fileContent as string);
-
-          console.log("DATA = ", fileContentInJsonFormat);
           setSelectedRequests(fileContentInJsonFormat);
         } catch (error) {
           console.error("Error while parsing JSON file", error);
@@ -213,46 +211,50 @@ export default function RightPanel() {
           />
         }
       >
-        {(state: any) => (
-          <>
-            <Modal.Content title={"Endpoint name: " + state.operationId}>
-              {"Edit params"}
-              {state.params?.length === 0 && <p>No params for this endpoint</p>}
-              {state.params?.map((item, index) => (
-                <Input
-                  key={index}
-                  id={"params-input-" + String(index)}
-                  label={<p className="font-semibold">{item.name}</p>}
-                  className="py-2"
-                  name="params"
-                  onChange={(e) => onParamChange(e, item.name)}
-                  value={item.value}
-                />
-              ))}
-            </Modal.Content>
+        {(state: any) => {
+          return (
+            <>
+              <Modal.Content title={"Endpoint name: " + state.operationId}>
+                {"Edit params"}
+                {state.params?.length === 0 && (
+                  <p>No params for this endpoint</p>
+                )}
+                {state.params?.map((item, index) => (
+                  <Input
+                    key={index}
+                    id={"params-input-" + String(index)}
+                    label={<p className="font-semibold">{item.name}</p>}
+                    className="py-2"
+                    name="params"
+                    onChange={(e) => onParamChange(e, item.name)}
+                    value={item.value}
+                  />
+                ))}
+              </Modal.Content>
 
-            <Modal.Footer>
-              <Button
-                id="submit-endpoint"
-                variant="filled"
-                color="success"
-                onClick={() => {
-                  selectItem();
-                }}
-              >
-                Submit Endpoint
-              </Button>
-              <Button
-                id="cancel-params"
-                variant="text"
-                color="white"
-                onClick={() => closeModal()}
-              >
-                Cancel
-              </Button>
-            </Modal.Footer>
-          </>
-        )}
+              <Modal.Footer>
+                <Button
+                  id="submit-endpoint"
+                  variant="filled"
+                  color="success"
+                  onClick={() => {
+                    selectItem();
+                  }}
+                >
+                  Submit Endpoint
+                </Button>
+                <Button
+                  id="cancel-params"
+                  variant="text"
+                  color="white"
+                  onClick={() => closeModal()}
+                >
+                  Cancel
+                </Button>
+              </Modal.Footer>
+            </>
+          );
+        }}
       </Modal>
       <div
         className="flex h-full m-1 p-4 bg-white drop-shadow-md"

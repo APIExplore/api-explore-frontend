@@ -76,7 +76,6 @@ export default function LandingPage() {
       }
     }
 
-    console.log("hereeee");
     setAllRequests(items);
     setAllShownItems(items);
   }
