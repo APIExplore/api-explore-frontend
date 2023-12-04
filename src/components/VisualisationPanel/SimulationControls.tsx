@@ -4,7 +4,7 @@ import { ButtonGroups } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import useApiCallsStore from "../../stores/apiCallsStore";
-import useRequestsStore from "../../stores/requestsStore";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { Request } from "../RightPanel/types/RightPanelTypes";
 
@@ -20,8 +20,29 @@ export default function SimulationControls() {
     await fetchData(callSequenceName, selectedRequests);
   };
 
+  const setAllRequests = useRequestsStore(
+    (store: RequestsStore) => store.setAllRequests
+  );
+  const setSelectedRequests = useRequestsStore(
+    (store: RequestsStore) => store.setSelectedRequests
+  );
+  const setDefinitions = useRequestsStore(
+    (store: RequestsStore) => store.setDefinitions
+  );
+  const setAllShownItems = useRequestsStore(
+    (store: RequestsStore) => store.setAllShownItems
+  );
+  const setCallSequenceName = useRequestsStore(
+    (store: RequestsStore) => store.setCallSequenceName
+  );
+
   const openLandingPage = () => {
     setModalOpened(true);
+    setAllRequests([]);
+    setSelectedRequests([]);
+    setDefinitions([]);
+    setAllShownItems([]);
+    setCallSequenceName("");
   };
 
   return (

@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-
 import { ResizableBox } from "react-resizable";
-
 import { Modal, useModal } from "@tiller-ds/alert";
-import { Button, IconButton, Tabs, Typography } from "@tiller-ds/core";
-import { DataTable } from "@tiller-ds/data-display";
+import { Button, Tabs, Typography } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
-
 import CallSequences from "./CallSequences";
-import { Item } from "./types/RightPanelTypes";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
+import ConfigurationDataTable from "./ConfigurationDataTable";
 
 export default function RightPanel() {
   const modal = useModal();
@@ -333,66 +329,13 @@ export default function RightPanel() {
                   ))}
                 </DropdownMenu>
               </div>
-              <DataTable
-                data={selectedRequests}
-                className="w-[300px]"
-                lastColumnFixed={true}
-              >
-                <DataTable.Column
-                  header="Method"
-                  id="method"
-                  className="max-w-md uppercase"
-                >
-                  {(item: Item) => <>{item.method}</>}
-                </DataTable.Column>
-                <DataTable.Column
-                  header="Operation Id"
-                  id="operationId"
-                  className="max-w-md"
-                >
-                  {(item: Item) => <>{item.operationId}</>}
-                </DataTable.Column>
-                <DataTable.Column
-                  header="Actions"
-                  id="actions"
-                  className="max-w-md"
-                  canSort={false}
-                >
-                  {(item: Item, index) => (
-                    <div className="flex justify-center items-center space-x-1">
-                      <IconButton
-                        id={"edit-" + String(index)}
-                        icon={
-                          <Icon
-                            type="pencil-simple"
-                            variant="fill"
-                            className="text-gray-500"
-                          />
-                        }
-                        onClick={() => {
-                          setModalOperation("edit");
-                          setClickedItem(
-                            JSON.parse(JSON.stringify({ ...item, index }))
-                          );
-                        }}
-                        label="Edit"
-                      />
-                      <IconButton
-                        id={"delete-" + String(index)}
-                        icon={
-                          <Icon
-                            type="trash"
-                            variant="fill"
-                            className="text-gray-500"
-                          />
-                        }
-                        onClick={() => removeItem(index)}
-                        label="Delete"
-                      />
-                    </div>
-                  )}
-                </DataTable.Column>
-              </DataTable>
+              <ConfigurationDataTable
+                selectedRequests={selectedRequests}
+                setSelectedRequests={setSelectedRequests}
+                setModalOperation={setModalOperation}
+                setClickedItem={setClickedItem}
+                removeItem={removeItem}
+              />
             </div>
           </Tabs.Tab>
           <Tabs.Tab
