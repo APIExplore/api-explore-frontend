@@ -32,7 +32,10 @@ function App() {
   return (
     <div className="flex flex-col w-full h-full" id="container">
       {agentLoading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-50 flex justify-center items-center">
+        <div
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-50 flex justify-center items-center"
+          id="loading-screen"
+        >
           <LoadingIcon size={6} className="text-white" />
         </div>
       )}
