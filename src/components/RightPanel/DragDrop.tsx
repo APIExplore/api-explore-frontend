@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import axios from "axios";
 
 import "./css/dragdrop.css";
-import { backendDomain } from "../../constants/apiConstants";
 import useSchemaModalStore from "../../stores/schemaModalStore";
+import { backendDomain } from "../../constants/apiConstants";
 
 // drag drop file component
 export default function DragDropFile({
@@ -61,7 +61,7 @@ export default function DragDropFile({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
       if (response.status != 201) {

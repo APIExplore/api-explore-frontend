@@ -4,11 +4,19 @@ import { ButtonGroups } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import useApiCallsStore from "../../stores/apiCallsStore";
-import useRequestsStore from "../../stores/requestsStore";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { Request } from "../RightPanel/types/RightPanelTypes";
+import useAgentStore from "../../stores/agentStore";
 
 export default function SimulationControls() {
+  /* Get agent id and pid*/
+  const agentPid = useAgentStore((store: any) => store.agentPid);
+  const agentId = useAgentStore((store: any) => store.agentId);
+
+  /* Function for setting new agent pid */
+  const restoreAgent = useAgentStore((store: any) => store.restoreAgent);
+
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
     (store) => store.selectedRequests
@@ -20,8 +28,29 @@ export default function SimulationControls() {
     await fetchData(callSequenceName, selectedRequests);
   };
 
+  const setAllRequests = useRequestsStore(
+    (store: RequestsStore) => store.setAllRequests
+  );
+  const setSelectedRequests = useRequestsStore(
+    (store: RequestsStore) => store.setSelectedRequests
+  );
+  const setDefinitions = useRequestsStore(
+    (store: RequestsStore) => store.setDefinitions
+  );
+  const setAllShownItems = useRequestsStore(
+    (store: RequestsStore) => store.setAllShownItems
+  );
+  const setCallSequenceName = useRequestsStore(
+    (store: RequestsStore) => store.setCallSequenceName
+  );
+
   const openLandingPage = () => {
     setModalOpened(true);
+    setAllRequests([]);
+    setSelectedRequests([]);
+    setDefinitions([]);
+    setAllShownItems([]);
+    setCallSequenceName("");
   };
 
   return (
@@ -34,6 +63,14 @@ export default function SimulationControls() {
           onClick={openLandingPage}
         >
           Choose Schema
+        </ButtonGroups.Button>
+        <ButtonGroups.Button
+          onClick={() => restoreAgent(agentId, agentPid)}
+          disabled={!agentPid}
+          variant="text"
+          id="restart-button"
+        >
+          <Icon type="arrow-counter-clockwise" />
         </ButtonGroups.Button>
         <ButtonGroups.Button variant="text" id="pause-button">
           <Icon type="pause" />

@@ -28,6 +28,11 @@ test("Test api schema adress submit and endpoints", async (t) => {
     .click("#methods-put")
     /* Open endpoints and select some */
     .click("#endpoints")
+    /* Select endpoint under index 2 and write under its params something (DELETE) */
+    .click("#option-2--menu--9")
+    .typeText("#params-input-0", `Item`)
+    .click("#submit-endpoint")
+    .click("#endpoints")
     /* Select endpoint under index 1 and write under its params something (POST) */
     .click("#option-1--menu--9")
     .typeText("#params-input-0", `Item`)
@@ -35,11 +40,6 @@ test("Test api schema adress submit and endpoints", async (t) => {
     .click("#endpoints")
     /* Select endpoint under index 0 and write under its params something (GET) */
     .click("#option-0--menu--9")
-    .typeText("#params-input-0", `Item`)
-    .click("#submit-endpoint")
-    .click("#endpoints")
-    /* Select endpoint under index 2 and write under its params something (DELETE) */
-    .click("#option-2--menu--9")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
@@ -60,11 +60,15 @@ test("Test api schema adress submit and endpoints", async (t) => {
     "#sequence-name-input",
     `Test sequence + ${Math.random() * (999 - 1 + 1) + 1}`
   );
+
   /* Submit sequence */
-
   await t.click("#play-button");
-  /* Select two endpoints for details */
 
+  /* Reorder and submit again */
+  await t.click("#move-up-1").wait(1000).click("#move-up-2");
+  await t.click("#play-button");
+
+  /* Select two endpoints for details */
   await t
     .click(Selector("div").withAttribute("row-index", "0"))
     .click(Selector("div").withAttribute("row-index", "1"));
