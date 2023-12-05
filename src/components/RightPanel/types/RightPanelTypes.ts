@@ -3,8 +3,7 @@ import { ApiCall } from "../../../types/apiCallTypes";
 export type Request = {
   path: string;
   method: string;
-  parameters?: Parameter[];
-  params?: Parameter[];
+  parameters: Parameter[];
 };
 
 export type Parameter = {
