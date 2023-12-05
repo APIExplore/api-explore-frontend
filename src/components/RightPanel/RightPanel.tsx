@@ -10,7 +10,6 @@ import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import ConfigurationDataTable from "./ConfigurationDataTable";
-import DragDrop from "./DragDrop";
 
 export default function RightPanel() {
   const modal = useModal();

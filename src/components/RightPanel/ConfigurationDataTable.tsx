@@ -76,7 +76,6 @@ export default function ConfigurationDataTable({
                 />
               }
               onClick={() => {
-                console.log("Index of item is ", index);
                 setModalOperation("edit");
                 setClickedItem(JSON.parse(JSON.stringify({ ...item, index })));
               }}

@@ -73,7 +73,7 @@ export default function CallSequenceCard({
           />
           <IconButton
             onClick={() => exportSequenceToJsonFile(sequence.name)}
-            icon={<Icon type={"paperclip"} />}
+            icon={<Icon type={"export"} />}
             id="export-to-json"
             label="Export to JSON file"
             className="float-right"
