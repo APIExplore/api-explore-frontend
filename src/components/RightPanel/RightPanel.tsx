@@ -36,6 +36,7 @@ export default function RightPanel() {
     (store: any) => store.setCallSequenceName
   );
   const [inputError, setInputError] = useState("");
+  const [nameError, setNameError] = useState("default name error");
 
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
@@ -171,6 +172,24 @@ export default function RightPanel() {
     else setInputError("");
   };
 
+  const extractDataFromCallSequence = (event: any) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const fileContent = e.target?.result ? e.target.result : {};
+          const fileContentInJsonFormat = JSON.parse(fileContent as string);
+          setSelectedRequests(fileContentInJsonFormat);
+        } catch (error) {
+          console.error("Error while parsing JSON file", error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <ResizableBox
       width={400}
@@ -191,46 +210,50 @@ export default function RightPanel() {
           />
         }
       >
-        {(state: any) => (
-          <>
-            <Modal.Content title={"Endpoint name: " + state.operationId}>
-              {"Edit params"}
-              {state.params?.length === 0 && <p>No params for this endpoint</p>}
-              {state.params?.map((item, index) => (
-                <Input
-                  key={index}
-                  id={"params-input-" + String(index)}
-                  label={<p className="font-semibold">{item.name}</p>}
-                  className="py-2"
-                  name="params"
-                  onChange={(e) => onParamChange(e, item.name)}
-                  value={item.value}
-                />
-              ))}
-            </Modal.Content>
+        {(state: any) => {
+          return (
+            <>
+              <Modal.Content title={"Endpoint name: " + state.operationId}>
+                {"Edit params"}
+                {state.params?.length === 0 && (
+                  <p>No params for this endpoint</p>
+                )}
+                {state.params?.map((item, index) => (
+                  <Input
+                    key={index}
+                    id={"params-input-" + String(index)}
+                    label={<p className="font-semibold">{item.name}</p>}
+                    className="py-2"
+                    name="params"
+                    onChange={(e) => onParamChange(e, item.name)}
+                    value={item.value}
+                  />
+                ))}
+              </Modal.Content>
 
-            <Modal.Footer>
-              <Button
-                id="submit-endpoint"
-                variant="filled"
-                color="success"
-                onClick={() => {
-                  selectItem();
-                }}
-              >
-                Submit Endpoint
-              </Button>
-              <Button
-                id="cancel-params"
-                variant="text"
-                color="white"
-                onClick={() => closeModal()}
-              >
-                Cancel
-              </Button>
-            </Modal.Footer>
-          </>
-        )}
+              <Modal.Footer>
+                <Button
+                  id="submit-endpoint"
+                  variant="filled"
+                  color="success"
+                  onClick={() => {
+                    selectItem();
+                  }}
+                >
+                  Submit Endpoint
+                </Button>
+                <Button
+                  id="cancel-params"
+                  variant="text"
+                  color="white"
+                  onClick={() => closeModal()}
+                >
+                  Cancel
+                </Button>
+              </Modal.Footer>
+            </>
+          );
+        }}
       </Modal>
       <div
         className="flex h-full m-1 p-4 bg-white drop-shadow-md"
@@ -308,7 +331,7 @@ export default function RightPanel() {
                   />
                 </div>
               </CheckboxGroup>
-              <div className="my-5">
+              <div className="my-5 flex items-center">
                 <DropdownMenu
                   title="Endpoints"
                   id="endpoints"
@@ -328,6 +351,14 @@ export default function RightPanel() {
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu>
+                <Input
+                  type="file"
+                  accept=".json"
+                  onChange={extractDataFromCallSequence}
+                  placeholder="Test placeholder"
+                  name={"Choose seq"}
+                  className="ml-2"
+                />
               </div>
               <ConfigurationDataTable
                 selectedRequests={selectedRequests}

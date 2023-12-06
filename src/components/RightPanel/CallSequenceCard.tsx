@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 import { Card, IconButton, Typography } from "@tiller-ds/core";
 import { DescriptionList } from "@tiller-ds/data-display";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
-
 import { CallSequence } from "./types/RightPanelTypes";
 import { ApiCall } from "../../types/apiCallTypes";
+import { saveAs } from "file-saver";
+import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 type CallSequenceCardProps = {
   sequence: CallSequence;
@@ -21,6 +22,16 @@ export default function CallSequenceCard({
   toggleDetails,
 }: CallSequenceCardProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const selectedRequests = useRequestsStore(
+    (store: RequestsStore) => store.selectedRequests
+  );
+
+  const exportSequenceToJsonFile = (name) => {
+    const jsonDataForExport = JSON.stringify(selectedRequests);
+    const blob = new Blob([jsonDataForExport], { type: "application/json" });
+    saveAs(blob, `${name}.json`);
+  };
+
   return (
     <Card className="p-4">
       <Card.Header removeSpacing>
@@ -59,6 +70,13 @@ export default function CallSequenceCard({
             sequence={sequence}
             selectApiCall={selectApiCall}
             toggleDetails={toggleDetails}
+          />
+          <IconButton
+            onClick={() => exportSequenceToJsonFile(sequence.name)}
+            icon={<Icon type={"export"} />}
+            id="export-to-json"
+            label="Export to JSON file"
+            className="float-right"
           />
         </Card.Body>
       )}
