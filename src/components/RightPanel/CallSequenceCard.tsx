@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 
+import { saveAs } from "file-saver";
+
 import { Card, IconButton, Typography } from "@tiller-ds/core";
 import { DescriptionList } from "@tiller-ds/data-display";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
+
 import { CallSequence } from "./types/RightPanelTypes";
-import { ApiCall } from "../../types/apiCallTypes";
-import { saveAs } from "file-saver";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
+import { ApiCall } from "../../types/apiCallTypes";
 
 type CallSequenceCardProps = {
   sequence: CallSequence;
@@ -21,9 +23,10 @@ export default function CallSequenceCard({
   selectApiCall,
   toggleDetails,
 }: CallSequenceCardProps) {
+  const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests
+    (store: RequestsStore) => store.selectedRequests,
   );
 
   const exportSequenceToJsonFile = (name) => {
@@ -32,14 +35,26 @@ export default function CallSequenceCard({
     saveAs(blob, `${name}.json`);
   };
 
+  useEffect(() => {
+    setLoading(false);
+  }, [sequence]);
+
   return (
     <Card className="p-4">
       <Card.Header removeSpacing>
         <Card.Header.Title>{sequence.name}</Card.Header.Title>
         <Card.Header.Actions>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 ">
+            {loading && (
+              <span className="pt-1 text-slate-500">
+                <LoadingIcon size={3} />
+              </span>
+            )}
             <IconButton
-              onClick={() => toggleFavorite(sequence.name)}
+              onClick={() => {
+                setLoading(true);
+                toggleFavorite(sequence.name);
+              }}
               className={`text-yellow-500 ${
                 sequence.favorite ? "opacity-100" : "opacity-50"
               } favourite-button`}
@@ -111,7 +126,6 @@ function SequenceDetails({
                 }
                 type="same-column"
               >
-                {/* Render API call details */}
                 <button
                   id="view-details"
                   className="text-blue-500 hover:underline mr-2"
@@ -119,7 +133,6 @@ function SequenceDetails({
                 >
                   View Details
                 </button>
-                {/* Additional API call details can be added here */}
               </DescriptionList.Item>
             ))}
           </DescriptionList>
