@@ -1,23 +1,26 @@
 import { useEffect, useRef, useState } from "react";
+
 import { ResizableBox } from "react-resizable";
+
 import { Modal, useModal } from "@tiller-ds/alert";
 import { Button, Tabs, Typography } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
+
 import CallSequences from "./CallSequences";
+import ConfigurationDataTable from "./ConfigurationDataTable";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import ConfigurationDataTable from "./ConfigurationDataTable";
 
 export default function RightPanel() {
   const modal = useModal();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height
+    (store) => store.panels.container.height,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
+    (store) => store.panels.bottom.height,
   );
 
   const [clickedItem, setClickedItem]: any = useState(null);
@@ -26,30 +29,30 @@ export default function RightPanel() {
 
   const allShownItems = useRequestsStore((store: any) => store.allShownItems);
   const setAllShownItems = useRequestsStore(
-    (store: any) => store.setAllShownItems
+    (store: any) => store.setAllShownItems,
   );
 
   const callSequenceName = useRequestsStore(
-    (store: any) => store.callSequenceName
+    (store: any) => store.callSequenceName,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: any) => store.setCallSequenceName
+    (store: any) => store.setCallSequenceName,
   );
   const [inputError, setInputError] = useState("");
 
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   /* Modal operation */
   const [modalOperation, setModalOperation] = useState("");
   /* Array of all requests */
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests
+    (store: RequestsStore) => store.allRequests,
   );
   /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests
+    (store: RequestsStore) => store.selectedRequests,
   );
   /* Initial ref */
   const isMountingRef = useRef(false);
@@ -117,7 +120,9 @@ export default function RightPanel() {
       setAllShownItems(allRequests);
     } else {
       setAllShownItems(
-        allRequests.filter((item: any) => selectedMethods[item.method] === true)
+        allRequests.filter(
+          (item: any) => selectedMethods[item.method] === true,
+        ),
       );
     }
   };
@@ -237,7 +242,12 @@ export default function RightPanel() {
         ref={ref}
         id="right-panel"
       >
-        <Tabs iconPlacement="trailing" fullWidth={true}>
+        <Tabs
+          iconPlacement="trailing"
+          fullWidth={true}
+          // index={0}
+          // onTabChange={function noRefCheck() {}}
+        >
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"

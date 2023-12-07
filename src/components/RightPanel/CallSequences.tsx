@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 import axios from "axios";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import ReactJson from "react-json-view";
 
 import { Modal, useModal } from "@tiller-ds/alert";
@@ -32,7 +34,7 @@ export default function CallSequences() {
             details: [],
             expanded: false,
             selectedApiCall: null,
-          })
+          }),
         );
 
         setCallSequences(sequencesFromApi);
@@ -40,7 +42,7 @@ export default function CallSequences() {
       } catch (error: any) {
         console.error(
           "Error fetching call sequences:",
-          error.response?.data?.error || "Unknown error"
+          error.response?.data?.error || "Unknown error",
         );
         setLoading(false);
       }
@@ -49,11 +51,44 @@ export default function CallSequences() {
     fetchCallSequences();
   }, [apiCalls]);
 
+  const onMoveUp = (index: number) => {
+    if (index > 0) {
+      setCallSequences((prevSequences) => {
+        const newSequences = [...prevSequences];
+        const temp = newSequences[index];
+        newSequences[index] = newSequences[index - 1];
+        newSequences[index - 1] = temp;
+        return newSequences;
+      });
+    }
+  };
+
+  const onMoveDown = (index: number) => {
+    if (index < callSequences.length - 1) {
+      setCallSequences((prevSequences) => {
+        const newSequences = [...prevSequences];
+        const temp = newSequences[index];
+        newSequences[index] = newSequences[index + 1];
+        newSequences[index + 1] = temp;
+        return newSequences;
+      });
+    }
+  };
+
+  const handleDragEnd = (draggedIndex, hoveredIndex) => {
+    setCallSequences((prevSequences) => {
+      const newSequences = [...prevSequences];
+      const [draggedItem] = newSequences.splice(draggedIndex, 1);
+      newSequences.splice(hoveredIndex, 0, draggedItem);
+      return newSequences;
+    });
+  };
+
   const toggleFavorite = async (sequenceName: string) => {
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq
-      )
+        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq,
+      ),
     );
   };
 
@@ -63,18 +98,18 @@ export default function CallSequences() {
     if (sequence && !sequence.details?.length) {
       try {
         const response = await axios.get(
-          `${backendDomain}/callsequence/fetch/${sequenceName}`
+          `${backendDomain}/callsequence/fetch/${sequenceName}`,
         );
         const details = response.data;
         setCallSequences((prevSequences) =>
           prevSequences.map((seq) =>
-            seq.name === sequenceName ? { ...seq, details } : seq
-          )
+            seq.name === sequenceName ? { ...seq, details } : seq,
+          ),
         );
       } catch (error: any) {
         console.error(
           "Error fetching call sequence details:",
-          error.response?.data?.error || "Unknown error"
+          error.response?.data?.error || "Unknown error",
         );
       }
     }
@@ -83,8 +118,8 @@ export default function CallSequences() {
       prevSequences.map((seq) =>
         seq.name === sequenceName
           ? { ...seq, expanded: !seq.expanded, selectedApiCall: null }
-          : seq
-      )
+          : seq,
+      ),
     );
   };
 
@@ -92,8 +127,8 @@ export default function CallSequences() {
     modal.onOpen({ apiCall: apiCall, sequenceName: sequence.name });
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq
-      )
+        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq,
+      ),
     );
   };
 
@@ -106,95 +141,100 @@ export default function CallSequences() {
     : callSequences;
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between">
-        <Typography variant="h5">Call Sequences</Typography>
-        <div className="mb-4">
-          <Toggle
-            label={
-              <span className="text-sm leading-5 font-medium text-gray-900">
-                Only favorites
-              </span>
-            }
-            reverse={true}
-            checkedIcon={
-              <div className="flex ml-3">
-                <Icon
-                  type="star"
-                  variant="fill"
-                  className="text-yellow-500"
-                  fill="yellow"
-                  size={3}
-                  style={{ paddingLeft: "0.5px" }}
-                />
-              </div>
-            }
-            uncheckedIcon={<Icon type="star" />}
-            checked={showFavorites}
-            onClick={showOnlyFavorites}
-            tokens={{
-              toggle:
-                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
-            }}
-          />
-        </div>
-      </div>
-      {loading ? (
-        <LoadingIcon size={6} />
-      ) : (
-        <div className="space-y-4">
-          {filteredSequences.map((sequence, index) => (
-            <CallSequenceCard
-              key={index}
-              sequence={sequence}
-              toggleFavorite={toggleFavorite}
-              selectApiCall={selectApiCall}
-              toggleDetails={toggleDetails}
+    <DndProvider backend={HTML5Backend}>
+      <div className="p-4">
+        <div className="flex justify-between">
+          <Typography variant="h5">Call Sequences</Typography>
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Only favorites
+                </span>
+              }
+              reverse={true}
+              checkedIcon={
+                <div className="flex ml-3">
+                  <Icon
+                    type="star"
+                    variant="fill"
+                    className="text-yellow-500"
+                    fill="yellow"
+                    size={3}
+                    style={{ paddingLeft: "0.5px" }}
+                  />
+                </div>
+              }
+              uncheckedIcon={<Icon type="star" />}
+              checked={showFavorites}
+              onClick={showOnlyFavorites}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+              }}
             />
-          ))}
-        </div>
-      )}
-      <Modal
-        {...modal}
-        icon={
-          <Modal.Icon
-            icon={<Icon type="info" variant="bold" />}
-            className="text-white bg-info"
-          />
-        }
-      >
-        <Modal.Content title={`Details - ${modal.state?.sequenceName}`}>
-          <Typography variant="subtitle">
-            {modal.state?.apiCall?.operationId}
-          </Typography>
-          <div
-            style={{ height: "700px", overflowY: "auto" }}
-            className="scrollbar pt-4"
-          >
-            {modal.state ? (
-              <ReactJson
-                src={modal.state.apiCall as ApiCall}
-                name={false}
-                collapsed={1}
-                style={{ backgroundColor: "#FFFF" }}
-              />
-            ) : (
-              <LoadingIcon size={6} />
-            )}
           </div>
-        </Modal.Content>
+        </div>
+        {loading ? (
+          <LoadingIcon size={6} />
+        ) : (
+          <div className="space-y-4">
+            {filteredSequences.map((sequence, index) => (
+              <CallSequenceCard
+                key={index}
+                sequence={sequence}
+                toggleFavorite={toggleFavorite}
+                selectApiCall={selectApiCall}
+                toggleDetails={toggleDetails}
+                onDragEnd={handleDragEnd}
+                onMoveDown={onMoveDown}
+                onMoveUp={onMoveUp}
+              />
+            ))}
+          </div>
+        )}
+        <Modal
+          {...modal}
+          icon={
+            <Modal.Icon
+              icon={<Icon type="info" variant="bold" />}
+              className="text-white bg-info"
+            />
+          }
+        >
+          <Modal.Content title={`Details - ${modal.state?.sequenceName}`}>
+            <Typography variant="subtitle">
+              {modal.state?.apiCall?.operationId}
+            </Typography>
+            <div
+              style={{ height: "700px", overflowY: "auto" }}
+              className="scrollbar pt-4"
+            >
+              {modal.state ? (
+                <ReactJson
+                  src={modal.state.apiCall as ApiCall}
+                  name={false}
+                  collapsed={1}
+                  style={{ backgroundColor: "#FFFF" }}
+                />
+              ) : (
+                <LoadingIcon size={6} />
+              )}
+            </div>
+          </Modal.Content>
 
-        <Modal.Footer>
-          <Button
-            id="close-details-modal"
-            variant="text"
-            color="white"
-            onClick={modal.onClose}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+          <Modal.Footer>
+            <Button
+              id="close-details-modal"
+              variant="text"
+              color="white"
+              onClick={modal.onClose}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    </DndProvider>
   );
 }

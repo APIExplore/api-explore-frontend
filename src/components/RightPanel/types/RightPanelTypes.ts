@@ -44,4 +44,5 @@ export type CallSequence = {
   details?: ApiCall[];
   expanded?: boolean;
   selectedApiCall?: ApiCall | null;
+  index: number;
 };
