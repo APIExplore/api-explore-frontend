@@ -21,39 +21,47 @@ export default function CallSequences() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchCallSequences() {
-      try {
-        const response = await axios.get(`${backendDomain}/callsequence/fetch`);
-        const sequencesFromApi: CallSequence[] = response.data.map(
-          (seq: any) => ({
-            ...seq,
-            favorite: false,
-            details: [],
-            expanded: false,
-            selectedApiCall: null,
-          })
-        );
+  const fetchCallSequences = async () => {
+    try {
+      const response = await axios.get(`${backendDomain}/callsequence/fetch`);
+      const sequencesFromApi: CallSequence[] = response.data.map(
+        (seq: any) => ({
+          ...seq,
+          details: [],
+          expanded: false,
+          selectedApiCall: null,
+        }),
+      );
 
-        setCallSequences(sequencesFromApi);
-        setLoading(false);
-      } catch (error: any) {
-        console.error(
-          "Error fetching call sequences:",
-          error.response?.data?.error || "Unknown error"
-        );
-        setLoading(false);
-      }
+      setCallSequences(sequencesFromApi);
+      setLoading(false);
+
+      return sequencesFromApi;
+    } catch (error: any) {
+      console.error(
+        "Error fetching call sequences:",
+        error.response?.data?.error || "Unknown error",
+      );
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchCallSequences();
   }, [apiCalls]);
 
+  useEffect(() => {
+    fetchCallSequences();
+  }, []);
+
   const toggleFavorite = async (sequenceName: string) => {
+    await axios.put(
+      `${backendDomain}/callsequence/toggle-favorite/${sequenceName}`,
+    );
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq
-      )
+        seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq,
+      ),
     );
   };
 
@@ -63,18 +71,18 @@ export default function CallSequences() {
     if (sequence && !sequence.details?.length) {
       try {
         const response = await axios.get(
-          `${backendDomain}/callsequence/fetch/${sequenceName}`
+          `${backendDomain}/callsequence/fetch/${sequenceName}`,
         );
         const details = response.data;
         setCallSequences((prevSequences) =>
           prevSequences.map((seq) =>
-            seq.name === sequenceName ? { ...seq, details } : seq
-          )
+            seq.name === sequenceName ? { ...seq, details } : seq,
+          ),
         );
       } catch (error: any) {
         console.error(
           "Error fetching call sequence details:",
-          error.response?.data?.error || "Unknown error"
+          error.response?.data?.error || "Unknown error",
         );
       }
     }
@@ -83,8 +91,8 @@ export default function CallSequences() {
       prevSequences.map((seq) =>
         seq.name === sequenceName
           ? { ...seq, expanded: !seq.expanded, selectedApiCall: null }
-          : seq
-      )
+          : seq,
+      ),
     );
   };
 
@@ -92,8 +100,8 @@ export default function CallSequences() {
     modal.onOpen({ apiCall: apiCall, sequenceName: sequence.name });
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
-        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq
-      )
+        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq,
+      ),
     );
   };
 
