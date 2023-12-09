@@ -25,7 +25,7 @@ export default function Terminal() {
         {categorized && (
           <div className="absolute left-1/2 -ml-1 w-[2px] h-full bg-slate-600 z-50 rounded-full" />
         )}
-        <div className="sticky w-full h-1/5 bg-slate-800 z-40 shadow-sm shadow-slate-800">
+        <div className="sticky w-full h-[42px] bg-slate-800 z-40 shadow-sm shadow-slate-600">
           {categorized ? (
             <>
               <div className="absolute left-2 top-1.5 w-full z-40 ">
@@ -74,7 +74,6 @@ export default function Terminal() {
             className="absolute right-4 top-1 z-50 text-slate-800"
           />
         </div>
-
         <div
           className="flex w-full h-4/5 absolute left-0 overflow-y-auto scrollbar"
           ref={terminalRef}
