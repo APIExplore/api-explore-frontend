@@ -83,8 +83,8 @@ test("Test api schema adress submit and endpoints", async (t) => {
   await t.click("#play-button");
   await t.click(".sequences-tab");
   /* Put first sequence as favourite */
+  await t.click(".favourite-button");
   await t
-    .click(".favourite-button")
     .click(".toggle-favorite")
     .click(".toggle-favorite")
     /* Expand first sequence */
@@ -97,4 +97,13 @@ test("Test api schema adress submit and endpoints", async (t) => {
     .click("#close-details-modal")
     .click(".timeline-tab")
     .wait(2000);
+
+  /* Export and import sequence */
+  await t.click("#export-to-json");
+
+  await t.click(".config-tab");
+  await t.setFilesToUpload("#input-choose-seq", [
+    "../assets/testSequence.json",
+  ]);
+  await t.click("#play-button").click("#delete-1");
 }).skipJsErrors();

@@ -356,7 +356,7 @@ export default function RightPanel() {
                   accept=".json"
                   onChange={extractDataFromCallSequence}
                   placeholder="Test placeholder"
-                  name={"Choose seq"}
+                  name={"choose-seq"}
                   className="ml-2"
                 />
               </div>
