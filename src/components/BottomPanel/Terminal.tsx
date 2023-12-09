@@ -17,8 +17,6 @@ export default function Terminal() {
     }
   }, [errors, warnings]);
 
-  console.log(errors);
-  console.log(warnings);
   return (
     <div className="bg-slate-900 h-full overflow-y-hidden">
       <div className="overflow-hidden relative text-gray-300 h-full">
