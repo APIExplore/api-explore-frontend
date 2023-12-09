@@ -89,7 +89,7 @@ export default function NewSchema({
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex flex-col my-2">
+      <div className="flex flex-col mt-2 mb-4 h-36">
         <div className="py-3 mt-6 text-center">
           <Typography variant="h6">Api Schema Name:</Typography>
         </div>
@@ -103,8 +103,8 @@ export default function NewSchema({
           value={name}
         />
       </div>
-
-      <div className="flex flex-col my-2">
+      <hr />
+      <div className="flex flex-col mb-2">
         <div className="py-3 mt-6 text-center">
           <Typography variant="h6">Api Schema Address:</Typography>
         </div>

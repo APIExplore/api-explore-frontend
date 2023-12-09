@@ -9,6 +9,7 @@ import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { CallSequence } from "./types/RightPanelTypes";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import { ApiCall } from "../../types/apiCallTypes";
+import ConditionalDisplay from "../ConditionalDisplay";
 
 type CallSequenceCardProps = {
   sequence: CallSequence;
@@ -114,33 +115,35 @@ function SequenceDetails({
         <Typography className="text-md font-semibold text-center">
           Details / Calls:
         </Typography>
-        {sequence.details && sequence.details?.length > 0 ? (
-          <DescriptionList type="default">
-            {sequence.details?.map((apiCall, apiIndex) => (
-              <DescriptionList.Item
-                key={apiIndex}
-                label={
-                  <span className="break-all line-clamp-1">
-                    {apiCall.operationId}
-                  </span>
-                }
-                type="same-column"
-              >
-                <button
-                  id="view-details"
-                  className="text-blue-500 hover:underline mr-2"
-                  onClick={() => selectApiCall(sequence, apiCall)}
+        <ConditionalDisplay
+          componentToDisplay={
+            <DescriptionList type="default">
+              {sequence.details?.map((apiCall, apiIndex) => (
+                <DescriptionList.Item
+                  key={apiIndex}
+                  label={
+                    <span className="break-all line-clamp-1">
+                      {apiCall.operationId}
+                    </span>
+                  }
+                  type="same-column"
                 >
-                  View Details
-                </button>
-              </DescriptionList.Item>
-            ))}
-          </DescriptionList>
-        ) : (
-          <div className="self-center p-2">
-            <LoadingIcon size={4} />
-          </div>
-        )}
+                  <button
+                    id="view-details"
+                    className="text-blue-500 hover:underline mr-2"
+                    onClick={() => selectApiCall(sequence, apiCall)}
+                  >
+                    View Details
+                  </button>
+                </DescriptionList.Item>
+              ))}
+            </DescriptionList>
+          }
+          condition={
+            sequence.details !== undefined && sequence.details.length > 0
+          }
+          className="self-center p-2"
+        />
       </div>
     </>
   );

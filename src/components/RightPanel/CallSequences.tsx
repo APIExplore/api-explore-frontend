@@ -6,16 +6,20 @@ import ReactJson from "react-json-view";
 import { Modal, useModal } from "@tiller-ds/alert";
 import { Button, Typography } from "@tiller-ds/core";
 import { Toggle } from "@tiller-ds/form-elements";
-import { Icon, LoadingIcon } from "@tiller-ds/icons";
+import { Icon } from "@tiller-ds/icons";
 
 import CallSequenceCard from "./CallSequenceCard";
 import { CallSequence } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import useApiCallsStore from "../../stores/apiCallsStore";
+import useLogsStore from "../../stores/logsStore";
 import { ApiCall } from "../../types/apiCallTypes";
+import ConditionalDisplay from "../ConditionalDisplay";
 
 export default function CallSequences() {
+  const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
+
   const modal = useModal<{ apiCall: ApiCall | null; sequenceName: string }>();
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -36,6 +40,10 @@ export default function CallSequences() {
       setCallSequences(sequencesFromApi);
       setLoading(false);
 
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+
       return sequencesFromApi;
     } catch (error: any) {
       console.error(
@@ -43,6 +51,10 @@ export default function CallSequences() {
         error.response?.data?.error || "Unknown error",
       );
       setLoading(false);
+
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
     }
   };
 
@@ -147,21 +159,22 @@ export default function CallSequences() {
           />
         </div>
       </div>
-      {loading ? (
-        <LoadingIcon size={6} />
-      ) : (
-        <div className="space-y-4">
-          {filteredSequences.map((sequence, index) => (
-            <CallSequenceCard
-              key={index}
-              sequence={sequence}
-              toggleFavorite={toggleFavorite}
-              selectApiCall={selectApiCall}
-              toggleDetails={toggleDetails}
-            />
-          ))}
-        </div>
-      )}
+      <ConditionalDisplay
+        componentToDisplay={
+          <div className="space-y-4">
+            {filteredSequences.map((sequence, index) => (
+              <CallSequenceCard
+                key={index}
+                sequence={sequence}
+                toggleFavorite={toggleFavorite}
+                selectApiCall={selectApiCall}
+                toggleDetails={toggleDetails}
+              />
+            ))}
+          </div>
+        }
+        condition={!loading}
+      />
       <Modal
         {...modal}
         icon={
@@ -179,16 +192,17 @@ export default function CallSequences() {
             style={{ height: "700px", overflowY: "auto" }}
             className="scrollbar pt-4"
           >
-            {modal.state ? (
-              <ReactJson
-                src={modal.state.apiCall as ApiCall}
-                name={false}
-                collapsed={1}
-                style={{ backgroundColor: "#FFFF" }}
-              />
-            ) : (
-              <LoadingIcon size={6} />
-            )}
+            <ConditionalDisplay
+              componentToDisplay={
+                <ReactJson
+                  src={modal.state?.apiCall as ApiCall}
+                  name={false}
+                  collapsed={1}
+                  style={{ backgroundColor: "#FFFF" }}
+                />
+              }
+              condition={modal.state !== null}
+            />
           </div>
         </Modal.Content>
 

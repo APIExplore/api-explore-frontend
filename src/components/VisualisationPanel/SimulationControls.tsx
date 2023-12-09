@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ButtonGroups } from "@tiller-ds/core";
+import { ButtonGroups, Tooltip } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import useApiCallsStore from "../../stores/apiCallsStore";
@@ -8,6 +8,7 @@ import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { Request } from "../RightPanel/types/RightPanelTypes";
 import useAgentStore from "../../stores/agentStore";
+import useLogsStore from "../../stores/logsStore";
 
 export default function SimulationControls() {
   /* Get agent id and pid*/
@@ -19,29 +20,30 @@ export default function SimulationControls() {
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests
+    (store) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
+  const logsStore = useLogsStore();
   const fetchData = useApiCallsStore((store) => store.fetchData);
 
   const simulateCallSequence = async () => {
-    await fetchData(callSequenceName, selectedRequests);
+    await fetchData(callSequenceName, selectedRequests, logsStore);
   };
 
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
+    (store: RequestsStore) => store.setAllRequests,
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
+    (store: RequestsStore) => store.setDefinitions,
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
+    (store: RequestsStore) => store.setAllShownItems,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName
+    (store: RequestsStore) => store.setCallSequenceName,
   );
 
   const openLandingPage = () => {
@@ -54,7 +56,7 @@ export default function SimulationControls() {
   };
 
   return (
-    <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-6 z-40">
+    <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-4 z-40">
       <ButtonGroups tokens={{ base: "" }}>
         <ButtonGroups.Button
           id="choose-schema"
@@ -81,7 +83,15 @@ export default function SimulationControls() {
           variant="text"
           id="play-button"
         >
-          <Icon type="play" />
+          {callSequenceName.length === 0 ? (
+            <Tooltip label="You must enter a call sequence name to run the simulation">
+              <div className="flex items-center justify-center">
+                <Icon type="play" className="text-primary-dark" />
+              </div>
+            </Tooltip>
+          ) : (
+            <Icon type="play" />
+          )}
         </ButtonGroups.Button>
         <ButtonGroups.Button variant="text" id="stop-button">
           <Icon type="stop" />
