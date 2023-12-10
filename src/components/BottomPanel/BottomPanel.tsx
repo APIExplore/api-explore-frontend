@@ -15,7 +15,7 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 export default function BottomPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const containerWidth = usePanelDimensionsStore(
-    (store) => store.panels.container.width,
+    (store) => store.panels.container.width
   );
 
   const ref = useResizeObserver("bottom", setDimensions);
@@ -35,11 +35,16 @@ export default function BottomPanel() {
         <Tabs iconPlacement="trailing">
           <Tabs.Tab
             label="Event Table"
+            className="event-tab"
             icon={<Icon type="table" variant="fill" />}
           >
             <CallsTable />
           </Tabs.Tab>
-          <Tabs.Tab label="Logs" icon={<Icon type="terminal" />}>
+          <Tabs.Tab
+            label="Logs"
+            className="log-tab"
+            icon={<Icon type="terminal" />}
+          >
             <Terminal />
           </Tabs.Tab>
         </Tabs>
