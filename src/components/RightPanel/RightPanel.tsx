@@ -70,6 +70,8 @@ export default function RightPanel() {
     delete: false,
   });
 
+  const [fetchingTab, setFetchingTab] = useState<number>(0);
+
   const ref = useResizeObserver("right", setDimensions);
 
   /* Function when checkbox is selected */
@@ -431,8 +433,9 @@ export default function RightPanel() {
             label="Sequences"
             className="sequences-tab"
             icon={<Icon type="clock-counter-clockwise" variant="fill" />}
+            onClick={setFetchingTab}
           >
-            <CallSequences />
+            <CallSequences fetchingTab={fetchingTab} />
           </Tabs.Tab>
         </Tabs>
       </div>
