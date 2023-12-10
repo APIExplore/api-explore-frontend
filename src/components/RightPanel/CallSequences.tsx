@@ -6,7 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import ReactJson from "react-json-view";
 
 import { Modal, useModal } from "@tiller-ds/alert";
-import { Button, Typography } from "@tiller-ds/core";
+import { Button, IconButton, Typography } from "@tiller-ds/core";
 import { Toggle } from "@tiller-ds/form-elements";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
@@ -22,6 +22,11 @@ export default function CallSequences() {
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sortAscending, setSortAscending] = useState(true);
+  const [originalSort, setOriginalSort] = useState(true);
+  const [sequencesFromApi, setSequencesFromApi] = useState<CallSequence[]>([]);
+  const [sortNameToggleIndex, setSortNameToggleIndex] = useState(0);
+  const [sortTimeToggleIndex, setSortTimeToggleIndex] = useState(0);
 
   useEffect(() => {
     async function fetchCallSequences() {
@@ -37,6 +42,7 @@ export default function CallSequences() {
           }),
         );
 
+        setSequencesFromApi(sequencesFromApi);
         setCallSequences(sequencesFromApi);
         setLoading(false);
       } catch (error: any) {
@@ -51,37 +57,36 @@ export default function CallSequences() {
     fetchCallSequences();
   }, [apiCalls]);
 
-  const onMoveUp = (index: number) => {
-    if (index > 0) {
-      setCallSequences((prevSequences) => {
-        const newSequences = [...prevSequences];
-        const temp = newSequences[index];
-        newSequences[index] = newSequences[index - 1];
-        newSequences[index - 1] = temp;
-        return newSequences;
-      });
+  const handleSortByName = () => {
+    setSortNameToggleIndex(sortNameToggleIndex + 1);
+    if (sortNameToggleIndex % 3 !== 0) {
+      setCallSequences((prevSequences) =>
+        prevSequences
+          .slice()
+          .sort((a, b) =>
+            sortAscending
+              ? a.name.localeCompare(b.name)
+              : b.name.localeCompare(a.name),
+          ),
+      );
+      setSortAscending((prevSort) => !prevSort);
+    } else {
+      setCallSequences(sequencesFromApi);
     }
   };
 
-  const onMoveDown = (index: number) => {
-    if (index < callSequences.length - 1) {
-      setCallSequences((prevSequences) => {
-        const newSequences = [...prevSequences];
-        const temp = newSequences[index];
-        newSequences[index] = newSequences[index + 1];
-        newSequences[index + 1] = temp;
-        return newSequences;
-      });
-    }
-  };
-
-  const handleDragEnd = (draggedIndex, hoveredIndex) => {
-    setCallSequences((prevSequences) => {
-      const newSequences = [...prevSequences];
-      const [draggedItem] = newSequences.splice(draggedIndex, 1);
-      newSequences.splice(hoveredIndex, 0, draggedItem);
-      return newSequences;
-    });
+  const handleSortByTime = () => {
+    // setSortTimeToggleIndex(sortTimeToggleIndex + 1);
+    // if (sortTimeToggleIndex % 3 !== 0) {
+    //   if (originalSort) {
+    //     setCallSequences(sequencesFromApi);
+    //   } else {
+    //     setCallSequences(sequencesFromApi.reverse);
+    //   }
+    //   setOriginalSort((prevOriginalSort) => !prevOriginalSort);
+    // } else {
+    //   setCallSequences(sequencesFromApi);
+    // }
   };
 
   const toggleFavorite = async (sequenceName: string) => {
@@ -174,6 +179,56 @@ export default function CallSequences() {
               }}
             />
           </div>
+          <IconButton
+            onClick={() => handleSortByName()}
+            icon={
+              <>
+                <Icon
+                  type="arrow-up"
+                  className={`${
+                    sortAscending && sortNameToggleIndex % 3 !== 0
+                      ? "text-black"
+                      : "text-gray-400"
+                  }`}
+                />
+                <Icon
+                  type="arrow-down"
+                  className={`${
+                    sortAscending && sortNameToggleIndex % 3 !== 0
+                      ? "text-gray-400"
+                      : "text-black"
+                  }`}
+                />
+              </>
+            }
+            label={sortAscending ? "Sort by name (A-Z)" : "Sort by name (Z-A)"}
+          />
+          <IconButton
+            onClick={() => handleSortByTime()}
+            icon={
+              <>
+                <Icon
+                  type="arrow-arc-left"
+                  className={`${
+                    originalSort && sortTimeToggleIndex % 3 !== 0
+                      ? "text-black"
+                      : "text-gray-400"
+                  }`}
+                />
+                <Icon
+                  type="arrow-bend-double-up-left"
+                  className={`${
+                    originalSort && sortTimeToggleIndex % 3 !== 0
+                      ? "text-gray-400"
+                      : "text-black"
+                  }`}
+                />
+              </>
+            }
+            label={
+              originalSort ? "Sort by most recent" : "Sort by least recent"
+            }
+          />
         </div>
         {loading ? (
           <LoadingIcon size={6} />
@@ -186,9 +241,6 @@ export default function CallSequences() {
                 toggleFavorite={toggleFavorite}
                 selectApiCall={selectApiCall}
                 toggleDetails={toggleDetails}
-                onDragEnd={handleDragEnd}
-                onMoveDown={onMoveDown}
-                onMoveUp={onMoveUp}
               />
             ))}
           </div>

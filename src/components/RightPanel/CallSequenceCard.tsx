@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import { useDrag, useDrop } from "react-dnd";
-
 import { Card, IconButton, Typography } from "@tiller-ds/core";
 import { DescriptionList } from "@tiller-ds/data-display";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
@@ -16,64 +14,64 @@ type CallSequenceCardProps = {
   toggleFavorite: (sequenceName: string) => Promise<void>;
   selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
   toggleDetails: (sequenceName: string) => Promise<void>;
-  onMoveUp?: (index: number) => void;
-  onMoveDown?: (index: number) => void;
-  onDragEnd?: (draggedIndex: number, hoveredIndex: number) => void;
 };
+
+function editSequence() {
+  return undefined;
+}
 
 export default function CallSequenceCard({
   sequence,
   toggleFavorite,
   selectApiCall,
   toggleDetails,
-  onDragEnd,
-  onMoveDown,
-  onMoveUp,
 }: CallSequenceCardProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  const handleMoveUp = () => {
-    if (onMoveUp) {
-      onMoveUp(sequence.index);
-    }
-  };
-
-  const handleMoveDown = () => {
-    if (onMoveDown) {
-      onMoveDown(sequence.index);
-    }
-  };
-
-  const [{ isDragging }, drag] = useDrag({
-    type: DND_ITEM_TYPE,
-    item: { index: sequence.index },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: DND_ITEM_TYPE,
-    hover: (draggedItem: { index: number }) => {
-      if (draggedItem.index !== sequence.index) {
-        if (onDragEnd) {
-          onDragEnd(draggedItem.index, sequence.index);
-        }
-      }
-    },
-  });
+  // const [{ isDragging }, drag] = useDrag({
+  //   type: DND_ITEM_TYPE,
+  //   item: { index: sequence.index },
+  //   collect: (monitor) => ({
+  //     isDragging: !!monitor.isDragging(),
+  //   }),
+  // });
+  //
+  // const [, drop] = useDrop({
+  //   accept: DND_ITEM_TYPE,
+  //   hover: (draggedItem: { index: number }) => {
+  //     if (draggedItem.index !== sequence.index) {
+  //       if (onDragEnd) {
+  //         onDragEnd(draggedItem.index, sequence.index);
+  //       }
+  //     }
+  //   },
+  // });
 
   const handleExpandToggle = () => setIsExpanded(!isExpanded);
 
-  const removeCallSequence = () => {
-    console.log("Delete sequence");
-    //target endpoint for removing a sequence
-  };
+  // const removeCallSequence = async (sequenceName) => {
+  //   try {
+  //     const response = await axios.delete(
+  //       `${backendDomain}/callsequence/delete/${sequenceName.trim()}`,
+  //     );
+  //
+  //     if (response.data.success) {
+  //       console.log("Call sequence deleted successfully");
+  //     } else {
+  //       console.error(`Error deleting call sequence: ${response.data.error}`);
+  //     }
+  //   } catch (error: any) {
+  //     console.error(
+  //       "An error occurred while deleting call sequence:",
+  //       error.message,
+  //     );
+  //   }
+  // };
 
   return (
     <div
-      ref={(node) => drag(drop(node))}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+    // ref={(node) => drag(drop(node))}
+    // style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       <Card className="p-4">
         <Card.Header removeSpacing>
@@ -81,32 +79,13 @@ export default function CallSequenceCard({
           <Card.Header.Actions>
             <div className="flex space-x-2">
               {/*TODO: Implement tab switch when this button is clicked*/}
-              {/*<IconButton*/}
-              {/*  onClick={() => function noRefCheck(){}}*/}
-              {/*  icon={<Icon type="plus" size={2} />}*/}
-              {/*  label="Modify"*/}
-              {/*  title="Modify"*/}
-              {/*/>*/}
-              {/*TODO: Check why moving up/down does not work*/}
               <IconButton
-                onClick={() => onMoveUp}
-                icon={<Icon type="arrow-up" size={2} />}
-                label="Move Up"
-                title="Move Up"
-              />
-              <IconButton
-                onClick={() => onMoveDown}
-                icon={<Icon type="arrow-down" size={2} />}
-                label="Move Down"
-                title="Move Down"
-              />
-              <IconButton
-                onMouseDown={(e) => e.preventDefault()} // Prevents text selection during drag
-                icon={<Icon type="hand-grabbing" size={2} />} // Adjust the icon type and size accordingly
-                label="Drag to reorder"
-                title="Drag to reorder"
-                onPointerDown={() => console.log("Start dragging")} // You can add your custom drag start logic here
-                onPointerUp={() => console.log("Stop dragging")} // You can add your custom drag end logic here
+                // onClick={() => function noRefCheck(){}}
+                onClick={editSequence()}
+                icon={<Icon type="plus" size={2} />}
+                label="Modify"
+                title="Modify"
+                className="text-green-600"
               />
               <IconButton
                 onClick={() => toggleFavorite(sequence.name)}
@@ -126,10 +105,11 @@ export default function CallSequenceCard({
                 }
               />
               <IconButton
-                onClick={() => removeCallSequence}
+                // onClick={() => removeCallSequence(sequence.name)}
                 icon={<Icon type="trash" size={2} />}
                 label="Remove"
                 title="Remove"
+                className="text-red-600"
               />
               <IconButton
                 onClick={() => setIsExpanded(!isExpanded)}
