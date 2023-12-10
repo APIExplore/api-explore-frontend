@@ -17,9 +17,14 @@ type ApiStore = {
     selectedRequests: Request[],
     logs: LogsStore,
   ) => Promise<void>;
+  callByCallMode: {
+    enabled: boolean;
+    nextCallIndex: number;
+  };
+  setCallByCallMode: (enabled?: boolean, nextCallIndex?: number) => void;
 };
 
-const useApiCallsStore = create<ApiStore>((set) => ({
+const useApiCallsStore = create<ApiStore>((set, get) => ({
   apiCalls: [],
   setApiCalls: (callSequence) => set({ apiCalls: callSequence }),
   selectedApiCalls: [],
@@ -28,10 +33,13 @@ const useApiCallsStore = create<ApiStore>((set) => ({
   fetchData: async (callSequenceName, selectedRequests, logs) => {
     try {
       set({ fetching: true });
-      const response = await axios.post(`${backendDomain}/explore/random`, {
+      const response = await axios.post(`${backendDomain}/explore/`, {
         callSequence: selectedRequests,
         name: callSequenceName,
         favorite: false,
+        callByCall: !get().callByCallMode.enabled
+          ? false
+          : get().callByCallMode.nextCallIndex !== 0,
       });
 
       set({ apiCalls: response.data.callSequence });
@@ -48,6 +56,17 @@ const useApiCallsStore = create<ApiStore>((set) => ({
       }
     }
   },
+  callByCallMode: { enabled: false, nextCallIndex: 0 },
+  setCallByCallMode: (mode, nextCallIndex) =>
+    set((state) => ({
+      callByCallMode: {
+        enabled: mode !== undefined ? mode : state.callByCallMode.enabled,
+        nextCallIndex:
+          nextCallIndex !== undefined
+            ? nextCallIndex
+            : state.callByCallMode.nextCallIndex,
+      },
+    })),
 }));
 
 export default useApiCallsStore;

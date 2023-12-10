@@ -16,7 +16,11 @@ import useLogsStore from "../../stores/logsStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
 
-export default function CallSequences() {
+export default function CallSequences({
+  fetchingTab,
+}: {
+  fetchingTab: number;
+}) {
   const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
 
@@ -60,11 +64,7 @@ export default function CallSequences() {
 
   useEffect(() => {
     fetchCallSequences();
-  }, [apiCalls]);
-
-  useEffect(() => {
-    fetchCallSequences();
-  }, []);
+  }, [apiCalls, fetchingTab]);
 
   const toggleFavorite = async (sequenceName: string) => {
     await axios.put(

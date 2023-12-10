@@ -11,10 +11,12 @@ export type Parameter = {
   in: string;
   required: boolean;
   type: string;
+  value: any;
 };
 
 export type Item = {
   path: string;
+  params: Parameter[];
   method: string;
   operationId: string;
 };
