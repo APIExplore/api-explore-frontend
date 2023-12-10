@@ -116,7 +116,7 @@ export default function Terminal() {
                         "warning" in log ? "text-warning" : "text-danger"
                       }
                     >
-                      [{"warning" in log ? "Error" : "Warning"}]
+                      [{"warning" in log ? "Warning" : "Error"}]
                     </Typography>{" "}
                     <Typography
                       variant="subtitle"
