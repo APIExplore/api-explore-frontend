@@ -19,11 +19,11 @@ export default function LeftPanel() {
   return (
     <ResizableBox
       width={400}
-      height={containerHeight - bottomPanelHeight - 12}
+      height={containerHeight - bottomPanelHeight - 8}
       resizeHandles={["e"]}
     >
       <div
-        className="h-full m-1 p-4 bg-white drop-shadow-md"
+        className="h-full m-1 p-2 bg-white drop-shadow-md"
         ref={ref}
         id="left-panel"
       >

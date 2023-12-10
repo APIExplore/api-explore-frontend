@@ -29,27 +29,27 @@ test("Test api schema adress submit and endpoints", async (t) => {
     /* Open endpoints and select some */
     .click("#endpoints")
     /* Select endpoint under index 2 and write under its params something (DELETE) */
-    .click("#option-2--menu--9")
+    .click("#option-2--menu--12")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 1 and write under its params something (POST) */
-    .click("#option-1--menu--9")
+    .click("#option-1--menu--12")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 0 and write under its params something (GET) */
-    .click("#option-0--menu--9")
+    .click("#option-0--menu--12")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select random endpoint and show how to delete it */
-    .click("#option-3--menu--9")
+    .click("#option-3--menu--12")
     .click("#submit-endpoint")
     .click("#delete-3")
     /* Select random endpoint and show how to edit it if you forget to add params */
     .click("#endpoints")
-    .click("#option-1--menu--9")
+    .click("#option-1--menu--12")
     .click("#submit-endpoint")
     .click("#edit-3")
     .typeText("#params-input-0", `Item number 2`)
@@ -97,4 +97,6 @@ test("Test api schema adress submit and endpoints", async (t) => {
     .click("#close-details-modal")
     .click(".timeline-tab")
     .wait(2000);
+
+  await t.click(".log-tab").wait(2000).click(".event-tab");
 }).skipJsErrors();

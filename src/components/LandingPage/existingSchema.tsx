@@ -8,6 +8,7 @@ import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 
 import { backendDomain } from "../../constants/apiConstants";
+import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
 export default function ExistingSchema({
@@ -19,11 +20,12 @@ export default function ExistingSchema({
   convertSchemaPathsToList: (data: any) => void;
   convertSchemaDefinitionsToList: (data: any) => void;
 }) {
+  const logs = useLogsStore();
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests
+    (store: RequestsStore) => store.allRequests,
   );
   const definitions = useRequestsStore(
-    (store: RequestsStore) => store.definitions
+    (store: RequestsStore) => store.definitions,
   );
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
   const [title, setTitle] = useState("Choose a schema");
@@ -45,12 +47,12 @@ export default function ExistingSchema({
     setError("");
 
     try {
-      const data = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name
+      const response = await axios.get(
+        `${backendDomain}/apiSchema/fetch/` + item.name,
       );
 
-      convertSchemaPathsToList(data.data);
-      convertSchemaDefinitionsToList(data.data);
+      convertSchemaPathsToList(response.data);
+      convertSchemaDefinitionsToList(response.data);
 
       setIsFetching(false);
       setIsFetched(true);
@@ -58,11 +60,18 @@ export default function ExistingSchema({
       setTimeout(() => {
         setIsFetched(false);
       }, 3000); // Display the "Schema fetched" message for 3 seconds
-    } catch (e: any) {
-      setError(e.response ? e.response.data.error : e.message);
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+    } catch (error: any) {
+      setError(error.response ? error.response.data.error : error.message);
       setIsFetching(false);
       setIsFetched(false);
-      console.log("error: ", e.response?.data.error);
+
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
     }
   }
 
@@ -72,8 +81,8 @@ export default function ExistingSchema({
         <div className="py-3 mt-6 text-center">
           <Typography variant="h6">Select API Schema Name:</Typography>
         </div>
-        <div className="flex flex-col my-2">
-          <div className="py-3 mt-6 text-center">
+        <div className="flex flex-col">
+          <div className="pb-3 mt-6 text-center">
             <DropdownMenu title={title} id="dropdown-existing-schemas">
               {existingApiSchemasNames.map((item, index) => (
                 <DropdownMenu.Item

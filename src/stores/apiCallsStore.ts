@@ -1,6 +1,7 @@
 import axios from "axios";
 import { create } from "zustand";
 
+import { LogsStore } from "./logsStore";
 import { Request } from "../components/RightPanel/types/RightPanelTypes";
 import { backendDomain } from "../constants/apiConstants";
 import { ApiCall } from "../types/apiCallTypes";
@@ -14,6 +15,7 @@ type ApiStore = {
   fetchData: (
     callSequenceName: string,
     selectedRequests: Request[],
+    logs: LogsStore,
   ) => Promise<void>;
 };
 
@@ -23,20 +25,27 @@ const useApiCallsStore = create<ApiStore>((set) => ({
   selectedApiCalls: [],
   setSelectedApiCalls: (apiCalls) => set({ selectedApiCalls: apiCalls }),
   fetching: false,
-  fetchData: async (callSequenceName, selectedRequests) => {
+  fetchData: async (callSequenceName, selectedRequests, logs) => {
     try {
       set({ fetching: true });
-      const data = await axios.post(`${backendDomain}/explore/random`, {
+      const response = await axios.post(`${backendDomain}/explore/random`, {
         callSequence: selectedRequests,
         name: callSequenceName,
         favorite: false,
       });
 
-      set({ apiCalls: data.data.callSequence });
+      set({ apiCalls: response.data.callSequence });
       set({ selectedApiCalls: [] });
       set({ fetching: false });
-    } catch (error) {
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+    } catch (error: any) {
       console.error("Error fetching data:", error);
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
     }
   },
 }));

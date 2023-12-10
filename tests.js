@@ -13,7 +13,7 @@ try {
     ])
     .browsers(["chrome --start-fullscreen"])
     .useProxy("localhost:5173")
-    .run({ speed: 0.7 });
+    .run({ speed: 0.9 });
 
   console.log("Tests failed: " + failed);
 } finally {

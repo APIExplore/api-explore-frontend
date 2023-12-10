@@ -1,23 +1,26 @@
 import { useEffect, useRef, useState } from "react";
+
 import { ResizableBox } from "react-resizable";
+
 import { Modal, useModal } from "@tiller-ds/alert";
 import { Button, Tabs, Typography } from "@tiller-ds/core";
 import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
+
 import CallSequences from "./CallSequences";
+import ConfigurationDataTable from "./ConfigurationDataTable";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import ConfigurationDataTable from "./ConfigurationDataTable";
 
 export default function RightPanel() {
   const modal = useModal();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height
+    (store) => store.panels.container.height,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
+    (store) => store.panels.bottom.height,
   );
 
   const [clickedItem, setClickedItem]: any = useState(null);
@@ -26,31 +29,30 @@ export default function RightPanel() {
 
   const allShownItems = useRequestsStore((store: any) => store.allShownItems);
   const setAllShownItems = useRequestsStore(
-    (store: any) => store.setAllShownItems
+    (store: any) => store.setAllShownItems,
   );
 
   const callSequenceName = useRequestsStore(
-    (store: any) => store.callSequenceName
+    (store: any) => store.callSequenceName,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: any) => store.setCallSequenceName
+    (store: any) => store.setCallSequenceName,
   );
   const [inputError, setInputError] = useState("");
-  const [nameError, setNameError] = useState("default name error");
 
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   /* Modal operation */
   const [modalOperation, setModalOperation] = useState("");
   /* Array of all requests */
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests
+    (store: RequestsStore) => store.allRequests,
   );
   /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests
+    (store: RequestsStore) => store.selectedRequests,
   );
   /* Initial ref */
   const isMountingRef = useRef(false);
@@ -118,7 +120,9 @@ export default function RightPanel() {
       setAllShownItems(allRequests);
     } else {
       setAllShownItems(
-        allRequests.filter((item: any) => selectedMethods[item.method] === true)
+        allRequests.filter(
+          (item: any) => selectedMethods[item.method] === true,
+        ),
       );
     }
   };
@@ -193,7 +197,7 @@ export default function RightPanel() {
   return (
     <ResizableBox
       width={400}
-      height={containerHeight - bottomPanelHeight - 12}
+      height={containerHeight - bottomPanelHeight - 8}
       resizeHandles={["w"]}
     >
       <Modal
@@ -256,7 +260,7 @@ export default function RightPanel() {
         }}
       </Modal>
       <div
-        className="flex h-full m-1 p-4 bg-white drop-shadow-md"
+        className="flex h-full m-1 p-2 bg-white drop-shadow-md"
         ref={ref}
         id="right-panel"
       >
@@ -266,107 +270,111 @@ export default function RightPanel() {
             label="Configuration"
             className="config-tab flex flex-row justify-center"
           >
-            <div className="py-8 text-center">
-              <Typography variant="h5">Call Sequence Configuration</Typography>
-            </div>
-            <Input
-              name="sequenceName"
-              id="sequence-name-input"
-              label="Call Sequence Name"
-              placeholder="Call sequence to be stored in the history tab"
-              value={callSequenceName}
-              onChange={(event) => {
-                setCallSequenceName(event.target.value);
-                validateInputLength(event.target.value);
-              }}
-              onBlur={() => validateInputLength()}
-              error={inputError}
-              className="px-0.5"
-            />
-            <div className="my-2 text-left">
-              <CheckboxGroup
-                label={
-                  <Typography className="my-3 font-semibold">
-                    Filter by method:
-                  </Typography>
-                }
-                name="methods"
-                className="my-2"
-                onChange={onCheckboxChange}
-                value={selectedMethods}
-                vertical
-              >
-                <div className="inline-grid grid-cols-2 gap-2">
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="GET"
-                    tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
-                    }}
-                    value="get"
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="POST"
-                    value="post"
-                    tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
-                    }}
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="PUT"
-                    value="put"
-                    tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
-                    }}
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="DELETE"
-                    value="delete"
-                    tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
-                    }}
+            <div className="px-3">
+              <div className="py-8 text-center">
+                <Typography variant="h5">
+                  Call Sequence Configuration
+                </Typography>
+              </div>
+              <Input
+                name="sequenceName"
+                id="sequence-name-input"
+                label="Call Sequence Name"
+                placeholder="Call sequence to be stored in the history tab"
+                value={callSequenceName}
+                onChange={(event) => {
+                  setCallSequenceName(event.target.value);
+                  validateInputLength(event.target.value);
+                }}
+                onBlur={() => validateInputLength()}
+                error={inputError}
+                className="px-0.5"
+              />
+              <div className="my-2 text-left">
+                <CheckboxGroup
+                  label={
+                    <Typography className="my-3 font-semibold">
+                      Filter by method:
+                    </Typography>
+                  }
+                  name="methods"
+                  className="my-2"
+                  onChange={onCheckboxChange}
+                  value={selectedMethods}
+                  vertical
+                >
+                  <div className="inline-grid grid-cols-2 gap-2">
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="GET"
+                      tokens={{
+                        GroupItem: { content: "static h-5 flex items-center" },
+                      }}
+                      value="get"
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="POST"
+                      value="post"
+                      tokens={{
+                        GroupItem: { content: "static h-5 flex items-center" },
+                      }}
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="PUT"
+                      value="put"
+                      tokens={{
+                        GroupItem: { content: "static h-5 flex items-center" },
+                      }}
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="DELETE"
+                      value="delete"
+                      tokens={{
+                        GroupItem: { content: "static h-5 flex items-center" },
+                      }}
+                    />
+                  </div>
+                </CheckboxGroup>
+                <div className="my-5 flex items-center">
+                  <DropdownMenu
+                    title="Endpoints"
+                    id="endpoints"
+                    visibleItemCount={5}
+                  >
+                    {allShownItems.map((item, index) => (
+                      <DropdownMenu.Item
+                        key={index}
+                        onSelect={() => {
+                          setModalOperation("add");
+                          setClickedItem(JSON.parse(JSON.stringify(item)));
+                        }}
+                      >
+                        <div className="text-body">
+                          {item.method.toUpperCase()} {item.operationId}
+                        </div>
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu>
+                  <Input
+                    type="file"
+                    accept=".json"
+                    onChange={extractDataFromCallSequence}
+                    placeholder="Test placeholder"
+                    name={"Choose seq"}
+                    className="ml-2"
                   />
                 </div>
-              </CheckboxGroup>
-              <div className="my-5 flex items-center">
-                <DropdownMenu
-                  title="Endpoints"
-                  id="endpoints"
-                  visibleItemCount={5}
-                >
-                  {allShownItems.map((item, index) => (
-                    <DropdownMenu.Item
-                      key={index}
-                      onSelect={() => {
-                        setModalOperation("add");
-                        setClickedItem(JSON.parse(JSON.stringify(item)));
-                      }}
-                    >
-                      <div className="text-body">
-                        {item.method.toUpperCase()} {item.operationId}
-                      </div>
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu>
-                <Input
-                  type="file"
-                  accept=".json"
-                  onChange={extractDataFromCallSequence}
-                  placeholder="Test placeholder"
-                  name={"Choose seq"}
-                  className="ml-2"
+                <ConfigurationDataTable
+                  selectedRequests={selectedRequests}
+                  setSelectedRequests={setSelectedRequests}
+                  setModalOperation={setModalOperation}
+                  setClickedItem={setClickedItem}
+                  removeItem={removeItem}
                 />
               </div>
-              <ConfigurationDataTable
-                selectedRequests={selectedRequests}
-                setSelectedRequests={setSelectedRequests}
-                setModalOperation={setModalOperation}
-                setClickedItem={setClickedItem}
-                removeItem={removeItem}
-              />
             </div>
           </Tabs.Tab>
           <Tabs.Tab
