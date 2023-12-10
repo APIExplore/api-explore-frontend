@@ -1,7 +1,11 @@
+import { useEffect } from "react";
+
+import { IconButton, Typography } from "@tiller-ds/core";
 import { DataTable } from "@tiller-ds/data-display";
-import { IconButton } from "@tiller-ds/core";
-import { Item } from "./types/RightPanelTypes";
 import { Icon } from "@tiller-ds/icons";
+
+import { Item } from "./types/RightPanelTypes";
+import useApiCallsStore from "../../stores/apiCallsStore";
 
 export default function ConfigurationDataTable({
   selectedRequests,
@@ -16,6 +20,8 @@ export default function ConfigurationDataTable({
   setClickedItem: (data: any) => void;
   removeItem: (data: any) => void;
 }) {
+  const callByCall = useApiCallsStore((store) => store.callByCallMode);
+
   const handleMoveUp = (index) => {
     if (index > 0) {
       const updatedRequests = [...selectedRequests];
@@ -38,11 +44,22 @@ export default function ConfigurationDataTable({
     }
   };
 
+  useEffect(() => {
+    setSelectedRequests(selectedRequests);
+  }, [callByCall.nextCallIndex, callByCall.enabled]);
+
   return (
     <DataTable
       data={selectedRequests}
       className="w-[300px]"
       lastColumnFixed={true}
+      getRowClassName={(values, index) =>
+        index === callByCall.nextCallIndex && callByCall.enabled
+          ? "bg-info-light"
+          : index <= callByCall.nextCallIndex - 1 && callByCall.enabled
+          ? "bg-success-light"
+          : "bg-white"
+      }
     >
       <DataTable.Column
         header="Method"
@@ -56,7 +73,16 @@ export default function ConfigurationDataTable({
         id="operationId"
         className="max-w-md"
       >
-        {(item: Item) => <>{item.operationId}</>}
+        {(item: Item) => (
+          <div className="flex flex-col">
+            {item.operationId}
+            {item.params.map((param, index) => (
+              <Typography variant="subtext" key={index}>
+                {param.name + ": " + param.value}
+              </Typography>
+            ))}
+          </div>
+        )}
       </DataTable.Column>
       <DataTable.Column
         header="Actions"
@@ -65,7 +91,7 @@ export default function ConfigurationDataTable({
         canSort={false}
       >
         {(item: Item, index) => (
-          <div className="flex justify-center items-center space-x-1">
+          <div className="flex items-center space-x-1">
             <IconButton
               id={"edit-" + String(index)}
               icon={
@@ -100,7 +126,17 @@ export default function ConfigurationDataTable({
                   />
                 }
                 onClick={() => handleMoveUp(index)}
-                label="Move Up"
+                disabled={
+                  (callByCall.enabled && index <= callByCall.nextCallIndex) ||
+                  index === 0
+                }
+                label={
+                  callByCall.enabled && index < callByCall.nextCallIndex
+                    ? "Cannot move already executed call"
+                    : callByCall.enabled && index === callByCall.nextCallIndex
+                    ? "Cannot move before already executed calls"
+                    : "Move Up"
+                }
               />
               <IconButton
                 id={"move-down-" + String(index)}
@@ -112,7 +148,15 @@ export default function ConfigurationDataTable({
                   />
                 }
                 onClick={() => handleMoveDown(index)}
-                label="Move Down"
+                disabled={
+                  (callByCall.enabled && index < callByCall.nextCallIndex) ||
+                  index === selectedRequests.length - 1
+                }
+                label={
+                  callByCall.enabled && index < callByCall.nextCallIndex
+                    ? "Cannot move already executed call"
+                    : "Move Down"
+                }
               />
             </div>
           </div>

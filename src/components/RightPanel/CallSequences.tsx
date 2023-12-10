@@ -152,10 +152,6 @@ export default function CallSequences() {
             uncheckedIcon={<Icon type="star" />}
             checked={showFavorites}
             onClick={showOnlyFavorites}
-            tokens={{
-              toggle:
-                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
-            }}
           />
         </div>
       </div>
