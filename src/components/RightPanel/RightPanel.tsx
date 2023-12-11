@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import axios from "axios";
 import { ResizableBox } from "react-resizable";
 
 import { Modal, useModal } from "@tiller-ds/alert";
@@ -10,6 +11,7 @@ import { DropdownMenu } from "@tiller-ds/menu";
 
 import CallSequences from "./CallSequences";
 import ConfigurationDataTable from "./ConfigurationDataTable";
+import { backendDomain } from "../../constants/apiConstants";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
@@ -25,6 +27,8 @@ export default function RightPanel() {
   );
 
   const [clickedItem, setClickedItem]: any = useState(null);
+
+  const [tabIndex, setTabIndex]: any = useState(0);
 
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
 
@@ -71,6 +75,8 @@ export default function RightPanel() {
   });
 
   const [fetchingTab, setFetchingTab] = useState<number>(0);
+
+  const [editingSequenceName, setEditingSequenceName] = useState<string>("");
 
   const ref = useResizeObserver("right", setDimensions);
 
@@ -202,6 +208,21 @@ export default function RightPanel() {
     }
   };
 
+  async function onEditSequence(sequenceName: string) {
+    //  TODO by_Edin: Set 'Configuration' tab as active
+    setTabIndex(0);
+    try {
+      //   TODO by_Edin: In ConfigurationTable show list of api calls tied to the sequence,
+      //                  fill sequenceName input field with sequenceName
+      const response = await axios.get(
+        `${backendDomain}/callsequence/fetch/${sequenceName}`,
+      );
+      setCallSequenceName(response.data.sequenceName);
+    } catch (error: any) {
+      console.log("Problem with retrieving sequence by name.");
+    }
+  }
+
   return (
     <ResizableBox
       width={400}
@@ -272,6 +293,7 @@ export default function RightPanel() {
         ref={ref}
         id="right-panel"
       >
+        {/* index={tabIndex} */}
         <Tabs iconPlacement="trailing" fullWidth={true}>
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
@@ -435,7 +457,7 @@ export default function RightPanel() {
             icon={<Icon type="clock-counter-clockwise" variant="fill" />}
             onClick={setFetchingTab}
           >
-            <CallSequences fetchingTab={fetchingTab} />
+            <CallSequences fetchingTab={fetchingTab} onEdit={onEditSequence} />
           </Tabs.Tab>
         </Tabs>
       </div>

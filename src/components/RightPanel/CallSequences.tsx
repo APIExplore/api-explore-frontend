@@ -18,8 +18,10 @@ import ConditionalDisplay from "../ConditionalDisplay";
 
 export default function CallSequences({
   fetchingTab,
+  onEditSequence,
 }: {
   fetchingTab: number;
+  onEditSequence: (sequenceName: string) => void;
 }) {
   const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
@@ -28,6 +30,19 @@ export default function CallSequences({
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sequenceName, setSequenceName] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "original">(
+    "original",
+  );
+
+  const handleSequenceEdit = (sequenceName: string) => {
+    setSequenceName(sequenceName);
+    onEditSequence(sequenceName);
+  };
+
+  const handleSequenceRemove = () => {
+    fetchCallSequences();
+  };
 
   const fetchCallSequences = async () => {
     try {
@@ -65,6 +80,28 @@ export default function CallSequences({
   useEffect(() => {
     fetchCallSequences();
   }, [apiCalls, fetchingTab]);
+
+  useEffect(() => {
+    fetchCallSequences();
+  }, [apiCalls, fetchingTab, sortOrder]); // Include sortOrder in dependencies
+
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => {
+      if (prevOrder === "asc") return "desc";
+      if (prevOrder === "desc") return "original";
+      return "asc";
+    });
+  };
+
+  const sortSequences = (sequences: CallSequence[]) => {
+    if (sortOrder === "asc") {
+      return sequences.slice().sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOrder === "desc") {
+      return sequences.slice().sort((a, b) => b.name.localeCompare(a.name));
+    } else {
+      return sequences;
+    }
+  };
 
   const toggleFavorite = async (sequenceName: string) => {
     await axios.put(
@@ -129,46 +166,78 @@ export default function CallSequences({
     <div className="p-4">
       <div className="flex justify-between">
         <Typography variant="h5">Call Sequences</Typography>
-        <div className="mb-4">
-          <Toggle
-            label={
-              <span className="text-sm leading-5 font-medium text-gray-900">
-                Only favorites
-              </span>
-            }
-            reverse={true}
-            checkedIcon={
-              <div className="flex ml-3">
+        <div className="flex flex-col items-end">
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Only favorites
+                </span>
+              }
+              reverse={true}
+              checkedIcon={
+                <div className="flex ml-3">
+                  <Icon
+                    type="star"
+                    variant="fill"
+                    className="text-yellow-500"
+                    fill="yellow"
+                    size={3}
+                    style={{ paddingLeft: "0.5px" }}
+                  />
+                </div>
+              }
+              uncheckedIcon={<Icon type="star" />}
+              checked={showFavorites}
+              onClick={showOnlyFavorites}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+              }}
+            />
+          </div>
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Sort by name
+                </span>
+              }
+              reverse={true}
+              checked={sortOrder !== "original"}
+              onClick={toggleSortOrder}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-sort",
+              }}
+              checkedIcon={
                 <Icon
-                  type="star"
-                  variant="fill"
-                  className="text-yellow-500"
-                  fill="yellow"
-                  size={3}
-                  style={{ paddingLeft: "0.5px" }}
+                  className={sortOrder === "asc" ? "text-white-0" : ""}
+                  type={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
                 />
-              </div>
-            }
-            uncheckedIcon={<Icon type="star" />}
-            checked={showFavorites}
-            onClick={showOnlyFavorites}
-            tokens={{
-              toggle:
-                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
-            }}
-          />
+              }
+              uncheckedIcon={
+                <Icon
+                  className={sortOrder === "desc" ? "text-white-0" : ""}
+                  type={sortOrder === "desc" ? "arrow-down" : "x"}
+                />
+              }
+            />
+          </div>
         </div>
       </div>
       <ConditionalDisplay
         componentToDisplay={
           <div className="space-y-4">
-            {filteredSequences.map((sequence, index) => (
+            {sortSequences(filteredSequences).map((sequence, index) => (
               <CallSequenceCard
                 key={index}
                 sequence={sequence}
                 toggleFavorite={toggleFavorite}
                 selectApiCall={selectApiCall}
                 toggleDetails={toggleDetails}
+                onEdit={handleSequenceEdit}
+                onRemove={handleSequenceRemove}
               />
             ))}
           </div>

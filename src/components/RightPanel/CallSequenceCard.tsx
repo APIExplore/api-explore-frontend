@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import axios from "axios"; // Import Axios for HTTP requests
 import { saveAs } from "file-saver";
 
 import { Card, IconButton, Typography } from "@tiller-ds/core";
@@ -7,6 +8,7 @@ import { DescriptionList } from "@tiller-ds/data-display";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
 import { CallSequence } from "./types/RightPanelTypes";
+import { backendDomain } from "../../constants/apiConstants";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
@@ -16,6 +18,8 @@ type CallSequenceCardProps = {
   toggleFavorite: (sequenceName: string) => Promise<void>;
   selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
   toggleDetails: (sequenceName: string) => Promise<void>;
+  onEdit: (sequenceName: string) => void;
+  onRemove: () => void;
 };
 
 export default function CallSequenceCard({
@@ -23,17 +27,52 @@ export default function CallSequenceCard({
   toggleFavorite,
   selectApiCall,
   toggleDetails,
+  onEdit,
+  onRemove,
 }: CallSequenceCardProps) {
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+  const [sequenceName, setSequenceName] = useState("");
 
   const exportSequenceToJsonFile = (name) => {
+    // TODO: Export sequence details as json
     const jsonDataForExport = JSON.stringify(selectedRequests);
     const blob = new Blob([jsonDataForExport], { type: "application/json" });
     saveAs(blob, `${name}.json`);
+  };
+
+  const handleAddClick = () => {
+    setSequenceName(sequence.name);
+    onEdit(sequenceName);
+  };
+
+  // TODO by_Edin: Make a similar functionality for api schema in the dropdown list of schemas on landing page.
+  //  (trash icon which, when clicked, sends a DELETE request to endpoint '${backendDomain}/apischema/delete/:schemaName'
+  //   and refreshes the list)
+  const removeSequence = async () => {
+    try {
+      // Make an axios.delete API call
+      const response = await axios.delete(
+        `${backendDomain}/callsequence/delete/${sequence.name}`,
+      );
+
+      if (response.data.success) {
+        // Successful deletion
+        console.log("Sequence removed successfully");
+        onRemove();
+      } else {
+        // Handle error
+        console.error(response.data.error);
+      }
+    } catch (error: any) {
+      // Handle network error
+      console.error("Network error:", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -52,12 +91,29 @@ export default function CallSequenceCard({
               </span>
             )}
             <IconButton
-              onClick={() => {
+              onClick={handleAddClick}
+              icon={<Icon type="plus" />}
+              label="Edit"
+              className={"text-green-600 hover:opacity-100 opacity-60"}
+            />
+            <IconButton
+              onClick={async () => {
                 setLoading(true);
-                toggleFavorite(sequence.name);
+                await removeSequence();
+              }}
+              icon={<Icon type="trash" />}
+              label="Delete"
+              className={"text-red-600 hover:opacity-100 opacity-60"}
+            />
+            <IconButton
+              onClick={async () => {
+                setLoading(true);
+                await toggleFavorite(sequence.name);
               }}
               className={`text-yellow-500 ${
-                sequence.favorite ? "opacity-100" : "opacity-50"
+                sequence.favorite
+                  ? "opacity-100"
+                  : "opacity-50 hover:opacity-100"
               } favourite-button`}
               icon={
                 <Icon
@@ -74,8 +130,9 @@ export default function CallSequenceCard({
               icon={
                 <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
               }
+              className={"text-black hover:opacity-100 opacity-60"}
               id="expand-sequence"
-              label="Toggle Favorite"
+              label="Expand details"
             />
           </div>
         </Card.Header.Actions>
@@ -86,9 +143,11 @@ export default function CallSequenceCard({
             sequence={sequence}
             selectApiCall={selectApiCall}
             toggleDetails={toggleDetails}
+            onEdit={handleAddClick}
+            onRemove={onRemove}
           />
           <IconButton
-            onClick={() => exportSequenceToJsonFile(sequence.name)}
+            // onClick={() => exportSequenceToJsonFile(sequence.name)}
             icon={<Icon type={"export"} />}
             id="export-to-json"
             label="Export to JSON file"
@@ -104,6 +163,8 @@ function SequenceDetails({
   sequence,
   selectApiCall,
   toggleDetails,
+  onEdit,
+  onRemove,
 }: Omit<CallSequenceCardProps, "toggleFavorite">) {
   useEffect(() => {
     toggleDetails(sequence.name);
