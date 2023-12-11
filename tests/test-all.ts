@@ -69,6 +69,7 @@ test("Test api schema adress submit and endpoints", async (t) => {
   await t.click(".log-tab");
   await t.click("#play-button");
 
+  await t.click(".event-tab");
   /* Select two endpoints for details */
   await t
     .click(Selector("div").withAttribute("row-index", "0"))
@@ -80,9 +81,11 @@ test("Test api schema adress submit and endpoints", async (t) => {
     .click(".dependency-graph-tab");
 
   /* Do another sequence */
+  await t.click(".log-tab");
   await t.typeText("#sequence-name-input", ` New one`);
   await t.click("#play-button");
   await t.click(".sequences-tab");
+
   /* Put first sequence as favourite */
   await t.click(".favourite-button");
   await t
@@ -94,10 +97,10 @@ test("Test api schema adress submit and endpoints", async (t) => {
   /* See sequence details */
   await t
     .click("#view-details")
-    .wait(3000)
+    .wait(2000)
     .click("#close-details-modal")
     .click(".timeline-tab")
-    .wait(2000);
+    .wait(1000);
 
   /* Export and import sequence */
   await t.click("#export-to-json");
