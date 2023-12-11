@@ -115,7 +115,7 @@ export default function ApiChart() {
     xaxis: {
       axisBorder: { show: true },
       labels: {
-        formatter: prettifyTimestamp,
+        formatter: (value) => prettifyTimestamp(value),
       },
     },
     plotOptions: {

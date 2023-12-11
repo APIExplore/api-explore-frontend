@@ -15,7 +15,7 @@ export function displayTooltip(
   const endTimestamp = prettifyTimestamp(timestamps[1]);
 
   return (
-    '<div class="p-2 bg-primary-light opacity-50 text-center">' +
+    '<div class="p-2 bg-primary-50 opacity-50 text-center">' +
     '<span class="text-body-dark font-medium">' +
     operation.operationId +
     "<br />" +

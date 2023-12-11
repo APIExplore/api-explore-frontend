@@ -11,17 +11,17 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function VisualisationPanel() {
   const leftPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.left.width
+    (store) => store.panels.left.width,
   );
   const rightPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.right.width
+    (store) => store.panels.right.width,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
+    (store) => store.panels.bottom.height,
   );
 
   const containerDimensions = usePanelDimensionsStore(
-    (store) => store.panels.container
+    (store) => store.panels.container,
   );
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const [position, setPosition] = useState<number>(leftPanelWidth);
@@ -37,9 +37,9 @@ export default function VisualisationPanel() {
         left: `${position}px`,
         width:
           containerDimensions.width - leftPanelWidth - rightPanelWidth - 24,
-        height: containerDimensions.height - bottomPanelHeight - 12,
+        height: containerDimensions.height - bottomPanelHeight - 8,
       }}
-      className="absolute col-span-6 p-4 m-1 bg-white drop-shadow-md h-full"
+      className="absolute col-span-6 p-2 m-1 bg-white drop-shadow-md h-full"
       ref={ref}
       id="middle-panel"
     >
