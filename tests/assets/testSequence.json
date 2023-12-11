@@ -1,0 +1,37 @@
+[
+  {
+    "path": "/products/{productName}/constraints/requires",
+    "method": "post",
+    "operationId": "addRequiresConstraintToProduct",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "" },
+      {
+        "type": "string",
+        "name": "sourceFeature",
+        "in": "formData",
+        "value": ""
+      },
+      {
+        "type": "string",
+        "name": "requiredFeature",
+        "in": "formData",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "path": "/products/{productName}/configurations/{configurationName}",
+    "method": "get",
+    "operationId": "getConfigurationWithNameForProduct",
+    "definitionRef": "#/definitions/ProductConfiguration",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "" },
+      {
+        "type": "string",
+        "name": "configurationName",
+        "in": "path",
+        "value": ""
+      }
+    ]
+  }
+]
