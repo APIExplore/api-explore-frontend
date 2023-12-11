@@ -4,6 +4,7 @@ import Chart from "react-apexcharts";
 import colors from "tailwindcss/colors";
 
 import { Alert } from "@tiller-ds/alert";
+import { Badge, Tooltip } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import { ApexData } from "./apexTypes";
@@ -20,6 +21,7 @@ import { ApiCall } from "../../../types/apiCallTypes";
 import { prettifyTimestamp } from "../../../util/dateUtils";
 
 export default function ApiChart() {
+  const schemaName = useApiCallsStore((store) => store.schemaName);
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
   const fetching = useApiCallsStore((state) => state.fetching);
   const setSelectedApiCalls = useApiCallsStore(
@@ -178,6 +180,20 @@ export default function ApiChart() {
           />
         </div>
       )}
+      <Tooltip label="Currently selected schema">
+        <Badge
+          className="w-fit self-center absolute bottom-0 left-0 z-50 select-all"
+          color="secondary"
+          small={true}
+          tokens={{
+            master:
+              "py-1 text-xs font-medium rounded-tr-md inline-flex items-center shadow-inner",
+          }}
+          variant="filled"
+        >
+          <Icon type="file-text" className="pr-1" /> {schemaName}
+        </Badge>
+      </Tooltip>
     </div>
   );
 }

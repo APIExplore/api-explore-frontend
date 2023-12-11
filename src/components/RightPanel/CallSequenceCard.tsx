@@ -107,7 +107,7 @@ function SequenceDetails({
 }: Omit<CallSequenceCardProps, "toggleFavorite">) {
   useEffect(() => {
     toggleDetails(sequence.name);
-  }, []);
+  }, [sequence]);
 
   return (
     <>

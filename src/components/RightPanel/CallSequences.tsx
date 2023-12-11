@@ -173,7 +173,7 @@ export default function CallSequences({
             ))}
           </div>
         }
-        condition={!loading}
+        condition={!loading || filteredSequences.length > 0}
       />
       <Modal
         {...modal}

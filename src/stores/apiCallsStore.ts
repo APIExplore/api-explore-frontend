@@ -7,6 +7,8 @@ import { backendDomain } from "../constants/apiConstants";
 import { ApiCall } from "../types/apiCallTypes";
 
 type ApiStore = {
+  schemaName: string;
+  setSchemaName: (name: string) => void;
   apiCalls: ApiCall[];
   setApiCalls: (callSequence: ApiCall[]) => void;
   selectedApiCalls: ApiCall[];
@@ -26,6 +28,8 @@ type ApiStore = {
 
 const useApiCallsStore = create<ApiStore>((set, get) => ({
   apiCalls: [],
+  schemaName: "",
+  setSchemaName: (name: string) => set({ schemaName: name }),
   setApiCalls: (callSequence) => set({ apiCalls: callSequence }),
   selectedApiCalls: [],
   setSelectedApiCalls: (apiCalls) => set({ selectedApiCalls: apiCalls }),

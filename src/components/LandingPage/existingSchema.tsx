@@ -8,6 +8,7 @@ import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 
 import { backendDomain } from "../../constants/apiConstants";
+import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 
@@ -20,6 +21,7 @@ export default function ExistingSchema({
   convertSchemaPathsToList: (data: any) => void;
   convertSchemaDefinitionsToList: (data: any) => void;
 }) {
+  const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
   const logs = useLogsStore();
   const allRequests = useRequestsStore(
     (store: RequestsStore) => store.allRequests,
@@ -51,6 +53,7 @@ export default function ExistingSchema({
         `${backendDomain}/apiSchema/fetch/` + item.name,
       );
 
+      setSchemaName(item.name);
       convertSchemaPathsToList(response.data);
       convertSchemaDefinitionsToList(response.data);
 
