@@ -281,7 +281,6 @@ export default function RightPanel() {
                 <Typography variant="h5">Sequence Config</Typography>
                 <div className="mb-4">
                   <Toggle
-                    className="toggle-call-by-call"
                     label={
                       <span className="text-sm leading-5 font-medium text-gray-900">
                         <div className="flex">
