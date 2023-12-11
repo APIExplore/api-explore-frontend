@@ -208,7 +208,7 @@ export default function RightPanel() {
     }
   };
 
-  async function onEditSequence(sequenceName: string) {
+  async function editSequence(sequenceName: string) {
     //  TODO by_Edin: Set 'Configuration' tab as active
     setTabIndex(0);
     try {
@@ -457,7 +457,10 @@ export default function RightPanel() {
             icon={<Icon type="clock-counter-clockwise" variant="fill" />}
             onClick={setFetchingTab}
           >
-            <CallSequences fetchingTab={fetchingTab} onEdit={onEditSequence} />
+            <CallSequences
+              fetchingTab={fetchingTab}
+              onEditSequence={editSequence}
+            />
           </Tabs.Tab>
         </Tabs>
       </div>

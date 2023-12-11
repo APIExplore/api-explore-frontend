@@ -18,7 +18,7 @@ type CallSequenceCardProps = {
   toggleFavorite: (sequenceName: string) => Promise<void>;
   selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
   toggleDetails: (sequenceName: string) => Promise<void>;
-  onEdit: (sequenceName: string) => void;
+  onEdit: (sequenceName: string) => Promise<void>;
   onRemove: () => void;
 };
 
@@ -44,7 +44,7 @@ export default function CallSequenceCard({
     saveAs(blob, `${name}.json`);
   };
 
-  const handleAddClick = () => {
+  const handleAddClick = async (sequenceName: string) => {
     setSequenceName(sequence.name);
     onEdit(sequenceName);
   };
@@ -91,7 +91,9 @@ export default function CallSequenceCard({
               </span>
             )}
             <IconButton
-              onClick={handleAddClick}
+              onClick={async () => {
+                await handleAddClick;
+              }}
               icon={<Icon type="plus" />}
               label="Edit"
               className={"text-green-600 hover:opacity-100 opacity-60"}
@@ -99,7 +101,7 @@ export default function CallSequenceCard({
             <IconButton
               onClick={async () => {
                 setLoading(true);
-                await removeSequence();
+                await removeSequence;
               }}
               icon={<Icon type="trash" />}
               label="Delete"

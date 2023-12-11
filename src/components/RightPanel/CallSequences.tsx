@@ -21,7 +21,7 @@ export default function CallSequences({
   onEditSequence,
 }: {
   fetchingTab: number;
-  onEditSequence: (sequenceName: string) => void;
+  onEditSequence: (sequenceName: string) => Promise<void>;
 }) {
   const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
@@ -35,7 +35,7 @@ export default function CallSequences({
     "original",
   );
 
-  const handleSequenceEdit = (sequenceName: string) => {
+  const handleSequenceEdit = async (sequenceName: string) => {
     setSequenceName(sequenceName);
     onEditSequence(sequenceName);
   };
