@@ -217,7 +217,7 @@ export default function RightPanel() {
       const response = await axios.get(
         `${backendDomain}/callsequence/fetch/${sequenceName}`,
       );
-      setCallSequenceName(response.data.sequenceName);
+      setCallSequenceName(sequenceName);
     } catch (error: any) {
       console.log("Problem with retrieving sequence by name.");
     }
@@ -360,7 +360,7 @@ export default function RightPanel() {
               />
               <CheckboxGroup
                 label={
-                  <Typography className="my-4 font-semibold">
+                  <Typography className="mt-4 font-semibold">
                     Filter by method:
                   </Typography>
                 }
@@ -438,7 +438,7 @@ export default function RightPanel() {
                   accept=".json"
                   onChange={extractDataFromCallSequence}
                   placeholder="Test placeholder"
-                  name={"Choose seq"}
+                  name={"choose-seq"}
                   className="ml-2"
                 />
               </div>

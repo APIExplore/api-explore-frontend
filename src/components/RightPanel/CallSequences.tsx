@@ -30,20 +30,14 @@ export default function CallSequences({
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sequenceName, setSequenceName] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "original">(
     "original",
   );
 
   const handleSequenceEdit = async (sequenceName: string) => {
-    setSequenceName(sequenceName);
-    onEditSequence(sequenceName);
+    console.log("2: " + sequenceName);
+    await onEditSequence(sequenceName);
   };
-
-  const handleSequenceRemove = () => {
-    fetchCallSequences();
-  };
-
   const fetchCallSequences = async () => {
     try {
       const response = await axios.get(`${backendDomain}/callsequence/fetch`);
@@ -81,9 +75,9 @@ export default function CallSequences({
     fetchCallSequences();
   }, [apiCalls, fetchingTab]);
 
-  useEffect(() => {
-    fetchCallSequences();
-  }, [apiCalls, fetchingTab, sortOrder]); // Include sortOrder in dependencies
+  const handleSequenceRemove = async () => {
+    await fetchCallSequences();
+  };
 
   const toggleSortOrder = () => {
     setSortOrder((prevOrder) => {
@@ -95,9 +89,9 @@ export default function CallSequences({
 
   const sortSequences = (sequences: CallSequence[]) => {
     if (sortOrder === "asc") {
-      return sequences.slice().sort((a, b) => a.name.localeCompare(b.name));
+      return sequences.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortOrder === "desc") {
-      return sequences.slice().sort((a, b) => b.name.localeCompare(a.name));
+      return sequences.sort((a, b) => b.name.localeCompare(a.name));
     } else {
       return sequences;
     }

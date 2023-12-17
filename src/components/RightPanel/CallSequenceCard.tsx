@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import axios from "axios"; // Import Axios for HTTP requests
+import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { Card, IconButton, Typography } from "@tiller-ds/core";
@@ -35,7 +35,6 @@ export default function CallSequenceCard({
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
-  const [sequenceName, setSequenceName] = useState("");
 
   const exportSequenceToJsonFile = (name) => {
     // TODO: Export sequence details as json
@@ -44,9 +43,9 @@ export default function CallSequenceCard({
     saveAs(blob, `${name}.json`);
   };
 
-  const handleAddClick = async (sequenceName: string) => {
-    setSequenceName(sequence.name);
-    onEdit(sequenceName);
+  const handleAddClick = async () => {
+    await onEdit(sequence.name);
+    setLoading(false);
   };
 
   // TODO by_Edin: Make a similar functionality for api schema in the dropdown list of schemas on landing page.
@@ -92,7 +91,8 @@ export default function CallSequenceCard({
             )}
             <IconButton
               onClick={async () => {
-                await handleAddClick;
+                setLoading(true);
+                await handleAddClick();
               }}
               icon={<Icon type="plus" />}
               label="Edit"
@@ -101,7 +101,7 @@ export default function CallSequenceCard({
             <IconButton
               onClick={async () => {
                 setLoading(true);
-                await removeSequence;
+                await removeSequence();
               }}
               icon={<Icon type="trash" />}
               label="Delete"
@@ -132,7 +132,7 @@ export default function CallSequenceCard({
               icon={
                 <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
               }
-              className={"text-black hover:opacity-100 opacity-60"}
+              // className={"text-black hover:opacity-100 opacity-60"}
               id="expand-sequence"
               label="Expand details"
             />
@@ -149,7 +149,7 @@ export default function CallSequenceCard({
             onRemove={onRemove}
           />
           <IconButton
-            // onClick={() => exportSequenceToJsonFile(sequence.name)}
+            onClick={() => exportSequenceToJsonFile(sequence.name)}
             icon={<Icon type={"export"} />}
             id="export-to-json"
             label="Export to JSON file"
@@ -170,7 +170,7 @@ function SequenceDetails({
 }: Omit<CallSequenceCardProps, "toggleFavorite">) {
   useEffect(() => {
     toggleDetails(sequence.name);
-  }, []);
+  }, [sequence]);
 
   return (
     <>
