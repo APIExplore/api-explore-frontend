@@ -1,6 +1,8 @@
 import { fixture, Selector } from "testcafe";
 
-fixture("Middle panel test").page("http://localhost:5173/");
+fixture("Middle panel test for timeline and dependency graph").page(
+  "http://localhost:5173/"
+);
 
 async function schemaUpload(t) {
   /* Test schema adress submit */
