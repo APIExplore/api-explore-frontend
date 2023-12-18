@@ -7,9 +7,9 @@ try {
 
   const failed = await runner
     .src([
+      "./tests/test-all.ts",
       "./tests/test-new-old-schema.ts",
       "./tests/call-by-call-test.ts",
-      "./tests/test-all.ts",
       "./tests/agent-test.ts",
     ])
     .browsers(["chrome --start-fullscreen"])

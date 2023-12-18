@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Badge, Typography } from "@tiller-ds/core";
+import { Badge, IconButton, Typography } from "@tiller-ds/core";
 import { Toggle } from "@tiller-ds/form-elements";
+import { Icon } from "@tiller-ds/icons";
 
 import useLogsStore, { LogError, LogWarning } from "../../stores/logsStore";
 import { prettifyTimestamp } from "../../util/dateUtils";
@@ -9,6 +10,11 @@ import { prettifyTimestamp } from "../../util/dateUtils";
 export default function Terminal() {
   const errors = useLogsStore((store) => store.errors);
   const warnings = useLogsStore((store) => store.warnings);
+
+  const clearWarnings = useLogsStore((store) => store.clearWarnings);
+  const clearErrors = useLogsStore((store) => store.clearErrors);
+  const clearAllLogs = useLogsStore((store) => store.clearAllLogs);
+
   const terminalRef = useRef<HTMLDivElement>(null);
   const [categorized, setCategorized] = useState<boolean>(false);
   useEffect(() => {
@@ -26,7 +32,7 @@ export default function Terminal() {
         <div className="sticky w-full h-[42px] bg-slate-800 z-40 shadow-sm shadow-slate-600">
           {categorized ? (
             <>
-              <div className="absolute left-2 top-1.5 w-full z-40 ">
+              <div className="absolute flex items-center space-x-2 left-2 top-1.5 w-full z-40 ">
                 <Badge
                   variant="outlined"
                   color="warning"
@@ -34,8 +40,14 @@ export default function Terminal() {
                 >
                   Warnings
                 </Badge>
+                <IconButton
+                  icon={<Icon type="eraser" />}
+                  onClick={clearWarnings}
+                  label="Clear Warnings"
+                  disabled={warnings.length === 0}
+                />
               </div>
-              <div className="absolute left-1/2 top-1.5 pl-2 z-40">
+              <div className="absolute flex items-center space-x-2 left-1/2 top-1.5 pl-2 z-40">
                 <Badge
                   variant="outlined"
                   color="danger"
@@ -43,10 +55,16 @@ export default function Terminal() {
                 >
                   Errors
                 </Badge>
+                <IconButton
+                  icon={<Icon type="eraser" />}
+                  onClick={clearErrors}
+                  label="Clear Errors"
+                  disabled={errors.length === 0}
+                />
               </div>
             </>
           ) : (
-            <div className="absolute left-2 top-1.5 w-full z-40 ">
+            <div className="absolute flex items-center space-x-2 left-2 top-1.5 w-full z-40 ">
               <Badge
                 variant="outlined"
                 color="info"
@@ -54,6 +72,12 @@ export default function Terminal() {
               >
                 Logs
               </Badge>
+              <IconButton
+                icon={<Icon type="eraser" />}
+                onClick={clearAllLogs}
+                label="Clear All Logs"
+                disabled={warnings.length === 0 && errors.length === 0}
+              />
             </div>
           )}
           <Toggle

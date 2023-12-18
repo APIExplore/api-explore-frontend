@@ -1,25 +1,55 @@
 [
   {
-    "path": "/products/{productName}/constraints/requires",
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+  },
+  {
+    "path": "/products/{productName}",
     "method": "post",
-    "operationId": "addRequiresConstraintToProduct",
+    "operationId": "addProduct",
     "params": [
-      { "type": "string", "name": "productName", "in": "path", "value": "" },
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+  },
+  {
+    "path": "/products/{productName}",
+    "method": "get",
+    "operationId": "getProductByName",
+    "definitionRef": "#/definitions/Product",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products/{productName}/features/{featureName}",
+    "method": "post",
+    "operationId": "addFeatureToProduct",
+    "params": [
       {
         "type": "string",
-        "name": "sourceFeature",
-        "in": "formData",
-        "value": ""
+        "name": "productName",
+        "in": "path",
+        "value": "test"
       },
+      { "type": "string", "name": "featureName", "in": "path", "value": "run" },
       {
         "type": "string",
-        "name": "requiredFeature",
+        "name": "description",
         "in": "formData",
-        "value": ""
+        "value": "run test"
       }
     ]
   },
   {
+<<<<<<< HEAD
     "path": "/products/{productName}/configurations/{configurationName}",
     "method": "get",
     "operationId": "getConfigurationWithNameForProduct",
@@ -33,5 +63,41 @@
         "value": ""
       }
     ]
+=======
+    "path": "/products/{productName}/features",
+    "method": "get",
+    "operationId": "getFeaturesForProduct",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products/{productName}/features/{featureName}",
+    "method": "delete",
+    "operationId": "deleteFeatureOfProduct",
+    "params": [
+      {
+        "type": "string",
+        "name": "productName",
+        "in": "path",
+        "value": "test"
+      },
+      { "type": "string", "name": "featureName", "in": "path", "value": "run" }
+    ]
+  },
+  {
+    "path": "/products/{productName}",
+    "method": "delete",
+    "operationId": "deleteProductByName",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+>>>>>>> e1176de2b63748aa58e305626da0c8de0b7314bd
   }
 ]

@@ -336,7 +336,7 @@ export default function RightPanel() {
               />
               <CheckboxGroup
                 label={
-                  <Typography className="my-4 font-semibold">
+                  <Typography className="mt-4 font-semibold">
                     Filter by method:
                   </Typography>
                 }
