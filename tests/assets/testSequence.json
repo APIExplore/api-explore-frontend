@@ -49,21 +49,6 @@
     ]
   },
   {
-<<<<<<< HEAD
-    "path": "/products/{productName}/configurations/{configurationName}",
-    "method": "get",
-    "operationId": "getConfigurationWithNameForProduct",
-    "definitionRef": "#/definitions/ProductConfiguration",
-    "params": [
-      { "type": "string", "name": "productName", "in": "path", "value": "" },
-      {
-        "type": "string",
-        "name": "configurationName",
-        "in": "path",
-        "value": ""
-      }
-    ]
-=======
     "path": "/products/{productName}/features",
     "method": "get",
     "operationId": "getFeaturesForProduct",
@@ -98,6 +83,5 @@
     "method": "get",
     "operationId": "getAllProducts",
     "params": []
->>>>>>> e1176de2b63748aa58e305626da0c8de0b7314bd
   }
 ]
