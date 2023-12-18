@@ -7,10 +7,10 @@ try {
 
   const failed = await runner
     .src([
-      "./tests/test-all.ts",
+      "./tests/right-panel-test.ts",
       "./tests/test-new-old-schema.ts",
-      "./tests/call-by-call-test.ts",
       "./tests/agent-test.ts",
+      "./tests/test-all.ts",
     ])
     .browsers(["chrome --start-fullscreen"])
     .useProxy("localhost:5173")
