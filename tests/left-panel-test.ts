@@ -1,6 +1,6 @@
 import { fixture, Selector } from "testcafe";
 
-fixture("Middle panel test").page("http://localhost:5173/");
+fixture("Left panel test").page("http://localhost:5173/");
 
 async function schemaUpload(t) {
   /* Test schema adress submit */
@@ -21,7 +21,7 @@ async function schemaUpload(t) {
   );
 }
 
-test("Test timeline and dependency graph visualisation", async (t) => {
+test("Test details", async (t) => {
   /* Test schema adress submit */
   await schemaUpload(t);
 
@@ -30,21 +30,20 @@ test("Test timeline and dependency graph visualisation", async (t) => {
     "../assets/testSequence.json",
   ]);
 
-  await t.click(".dependency-graph-tab");
-  await t.click("#play-button").wait(2000);
-  await t.click(".timeline-tab");
-  await t
-    .click("#endpoints")
-    .click("#option-2--menu--19")
-    .typeText("#params-input-0", `Sequence upload`)
-    .click("#submit-endpoint")
-    .click("#edit-3")
-    .typeText("#params-input-0", `Item number 2`, { replace: true })
-    .click("#submit-endpoint")
-    .click("#delete-4")
-    .click("#delete-4")
-    .click("#delete-4");
   await t.click("#play-button");
-  await t.click(".dependency-graph-tab").wait(2000);
-  await t.click(".timeline-tab");
+
+  await t
+    .click(Selector("div").withAttribute("row-index", "1"))
+    .click(Selector("div").withAttribute("row-index", "3"));
+
+  /* Show those details for both endpoints */
+  await t.click(
+    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(0)
+  );
+  await t.click(
+    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(1)
+  );
+
+  await t.click(".metrics-tab");
+  await t.click(".details-tab");
 }).skipJsErrors();

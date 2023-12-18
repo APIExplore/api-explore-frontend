@@ -7,6 +7,7 @@ try {
 
   const failed = await runner
     .src([
+      "./tests/left-panel-test.ts",
       "./tests/middle-panel-test.ts",
       "./tests/right-panel-test.ts",
       "./tests/test-new-old-schema.ts",
