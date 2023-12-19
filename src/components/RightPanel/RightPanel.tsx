@@ -4,13 +4,14 @@ import axios from "axios";
 import { ResizableBox } from "react-resizable";
 
 import { Modal, useModal } from "@tiller-ds/alert";
-import { Button, Tabs, Tooltip, Typography } from "@tiller-ds/core";
+import { Button, IconButton, Tabs, Tooltip, Typography } from "@tiller-ds/core";
 import { CheckboxGroup, Input, Toggle } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 
 import CallSequences from "./CallSequences";
 import ConfigurationDataTable from "./ConfigurationDataTable";
+import { CallSequence } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import useApiCallsStore from "../../stores/apiCallsStore";
@@ -63,6 +64,14 @@ export default function RightPanel() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
+  const [existingSequenceFlag, setExistingSequenceFlag] =
+    useState<boolean>(false);
+
+  // Function to update callSequences in the parent component
+  const updateCallSequences = (updatedCallSequences: CallSequence[]): void => {
+    setCallSequences(updatedCallSequences);
+  };
 
   /* Initial ref */
   const isMountingRef = useRef(false);
@@ -75,8 +84,6 @@ export default function RightPanel() {
   });
 
   const [fetchingTab, setFetchingTab] = useState<number>(0);
-
-  const [editingSequenceName, setEditingSequenceName] = useState<string>("");
 
   const ref = useResizeObserver("right", setDimensions);
 
@@ -185,9 +192,11 @@ export default function RightPanel() {
     if (
       (value && value?.length === 0) ||
       (!value && callSequenceName.length === 0)
-    )
+    ) {
       setInputError("You must enter a name for your sequence");
-    else setInputError("");
+    } else {
+      setInputError("");
+    }
   };
 
   const extractDataFromCallSequence = (event: any) => {
@@ -208,16 +217,33 @@ export default function RightPanel() {
     }
   };
 
+  const checkExistingSequences = (value?: string) => {
+    if (inputError === "") {
+      setExistingSequenceFlag(
+        callSequences.some((sequence) => sequence.name === value),
+      );
+    }
+  };
+
   async function editSequence(sequenceName: string) {
-    //  TODO by_Edin: Set 'Configuration' tab as active
+    // TODO by_Edin: Switch to Configuration tab
     setTabIndex(0);
     try {
-      //   TODO by_Edin: In ConfigurationTable show list of api calls tied to the sequence,
-      //                  fill sequenceName input field with sequenceName
       const response = await axios.get(
         `${backendDomain}/callsequence/fetch/${sequenceName}`,
       );
       setCallSequenceName(sequenceName);
+      console.log(selectedRequests); //this is how the selected requests currently look
+      const newRequests = response.data.map((apiCall) => ({
+        path: apiCall.endpoint,
+        method: apiCall.method,
+        parameters: apiCall.parameters,
+        operationId: apiCall.operationId,
+      }));
+      // console.log(response.data);
+      console.log(newRequests); //new requests have same structure as old ones
+      //  TODO by_Edin: Can't set new requests??
+      // setSelectedRequests(newRequests);
     } catch (error: any) {
       console.log("Problem with retrieving sequence by name.");
     }
@@ -345,19 +371,34 @@ export default function RightPanel() {
                   />
                 </div>
               </div>
-              <Input
-                name="sequenceName"
-                id="sequence-name-input"
-                label="Call Sequence Name"
-                placeholder="Call sequence to be stored in the Sequences tab"
-                value={callSequenceName}
-                onChange={(event) => {
-                  setCallSequenceName(event.target.value);
-                  validateInputLength(event.target.value);
-                }}
-                onBlur={() => validateInputLength()}
-                error={inputError}
-              />
+              <div className="flex-nowrap">
+                <Input
+                  name="sequenceName"
+                  id="sequence-name-input"
+                  label="Call Sequence Name"
+                  placeholder="Call sequence to be stored in the Sequences tab"
+                  value={callSequenceName}
+                  onChange={(event) => {
+                    setExistingSequenceFlag(false);
+                    setCallSequenceName(event.target.value);
+                    validateInputLength(event.target.value);
+                    checkExistingSequences(event.target.value);
+                  }}
+                  onBlur={() => validateInputLength()}
+                  error={inputError}
+                />
+                {/*TODO by_Edin: Place the button somewhere else (I suck at css, so I don't know how)*/}
+                <IconButton
+                  onClick={() => {
+                    //fill configurationDataTable with api calls that belong to the current sequence
+                  }}
+                  icon={<Icon type="pencil" />}
+                  label="Edit existing sequence"
+                  className={`text-blue-700 ${
+                    existingSequenceFlag ? "opacity-100" : "hidden"
+                  }`}
+                />
+              </div>
               <CheckboxGroup
                 label={
                   <Typography className="mt-4 font-semibold">
@@ -460,6 +501,7 @@ export default function RightPanel() {
             <CallSequences
               fetchingTab={fetchingTab}
               onEditSequence={editSequence}
+              updateCallSequences={updateCallSequences}
             />
           </Tabs.Tab>
         </Tabs>

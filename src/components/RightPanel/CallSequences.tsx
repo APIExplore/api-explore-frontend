@@ -19,9 +19,11 @@ import ConditionalDisplay from "../ConditionalDisplay";
 export default function CallSequences({
   fetchingTab,
   onEditSequence,
+  updateCallSequences,
 }: {
   fetchingTab: number;
   onEditSequence: (sequenceName: string) => Promise<void>;
+  updateCallSequences: (updatedCallSequences: CallSequence[]) => void;
 }) {
   const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
@@ -35,7 +37,6 @@ export default function CallSequences({
   );
 
   const handleSequenceEdit = async (sequenceName: string) => {
-    console.log("2: " + sequenceName);
     await onEditSequence(sequenceName);
   };
   const fetchCallSequences = async () => {
@@ -51,6 +52,7 @@ export default function CallSequences({
       );
 
       setCallSequences(sequencesFromApi);
+      updateCallSequences(sequencesFromApi);
       setLoading(false);
 
       if (response.data.warnings) {

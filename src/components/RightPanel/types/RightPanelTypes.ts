@@ -4,6 +4,7 @@ export type Request = {
   path: string;
   method: string;
   parameters: Parameter[];
+  operationId?: string;
 };
 
 export type Parameter = {
@@ -46,4 +47,13 @@ export type CallSequence = {
   details?: ApiCall[];
   expanded?: boolean;
   selectedApiCall?: ApiCall | null;
+};
+
+export type CallSequenceCardProps = {
+  sequence: CallSequence;
+  toggleFavorite: (sequenceName: string) => Promise<void>;
+  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
+  toggleDetails: (sequenceName: string) => Promise<void>;
+  onEdit: (sequenceName: string) => Promise<void>;
+  onRemove: () => void;
 };

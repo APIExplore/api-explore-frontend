@@ -3,24 +3,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { Card, IconButton, Typography } from "@tiller-ds/core";
-import { DescriptionList } from "@tiller-ds/data-display";
+import { Card, IconButton } from "@tiller-ds/core";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
-import { CallSequence } from "./types/RightPanelTypes";
+import { SequenceDetails } from "./SequenceDetails";
+import { CallSequenceCardProps } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { ApiCall } from "../../types/apiCallTypes";
-import ConditionalDisplay from "../ConditionalDisplay";
-
-type CallSequenceCardProps = {
-  sequence: CallSequence;
-  toggleFavorite: (sequenceName: string) => Promise<void>;
-  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
-  toggleDetails: (sequenceName: string) => Promise<void>;
-  onEdit: (sequenceName: string) => Promise<void>;
-  onRemove: () => void;
-};
 
 export default function CallSequenceCard({
   sequence,
@@ -48,9 +37,6 @@ export default function CallSequenceCard({
     setLoading(false);
   };
 
-  // TODO by_Edin: Make a similar functionality for api schema in the dropdown list of schemas on landing page.
-  //  (trash icon which, when clicked, sends a DELETE request to endpoint '${backendDomain}/apischema/delete/:schemaName'
-  //   and refreshes the list)
   const removeSequence = async () => {
     try {
       // Make an axios.delete API call
@@ -158,56 +144,5 @@ export default function CallSequenceCard({
         </Card.Body>
       )}
     </Card>
-  );
-}
-
-function SequenceDetails({
-  sequence,
-  selectApiCall,
-  toggleDetails,
-  onEdit,
-  onRemove,
-}: Omit<CallSequenceCardProps, "toggleFavorite">) {
-  useEffect(() => {
-    toggleDetails(sequence.name);
-  }, [sequence]);
-
-  return (
-    <>
-      <div className="mt-2 flex flex-col w-full">
-        <Typography className="text-md font-semibold text-center">
-          Details / Calls:
-        </Typography>
-        <ConditionalDisplay
-          componentToDisplay={
-            <DescriptionList type="default">
-              {sequence.details?.map((apiCall, apiIndex) => (
-                <DescriptionList.Item
-                  key={apiIndex}
-                  label={
-                    <span className="break-all line-clamp-1">
-                      {apiCall.operationId}
-                    </span>
-                  }
-                  type="same-column"
-                >
-                  <button
-                    id="view-details"
-                    className="text-blue-500 hover:underline mr-2"
-                    onClick={() => selectApiCall(sequence, apiCall)}
-                  >
-                    View Details
-                  </button>
-                </DescriptionList.Item>
-              ))}
-            </DescriptionList>
-          }
-          condition={
-            sequence.details !== undefined && sequence.details.length > 0
-          }
-          className="self-center p-2"
-        />
-      </div>
-    </>
   );
 }
