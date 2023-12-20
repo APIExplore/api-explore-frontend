@@ -29,27 +29,27 @@ test("Test api schema adress submit and endpoints", async (t) => {
     /* Open endpoints and select some */
     .click("#endpoints")
     /* Select endpoint under index 2 and write under its params something (DELETE) */
-    .click("#option-2--menu--16")
+    .click("#option-2--menu--19")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 1 and write under its params something (POST) */
-    .click("#option-1--menu--16")
+    .click("#option-1--menu--19")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 0 and write under its params something (GET) */
-    .click("#option-0--menu--16")
+    .click("#option-0--menu--19")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select random endpoint and show how to delete it */
-    .click("#option-3--menu--16")
+    .click("#option-3--menu--19")
     .click("#submit-endpoint")
     .click("#delete-3")
     /* Select random endpoint and show how to edit it if you forget to add params */
     .click("#endpoints")
-    .click("#option-1--menu--16")
+    .click("#option-1--menu--19")
     .click("#submit-endpoint")
     .click("#edit-3")
     .typeText("#params-input-0", `Item number 2`)
