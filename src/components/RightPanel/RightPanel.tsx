@@ -21,10 +21,10 @@ import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 export default function RightPanel() {
   const modal = useModal();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height,
+    (store) => store.panels.container.height
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height,
+    (store) => store.panels.bottom.height
   );
 
   const [clickedItem, setClickedItem]: any = useState(null);
@@ -35,30 +35,30 @@ export default function RightPanel() {
 
   const allShownItems = useRequestsStore((store: any) => store.allShownItems);
   const setAllShownItems = useRequestsStore(
-    (store: any) => store.setAllShownItems,
+    (store: any) => store.setAllShownItems
   );
 
   const callSequenceName = useRequestsStore(
-    (store: any) => store.callSequenceName,
+    (store: any) => store.callSequenceName
   );
   const setCallSequenceName = useRequestsStore(
-    (store: any) => store.setCallSequenceName,
+    (store: any) => store.setCallSequenceName
   );
   const [inputError, setInputError] = useState("");
 
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests,
+    (store: RequestsStore) => store.setSelectedRequests
   );
   /* Modal operation */
   const [modalOperation, setModalOperation] = useState("");
   /* Array of all requests */
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests,
+    (store: RequestsStore) => store.allRequests
   );
   /* Array of selected requests*/
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests,
+    (store: RequestsStore) => store.selectedRequests
   );
 
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
@@ -141,9 +141,7 @@ export default function RightPanel() {
       setAllShownItems(allRequests);
     } else {
       setAllShownItems(
-        allRequests.filter(
-          (item: any) => selectedMethods[item.method] === true,
-        ),
+        allRequests.filter((item: any) => selectedMethods[item.method] === true)
       );
     }
   };
@@ -220,7 +218,7 @@ export default function RightPanel() {
   const checkExistingSequences = (value?: string) => {
     if (inputError === "") {
       setExistingSequenceFlag(
-        callSequences.some((sequence) => sequence.name === value),
+        callSequences.some((sequence) => sequence.name === value)
       );
     }
   };
@@ -230,20 +228,20 @@ export default function RightPanel() {
     setTabIndex(0);
     try {
       const response = await axios.get(
-        `${backendDomain}/callsequence/fetch/${sequenceName}`,
+        `${backendDomain}/callsequence/fetch/${sequenceName}`
       );
       setCallSequenceName(sequenceName);
       console.log(selectedRequests); //this is how the selected requests currently look
       const newRequests = response.data.map((apiCall) => ({
         path: apiCall.endpoint,
         method: apiCall.method,
-        parameters: apiCall.parameters,
+        params: apiCall.parameters,
         operationId: apiCall.operationId,
       }));
       // console.log(response.data);
       console.log(newRequests); //new requests have same structure as old ones
       //  TODO by_Edin: Can't set new requests??
-      // setSelectedRequests(newRequests);
+      setSelectedRequests(newRequests);
     } catch (error: any) {
       console.log("Problem with retrieving sequence by name.");
     }
