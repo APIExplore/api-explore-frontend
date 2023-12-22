@@ -45,5 +45,8 @@ test("Test bottom panel", async (t) => {
     .click("#delete-4")
     .click("#delete-4");
   await t.click("#play-button");
+  await t
+    .click(Selector("div").withAttribute("row-index", "1"))
+    .click(Selector("div").withAttribute("row-index", "3"));
   await t.click(".log-tab").wait(1000);
 }).skipJsErrors();
