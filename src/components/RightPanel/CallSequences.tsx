@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
 import ReactJson from "react-json-view";
 
-import { Modal, useModal } from "@tiller-ds/alert";
+import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
 import { Button, Typography } from "@tiller-ds/core";
 import { Toggle } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
@@ -16,11 +16,18 @@ import useLogsStore from "../../stores/logsStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
 
+type CallSequencesProps = {
+  fetchingTab: number;
+  onEditSequence: (sequenceName: string) => Promise<void>;
+  updateCallSequences: (updatedCallSequences: CallSequence[]) => void;
+};
+
 export default function CallSequences({
   fetchingTab,
-}: {
-  fetchingTab: number;
-}) {
+  onEditSequence,
+  updateCallSequences,
+}: CallSequencesProps) {
+  const notification = useNotificationContext();
   const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
 
@@ -28,6 +35,13 @@ export default function CallSequences({
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "original">(
+    "original",
+  );
+
+  const handleSequenceEdit = async (sequenceName: string) => {
+    await onEditSequence(sequenceName);
+  };
 
   const fetchCallSequences = async () => {
     try {
@@ -42,6 +56,7 @@ export default function CallSequences({
       );
 
       setCallSequences(sequencesFromApi);
+      updateCallSequences(sequencesFromApi);
       setLoading(false);
 
       if (response.data.warnings) {
@@ -66,6 +81,28 @@ export default function CallSequences({
     fetchCallSequences();
   }, [apiCalls, fetchingTab]);
 
+  const handleSequenceRemove = async () => {
+    await fetchCallSequences();
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => {
+      if (prevOrder === "asc") return "desc";
+      if (prevOrder === "desc") return "original";
+      return "asc";
+    });
+  };
+
+  const sortSequences = (sequences: CallSequence[]) => {
+    if (sortOrder === "asc") {
+      return sequences.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOrder === "desc") {
+      return sequences.sort((a, b) => b.name.localeCompare(a.name));
+    } else {
+      return sequences;
+    }
+  };
+
   const toggleFavorite = async (sequenceName: string) => {
     await axios.put(
       `${backendDomain}/callsequence/toggle-favorite/${sequenceName}`,
@@ -78,6 +115,7 @@ export default function CallSequences({
   };
 
   const toggleDetails = async (sequenceName: string) => {
+    console.log("Toggling details");
     const sequence = callSequences.find((seq) => seq.name === sequenceName);
 
     if (sequence && !sequence.details?.length) {
@@ -125,50 +163,86 @@ export default function CallSequences({
     ? callSequences.filter((sequence) => sequence.favorite)
     : callSequences;
 
+  const collapseFlag = useMemo(() => showFavorites, [showFavorites]);
   return (
     <div className="p-4">
       <div className="flex justify-between">
         <Typography variant="h5">Call Sequences</Typography>
-        <div className="mb-4">
-          <Toggle
-            label={
-              <span className="text-sm leading-5 font-medium text-gray-900">
-                Only favorites
-              </span>
-            }
-            reverse={true}
-            checkedIcon={
-              <div className="flex ml-3">
+        <div className="flex flex-col items-end">
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Only favorites
+                </span>
+              }
+              reverse={true}
+              checkedIcon={
+                <div className="flex ml-3">
+                  <Icon
+                    type="star"
+                    variant="fill"
+                    className="text-yellow-500"
+                    fill="yellow"
+                    size={3}
+                    style={{ paddingLeft: "0.5px" }}
+                  />
+                </div>
+              }
+              uncheckedIcon={<Icon type="star" />}
+              checked={showFavorites}
+              onClick={() => {
+                showOnlyFavorites();
+              }}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+              }}
+            />
+          </div>
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Sort by name
+                </span>
+              }
+              reverse={true}
+              checked={sortOrder !== "original"}
+              onClick={toggleSortOrder}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-sort",
+              }}
+              checkedIcon={
                 <Icon
-                  type="star"
-                  variant="fill"
-                  className="text-yellow-500"
-                  fill="yellow"
-                  size={3}
-                  style={{ paddingLeft: "0.5px" }}
+                  className={sortOrder === "asc" ? "text-white-0" : ""}
+                  type={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
                 />
-              </div>
-            }
-            uncheckedIcon={<Icon type="star" />}
-            checked={showFavorites}
-            onClick={showOnlyFavorites}
-            tokens={{
-              toggle:
-                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
-            }}
-          />
+              }
+              uncheckedIcon={
+                <Icon
+                  className={sortOrder === "desc" ? "text-white-0" : ""}
+                  type={sortOrder === "desc" ? "arrow-down" : "x"}
+                />
+              }
+            />
+          </div>
         </div>
       </div>
       <ConditionalDisplay
         componentToDisplay={
           <div className="space-y-4">
-            {filteredSequences.map((sequence, index) => (
+            {sortSequences(filteredSequences).map((sequence, index) => (
               <CallSequenceCard
                 key={index}
                 sequence={sequence}
                 toggleFavorite={toggleFavorite}
                 selectApiCall={selectApiCall}
                 toggleDetails={toggleDetails}
+                onEdit={handleSequenceEdit}
+                onRemove={handleSequenceRemove}
+                initialExpanded={collapseFlag}
               />
             ))}
           </div>
