@@ -11,7 +11,7 @@ import { SequenceDetails } from "./SequenceDetails";
 import { CallSequenceCardProps } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { renderRemoveSequenceNotification } from "../../util/notificationUtils";
+import { renderRemoveSchemaNotification } from "../../util/notificationUtils";
 
 export default function CallSequenceCard({
   sequence,
@@ -65,7 +65,7 @@ export default function CallSequenceCard({
         // Successful deletion
         console.log("Sequence removed successfully");
         await onRemove();
-        notification.push(renderRemoveSequenceNotification(sequence.name));
+        notification.push(renderRemoveSchemaNotification(sequence.name));
       } else {
         // Handle error
         console.error(response.data.error);

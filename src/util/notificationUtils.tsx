@@ -33,3 +33,17 @@ export function renderRemoveSequenceNotification(sequenceName: string) {
     ),
   } as NotificationProps;
 }
+
+export function renderRemoveSchemaNotification(schemaName: string) {
+  return {
+    title: "Schema Removed",
+    content: (
+      <Typography className="text-body-light">
+        You have removed the schema <i>{schemaName}</i>
+      </Typography>
+    ),
+    icon: (
+      <Icon type="x-circle" className="text-danger-600 opacity-60" size={7} />
+    ),
+  } as NotificationProps;
+}

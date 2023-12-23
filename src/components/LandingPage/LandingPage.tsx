@@ -55,6 +55,23 @@ export default function LandingPage() {
     fetchData();
   }, []);
 
+  async function updateAvailableSchemas() {
+    console.log("updated schema list");
+    try {
+      const response = await axios.get(`${backendDomain}/apiSchema/fetch`); // Fetch all existing schemas
+      setExistingApiSchemasNames(response.data);
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+    } catch (error: any) {
+      console.error("Error fetching API schemas from the backend:", error);
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
+    }
+  }
+
   /* Set all requests and shown items after initial fetch */
   function convertSchemaPathsToList(schema: any) {
     const schemaPaths = schema["paths"];
@@ -141,6 +158,7 @@ export default function LandingPage() {
                     convertSchemaDefinitionsToList={
                       convertSchemaDefinitionsToList
                     }
+                    onSchemaRemoval={updateAvailableSchemas}
                   />
                 }
                 condition={existingApiSchemasNames?.length > 0}
