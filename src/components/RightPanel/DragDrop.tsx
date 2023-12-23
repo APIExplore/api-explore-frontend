@@ -4,6 +4,7 @@ import axios from "axios";
 
 import "./css/dragdrop.css";
 import { backendDomain } from "../../constants/apiConstants";
+import useLogsStore from "../../stores/logsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 
 // drag drop file component
@@ -16,6 +17,7 @@ export default function DragDropFile({
   name: string;
   setNameError: (data: any) => void;
 }) {
+  const logs = useLogsStore();
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
   // drag state
@@ -69,8 +71,16 @@ export default function DragDropFile({
       }
 
       onFileUpload(response.data);
-    } catch (e: any) {
-      setErrorMsg(e.response ? e.response.data.error : e.message);
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+    } catch (error: any) {
+      setErrorMsg(error.response ? error.response.data.error : error.message);
+
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
     }
 
     // Show confirmation message

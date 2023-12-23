@@ -10,7 +10,7 @@ export default function Details() {
 
   const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
-      (elem) => elem.date === timestamp
+      (elem) => elem.date === timestamp,
     );
 
     return (
@@ -40,11 +40,13 @@ export default function Details() {
               </DescriptionList.Item>
             )}
           <DescriptionList.Item label="Response body">
-            {(clickedApiCall?.response.data &&
-            typeof clickedApiCall.response.data === "string"
-              ? clickedApiCall?.response.data
-              : Array.isArray(clickedApiCall?.response.data) &&
-                clickedApiCall?.response.data.join(", ")) || "-"}
+            <div className="line-clamp-3">
+              {(clickedApiCall?.response.data &&
+              typeof clickedApiCall.response.data === "string"
+                ? clickedApiCall?.response.data
+                : Array.isArray(clickedApiCall?.response.data) &&
+                  clickedApiCall?.response.data.join(", ")) || "-"}
+            </div>
           </DescriptionList.Item>
         </div>
       </DescriptionList>
@@ -52,7 +54,7 @@ export default function Details() {
   };
 
   return (
-    <div className="w-full max-w-full h-full">
+    <div className="w-full max-w-full h-full px-2">
       {selectedApiCalls.length > 0 && !fetching ? (
         <DataTable
           data={selectedApiCalls}

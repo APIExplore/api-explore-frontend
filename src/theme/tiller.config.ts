@@ -5,8 +5,8 @@ export const defaultComponentConfig: ThemeConfigFactory = {
   component: {
     DataTable: {
       tableRow: {
-        odd: "bg-white",
-        even: "bg-white",
+        odd: "",
+        even: "",
       },
     },
     Modal: {
@@ -40,6 +40,12 @@ export const defaultComponentConfig: ThemeConfigFactory = {
           fontSize: "text-base",
         },
       },
+      footer: {
+        padding: "pt-4",
+      },
+    },
+    Toggle: {
+      master: "flex items-center space-x-2",
     },
   },
 };

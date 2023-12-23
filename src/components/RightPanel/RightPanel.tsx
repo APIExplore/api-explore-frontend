@@ -1,20 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import axios from "axios";
 import { ResizableBox } from "react-resizable";
 
-import { Modal, useModal } from "@tiller-ds/alert";
-import { Button, Tabs, Typography } from "@tiller-ds/core";
-import { CheckboxGroup, Input } from "@tiller-ds/form-elements";
+import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
+import { Button, Tabs, Tooltip, Typography } from "@tiller-ds/core";
+import { CheckboxGroup, Input, Toggle } from "@tiller-ds/form-elements";
 import { Icon } from "@tiller-ds/icons";
 import { DropdownMenu } from "@tiller-ds/menu";
 
 import CallSequences from "./CallSequences";
 import ConfigurationDataTable from "./ConfigurationDataTable";
+import { CallSequence } from "./types/RightPanelTypes";
+import { backendDomain } from "../../constants/apiConstants";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
+import useApiCallsStore from "../../stores/apiCallsStore";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
+import { renderEditSequenceNotification } from "../../util/notificationUtils";
 
 export default function RightPanel() {
+  const notification = useNotificationContext();
   const modal = useModal();
   const containerHeight = usePanelDimensionsStore(
     (store) => store.panels.container.height,
@@ -54,6 +60,19 @@ export default function RightPanel() {
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+
+  const callByCall = useApiCallsStore((store) => store.callByCallMode);
+  const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
+  const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
+  const [existingSequenceFlag, setExistingSequenceFlag] =
+    useState<boolean>(false);
+
+  // Function to update callSequences in the parent component
+  const updateCallSequences = (updatedCallSequences: CallSequence[]): void => {
+    setCallSequences(updatedCallSequences);
+  };
+
   /* Initial ref */
   const isMountingRef = useRef(false);
   /* Methods that can be selected */
@@ -63,6 +82,8 @@ export default function RightPanel() {
     put: false,
     delete: false,
   });
+
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   const ref = useResizeObserver("right", setDimensions);
 
@@ -171,15 +192,66 @@ export default function RightPanel() {
     if (
       (value && value?.length === 0) ||
       (!value && callSequenceName.length === 0)
-    )
+    ) {
       setInputError("You must enter a name for your sequence");
-    else setInputError("");
+    } else {
+      setInputError("");
+    }
   };
+
+  const extractDataFromCallSequence = (event: any) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const fileContent = e.target?.result ? e.target.result : {};
+          const fileContentInJsonFormat = JSON.parse(fileContent as string);
+          setSelectedRequests(fileContentInJsonFormat);
+        } catch (error) {
+          console.error("Error while parsing JSON file", error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const checkExistingSequences = (value?: string) => {
+    if (inputError === "") {
+      setExistingSequenceFlag(
+        callSequences.some((sequence) => sequence.name === value),
+      );
+    }
+  };
+
+  async function editSequence(sequenceName: string) {
+    try {
+      await axios
+        .get(`${backendDomain}/callsequence/fetch/${sequenceName}`)
+        .then((response) => {
+          setCallSequenceName(sequenceName);
+          console.log(selectedRequests); //this is how the selected requests currently look
+          const newRequests = response.data.map((apiCall) => ({
+            path: apiCall.endpoint,
+            method: apiCall.method,
+            params: apiCall.parameters,
+            operationId: apiCall.operationId,
+          }));
+          setSelectedRequests(newRequests);
+          setActiveTab(0);
+
+          notification.push(renderEditSequenceNotification(sequenceName));
+        });
+    } catch (error: any) {
+      console.log("Problem with retrieving sequence by name.");
+    }
+  }
 
   return (
     <ResizableBox
       width={400}
-      height={containerHeight - bottomPanelHeight - 12}
+      height={containerHeight - bottomPanelHeight - 8}
       resizeHandles={["w"]}
     >
       <Modal
@@ -196,89 +268,151 @@ export default function RightPanel() {
           />
         }
       >
-        {(state: any) => (
-          <>
-            <Modal.Content title={"Endpoint name: " + state.operationId}>
-              {"Edit params"}
-              {state.params?.length === 0 && <p>No params for this endpoint</p>}
-              {state.params?.map((item, index) => (
-                <Input
-                  key={index}
-                  id={"params-input-" + String(index)}
-                  label={<p className="font-semibold">{item.name}</p>}
-                  className="py-2"
-                  name="params"
-                  onChange={(e) => onParamChange(e, item.name)}
-                  value={item.value}
-                />
-              ))}
-            </Modal.Content>
+        {(state: any) => {
+          return (
+            <>
+              <Modal.Content title={"Endpoint name: " + state.operationId}>
+                {"Edit params"}
+                {state.params?.length === 0 && (
+                  <p>No params for this endpoint</p>
+                )}
+                {state.params?.map((item, index) => (
+                  <Input
+                    key={index}
+                    id={"params-input-" + String(index)}
+                    label={<p className="font-semibold">{item.name}</p>}
+                    className="py-2"
+                    name="params"
+                    onChange={(e) => onParamChange(e, item.name)}
+                    value={item.value}
+                  />
+                ))}
+              </Modal.Content>
 
-            <Modal.Footer>
-              <Button
-                id="submit-endpoint"
-                variant="filled"
-                color="success"
-                onClick={() => {
-                  selectItem();
-                }}
-              >
-                Submit Endpoint
-              </Button>
-              <Button
-                id="cancel-params"
-                variant="text"
-                color="white"
-                onClick={() => closeModal()}
-              >
-                Cancel
-              </Button>
-            </Modal.Footer>
-          </>
-        )}
+              <Modal.Footer>
+                <Button
+                  id="submit-endpoint"
+                  variant="filled"
+                  color="success"
+                  onClick={() => {
+                    selectItem();
+                  }}
+                >
+                  Submit Endpoint
+                </Button>
+                <Button
+                  id="cancel-params"
+                  variant="text"
+                  color="white"
+                  onClick={() => closeModal()}
+                >
+                  Cancel
+                </Button>
+              </Modal.Footer>
+            </>
+          );
+        }}
       </Modal>
       <div
-        className="flex h-full m-1 p-4 bg-white drop-shadow-md"
+        className="flex h-full m-1 p-2 bg-white drop-shadow-md"
         ref={ref}
         id="right-panel"
       >
-        <Tabs
-          iconPlacement="trailing"
-          fullWidth={true}
-          // index={0}
-          // onTabChange={function noRefCheck() {}}
-        >
+        <Tabs iconPlacement="trailing" fullWidth={true} index={activeTab}>
           <Tabs.Tab
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
             className="config-tab flex flex-row justify-center"
+            onClick={setActiveTab}
           >
-            <div className="py-8 text-center">
-              <Typography variant="h5">Call Sequence Configuration</Typography>
-            </div>
-            <Input
-              name="sequenceName"
-              id="sequence-name-input"
-              label="Call Sequence Name"
-              placeholder="Call sequence to be stored in the history tab"
-              value={callSequenceName}
-              onChange={(event) => {
-                setCallSequenceName(event.target.value);
-                validateInputLength(event.target.value);
-              }}
-              onBlur={() => validateInputLength()}
-              error={inputError}
-              className="px-0.5"
-            />
-            <div className="my-2 text-left">
+            <div className="p-4">
+              <div className="flex justify-between">
+                <Typography variant="h5">Sequence Config</Typography>
+                <div className="mb-4">
+                  <Toggle
+                    label={
+                      <span className="text-sm leading-5 font-medium text-gray-900">
+                        <div className="flex">
+                          <Tooltip
+                            label={
+                              <span>
+                                When starting the simulation execute only one
+                                call from the sequence <br />
+                                <div className="flex">
+                                  <div className="w-4 h-4 bg-success-light" /> -
+                                  executed call
+                                </div>
+                                <div className="flex">
+                                  <div className="w-4 h-4 bg-info-light" /> -
+                                  next call to be executed
+                                </div>
+                              </span>
+                            }
+                          >
+                            <div className="flex items-center justify-center pr-1">
+                              <Icon
+                                type="info"
+                                size={4}
+                                className="text-slate-500"
+                              />
+                            </div>
+                          </Tooltip>
+                          Call-by-call
+                        </div>
+                      </span>
+                    }
+                    reverse={true}
+                    checked={callByCall.enabled}
+                    onClick={() => {
+                      setCallByCall(!callByCall.enabled, 0);
+                      setApiCalls([]);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="">
+                <Input
+                  name="sequenceName"
+                  id="sequence-name-input"
+                  label="Call Sequence Name"
+                  placeholder="Call sequence to be stored in the Sequences tab"
+                  tooltip={
+                    existingSequenceFlag && (
+                      <Tooltip
+                        label={
+                          <span>
+                            The sequence with this name already exists in the
+                            history. <br />
+                            Running the simulation will overwrite the calls.
+                          </span>
+                        }
+                      >
+                        <span className="flex items-center bg-yellow-200 text-xs px-1.5 py-0.5 rounded-full hover:text-black">
+                          <Icon type="warning" size={1} className="mr-0.5" />
+                          Existing
+                        </span>
+                      </Tooltip>
+                    )
+                  }
+                  value={callSequenceName}
+                  onChange={(event) => {
+                    setExistingSequenceFlag(false);
+                    setCallSequenceName(event.target.value);
+                    validateInputLength(event.target.value);
+                    checkExistingSequences(event.target.value);
+                  }}
+                  onBlur={() => validateInputLength()}
+                  error={inputError}
+                />
+              </div>
               <CheckboxGroup
                 label={
-                  <Typography className="my-3 font-semibold">
+                  <Typography className="mt-4 font-semibold">
                     Filter by method:
                   </Typography>
                 }
                 name="methods"
-                className="my-2"
+                className="-mt-0.5"
                 onChange={onCheckboxChange}
                 value={selectedMethods}
                 vertical
@@ -288,7 +422,9 @@ export default function RightPanel() {
                     className="col-span-1"
                     label="GET"
                     tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
+                      GroupItem: {
+                        content: "static h-5 flex items-center",
+                      },
                     }}
                     value="get"
                   />
@@ -297,7 +433,9 @@ export default function RightPanel() {
                     label="POST"
                     value="post"
                     tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
+                      GroupItem: {
+                        content: "static h-5 flex items-center",
+                      },
                     }}
                   />
                   <CheckboxGroup.Item
@@ -305,7 +443,9 @@ export default function RightPanel() {
                     label="PUT"
                     value="put"
                     tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
+                      GroupItem: {
+                        content: "static h-5 flex items-center",
+                      },
                     }}
                   />
                   <CheckboxGroup.Item
@@ -313,12 +453,14 @@ export default function RightPanel() {
                     label="DELETE"
                     value="delete"
                     tokens={{
-                      GroupItem: { content: "static h-5 flex items-center" },
+                      GroupItem: {
+                        content: "static h-5 flex items-center",
+                      },
                     }}
                   />
                 </div>
               </CheckboxGroup>
-              <div className="my-5">
+              <div className="my-5 flex items-center">
                 <DropdownMenu
                   title="Endpoints"
                   id="endpoints"
@@ -338,6 +480,14 @@ export default function RightPanel() {
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu>
+                <Input
+                  type="file"
+                  accept=".json"
+                  onChange={extractDataFromCallSequence}
+                  placeholder="Test placeholder"
+                  name={"choose-seq"}
+                  className="ml-2"
+                />
               </div>
               <ConfigurationDataTable
                 selectedRequests={selectedRequests}
@@ -352,8 +502,13 @@ export default function RightPanel() {
             label="Sequences"
             className="sequences-tab"
             icon={<Icon type="clock-counter-clockwise" variant="fill" />}
+            onClick={setActiveTab}
           >
-            <CallSequences />
+            <CallSequences
+              fetchingTab={activeTab}
+              onEditSequence={editSequence}
+              updateCallSequences={updateCallSequences}
+            />
           </Tabs.Tab>
         </Tabs>
       </div>

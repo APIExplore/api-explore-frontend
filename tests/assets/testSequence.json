@@ -1,0 +1,87 @@
+[
+  {
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+  },
+  {
+    "path": "/products/{productName}",
+    "method": "post",
+    "operationId": "addProduct",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+  },
+  {
+    "path": "/products/{productName}",
+    "method": "get",
+    "operationId": "getProductByName",
+    "definitionRef": "#/definitions/Product",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products/{productName}/features/{featureName}",
+    "method": "post",
+    "operationId": "addFeatureToProduct",
+    "params": [
+      {
+        "type": "string",
+        "name": "productName",
+        "in": "path",
+        "value": "test"
+      },
+      { "type": "string", "name": "featureName", "in": "path", "value": "run" },
+      {
+        "type": "string",
+        "name": "description",
+        "in": "formData",
+        "value": "run test"
+      }
+    ]
+  },
+  {
+    "path": "/products/{productName}/features",
+    "method": "get",
+    "operationId": "getFeaturesForProduct",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products/{productName}/features/{featureName}",
+    "method": "delete",
+    "operationId": "deleteFeatureOfProduct",
+    "params": [
+      {
+        "type": "string",
+        "name": "productName",
+        "in": "path",
+        "value": "test"
+      },
+      { "type": "string", "name": "featureName", "in": "path", "value": "run" }
+    ]
+  },
+  {
+    "path": "/products/{productName}",
+    "method": "delete",
+    "operationId": "deleteProductByName",
+    "params": [
+      { "type": "string", "name": "productName", "in": "path", "value": "test" }
+    ]
+  },
+  {
+    "path": "/products",
+    "method": "get",
+    "operationId": "getAllProducts",
+    "params": []
+  }
+]

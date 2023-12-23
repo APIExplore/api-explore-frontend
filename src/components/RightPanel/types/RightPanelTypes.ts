@@ -11,10 +11,12 @@ export type Parameter = {
   in: string;
   required: boolean;
   type: string;
+  value: any;
 };
 
 export type Item = {
   path: string;
+  params: Parameter[];
   method: string;
   operationId: string;
 };
@@ -45,4 +47,14 @@ export type CallSequence = {
   expanded?: boolean;
   selectedApiCall?: ApiCall | null;
   index: number;
+};
+
+export type CallSequenceCardProps = {
+  sequence: CallSequence;
+  toggleFavorite: (sequenceName: string) => Promise<void>;
+  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
+  toggleDetails: (sequenceName: string) => Promise<void>;
+  onEdit: (sequenceName: string) => Promise<void>;
+  onRemove: () => Promise<void>;
+  initialExpanded?: boolean;
 };

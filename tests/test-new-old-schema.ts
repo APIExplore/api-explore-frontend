@@ -23,7 +23,7 @@ test("Test sequence upload", async (t) => {
     /* See if endpoints exist */
     await t
       .click("#endpoints")
-      .click("#option-0--menu--9")
+      .click("#option-0--menu--19")
       .click("#cancel-params");
   }
 
@@ -44,6 +44,6 @@ test("Test sequence upload", async (t) => {
   /* Check if schema endpoints are fetched */
   await t
     .click("#endpoints")
-    .click("#option-0--menu--9")
+    .click("#option-0--menu--19")
     .click("#cancel-params");
 }).skipJsErrors();

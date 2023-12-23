@@ -9,26 +9,28 @@ import { Icon } from "@tiller-ds/icons";
 import ExistingSchema from "./existingSchema";
 import NewSchema from "./newSchema";
 import { backendDomain } from "../../constants/apiConstants";
+import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
-import { CallSequence, Definition } from "../RightPanel/types/RightPanelTypes";
+import ConditionalDisplay from "../ConditionalDisplay";
+import { Definition } from "../RightPanel/types/RightPanelTypes";
 
 export default function LandingPage() {
   const modalOpened = useSchemaModalStore((store) => store.opened);
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
+    (store: RequestsStore) => store.setAllRequests,
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
+    (store: RequestsStore) => store.setDefinitions,
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
+    (store: RequestsStore) => store.setAllShownItems,
   );
+  const logs = useLogsStore();
 
   const modal = useModal();
-
   const close = () => {
     setModalOpened(false);
   };
@@ -38,8 +40,15 @@ export default function LandingPage() {
       try {
         const response = await axios.get(`${backendDomain}/apiSchema/fetch`); // Fetch all existing schemas
         setExistingApiSchemasNames(response.data);
-      } catch (error) {
+
+        if (response.data.warnings) {
+          logs.addWarnings(response.data.warnings);
+        }
+      } catch (error: any) {
         console.error("Error fetching API schemas from the backend:", error);
+        if (error.response.data) {
+          logs.addError(error.response.data);
+        }
       }
     };
 
@@ -67,7 +76,7 @@ export default function LandingPage() {
                   in: param.in,
                   value: "",
                 };
-              }
+              },
             );
           }
 
@@ -76,7 +85,6 @@ export default function LandingPage() {
       }
     }
 
-    console.log("hereeee");
     setAllRequests(items);
     setAllShownItems(items);
   }
@@ -125,15 +133,25 @@ export default function LandingPage() {
               label="Existing schema"
               icon={<Icon type="list" variant="fill" />}
             >
-              {existingApiSchemasNames?.length && (
-                <ExistingSchema
-                  existingApiSchemasNames={existingApiSchemasNames}
-                  convertSchemaPathsToList={convertSchemaPathsToList}
-                  convertSchemaDefinitionsToList={
-                    convertSchemaDefinitionsToList
-                  }
-                />
-              )}
+              <ConditionalDisplay
+                componentToDisplay={
+                  <ExistingSchema
+                    existingApiSchemasNames={existingApiSchemasNames}
+                    convertSchemaPathsToList={convertSchemaPathsToList}
+                    convertSchemaDefinitionsToList={
+                      convertSchemaDefinitionsToList
+                    }
+                  />
+                }
+                condition={existingApiSchemasNames?.length > 0}
+                spinnerSize={10}
+                spinnerCaption={
+                  <span className="animate-pulse text-body">
+                    Loading schemas
+                  </span>
+                }
+                className="flex flex-col space-y-4 w-full justify-center items-center h-full p-4"
+              />
             </Tabs.Tab>
           </Tabs>
         </Modal.Content>

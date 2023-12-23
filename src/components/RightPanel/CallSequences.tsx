@@ -1,95 +1,112 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import ReactJson from "react-json-view";
 
-import { Modal, useModal } from "@tiller-ds/alert";
-import { Button, IconButton, Typography } from "@tiller-ds/core";
+import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
+import { Button, Typography } from "@tiller-ds/core";
 import { Toggle } from "@tiller-ds/form-elements";
-import { Icon, LoadingIcon } from "@tiller-ds/icons";
+import { Icon } from "@tiller-ds/icons";
 
 import CallSequenceCard from "./CallSequenceCard";
 import { CallSequence } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import useApiCallsStore from "../../stores/apiCallsStore";
+import useLogsStore from "../../stores/logsStore";
 import { ApiCall } from "../../types/apiCallTypes";
+import ConditionalDisplay from "../ConditionalDisplay";
 
-export default function CallSequences() {
+type CallSequencesProps = {
+  fetchingTab: number;
+  onEditSequence: (sequenceName: string) => Promise<void>;
+  updateCallSequences: (updatedCallSequences: CallSequence[]) => void;
+};
+
+export default function CallSequences({
+  fetchingTab,
+  onEditSequence,
+  updateCallSequences,
+}: CallSequencesProps) {
+  const notification = useNotificationContext();
+  const logs = useLogsStore();
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
+
   const modal = useModal<{ apiCall: ApiCall | null; sequenceName: string }>();
   const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sortAscending, setSortAscending] = useState(true);
-  const [originalSort, setOriginalSort] = useState(true);
-  const [sequencesFromApi, setSequencesFromApi] = useState<CallSequence[]>([]);
-  const [sortNameToggleIndex, setSortNameToggleIndex] = useState(0);
-  const [sortTimeToggleIndex, setSortTimeToggleIndex] = useState(0);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "original">(
+    "original",
+  );
 
-  useEffect(() => {
-    async function fetchCallSequences() {
-      try {
-        const response = await axios.get(`${backendDomain}/callsequence/fetch`);
-        const sequencesFromApi: CallSequence[] = response.data.map(
-          (seq: any) => ({
-            ...seq,
-            favorite: false,
-            details: [],
-            expanded: false,
-            selectedApiCall: null,
-          }),
-        );
+  const handleSequenceEdit = async (sequenceName: string) => {
+    await onEditSequence(sequenceName);
+  };
 
-        setSequencesFromApi(sequencesFromApi);
-        setCallSequences(sequencesFromApi);
-        setLoading(false);
-      } catch (error: any) {
-        console.error(
-          "Error fetching call sequences:",
-          error.response?.data?.error || "Unknown error",
-        );
-        setLoading(false);
-      }
-    }
-
-    fetchCallSequences();
-  }, [apiCalls]);
-
-  const handleSortByName = () => {
-    setSortNameToggleIndex(sortNameToggleIndex + 1);
-    if (sortNameToggleIndex % 3 !== 0) {
-      setCallSequences((prevSequences) =>
-        prevSequences
-          .slice()
-          .sort((a, b) =>
-            sortAscending
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name),
-          ),
+  const fetchCallSequences = async () => {
+    try {
+      const response = await axios.get(`${backendDomain}/callsequence/fetch`);
+      const sequencesFromApi: CallSequence[] = response.data.map(
+        (seq: any) => ({
+          ...seq,
+          details: [],
+          expanded: false,
+          selectedApiCall: null,
+        }),
       );
-      setSortAscending((prevSort) => !prevSort);
-    } else {
+
       setCallSequences(sequencesFromApi);
+      updateCallSequences(sequencesFromApi);
+      setLoading(false);
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+
+      return sequencesFromApi;
+    } catch (error: any) {
+      console.error(
+        "Error fetching call sequences:",
+        error.response?.data?.error || "Unknown error",
+      );
+      setLoading(false);
+
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
     }
   };
 
-  const handleSortByTime = () => {
-    // setSortTimeToggleIndex(sortTimeToggleIndex + 1);
-    // if (sortTimeToggleIndex % 3 !== 0) {
-    //   if (originalSort) {
-    //     setCallSequences(sequencesFromApi);
-    //   } else {
-    //     setCallSequences(sequencesFromApi.reverse);
-    //   }
-    //   setOriginalSort((prevOriginalSort) => !prevOriginalSort);
-    // } else {
-    //   setCallSequences(sequencesFromApi);
-    // }
+  useEffect(() => {
+    fetchCallSequences();
+  }, [apiCalls, fetchingTab]);
+
+  const handleSequenceRemove = async () => {
+    await fetchCallSequences();
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => {
+      if (prevOrder === "asc") return "desc";
+      if (prevOrder === "desc") return "original";
+      return "asc";
+    });
+  };
+
+  const sortSequences = (sequences: CallSequence[]) => {
+    if (sortOrder === "asc") {
+      return sequences.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOrder === "desc") {
+      return sequences.sort((a, b) => b.name.localeCompare(a.name));
+    } else {
+      return sequences;
+    }
   };
 
   const toggleFavorite = async (sequenceName: string) => {
+    await axios.put(
+      `${backendDomain}/callsequence/toggle-favorite/${sequenceName}`,
+    );
     setCallSequences((prevSequences) =>
       prevSequences.map((seq) =>
         seq.name === sequenceName ? { ...seq, favorite: !seq.favorite } : seq,
@@ -98,6 +115,7 @@ export default function CallSequences() {
   };
 
   const toggleDetails = async (sequenceName: string) => {
+    console.log("Toggling details");
     const sequence = callSequences.find((seq) => seq.name === sequenceName);
 
     if (sequence && !sequence.details?.length) {
@@ -145,11 +163,12 @@ export default function CallSequences() {
     ? callSequences.filter((sequence) => sequence.favorite)
     : callSequences;
 
+  const collapseFlag = useMemo(() => showFavorites, [showFavorites]);
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="p-4">
-        <div className="flex justify-between">
-          <Typography variant="h5">Call Sequences</Typography>
+    <div className="p-4">
+      <div className="flex justify-between">
+        <Typography variant="h5">Call Sequences</Typography>
+        <div className="flex flex-col items-end">
           <div className="mb-4">
             <Toggle
               label={
@@ -172,121 +191,106 @@ export default function CallSequences() {
               }
               uncheckedIcon={<Icon type="star" />}
               checked={showFavorites}
-              onClick={showOnlyFavorites}
+              onClick={() => {
+                showOnlyFavorites();
+              }}
               tokens={{
                 toggle:
                   "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
               }}
             />
           </div>
-          <IconButton
-            onClick={() => handleSortByName()}
-            icon={
-              <>
+          <div className="mb-4">
+            <Toggle
+              label={
+                <span className="text-sm leading-5 font-medium text-gray-900">
+                  Sort by name
+                </span>
+              }
+              reverse={true}
+              checked={sortOrder !== "original"}
+              onClick={toggleSortOrder}
+              tokens={{
+                toggle:
+                  "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-sort",
+              }}
+              checkedIcon={
                 <Icon
-                  type="arrow-up"
-                  className={`${
-                    sortAscending && sortNameToggleIndex % 3 !== 0
-                      ? "text-black"
-                      : "text-gray-400"
-                  }`}
+                  className={sortOrder === "asc" ? "text-white-0" : ""}
+                  type={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
                 />
+              }
+              uncheckedIcon={
                 <Icon
-                  type="arrow-down"
-                  className={`${
-                    sortAscending && sortNameToggleIndex % 3 !== 0
-                      ? "text-gray-400"
-                      : "text-black"
-                  }`}
+                  className={sortOrder === "desc" ? "text-white-0" : ""}
+                  type={sortOrder === "desc" ? "arrow-down" : "x"}
                 />
-              </>
-            }
-            label={sortAscending ? "Sort by name (A-Z)" : "Sort by name (Z-A)"}
-          />
-          <IconButton
-            onClick={() => handleSortByTime()}
-            icon={
-              <>
-                <Icon
-                  type="arrow-arc-left"
-                  className={`${
-                    originalSort && sortTimeToggleIndex % 3 !== 0
-                      ? "text-black"
-                      : "text-gray-400"
-                  }`}
-                />
-                <Icon
-                  type="arrow-bend-double-up-left"
-                  className={`${
-                    originalSort && sortTimeToggleIndex % 3 !== 0
-                      ? "text-gray-400"
-                      : "text-black"
-                  }`}
-                />
-              </>
-            }
-            label={
-              originalSort ? "Sort by most recent" : "Sort by least recent"
-            }
-          />
+              }
+            />
+          </div>
         </div>
-        {loading ? (
-          <LoadingIcon size={6} />
-        ) : (
+      </div>
+      <ConditionalDisplay
+        componentToDisplay={
           <div className="space-y-4">
-            {filteredSequences.map((sequence, index) => (
+            {sortSequences(filteredSequences).map((sequence, index) => (
               <CallSequenceCard
                 key={index}
                 sequence={sequence}
                 toggleFavorite={toggleFavorite}
                 selectApiCall={selectApiCall}
                 toggleDetails={toggleDetails}
+                onEdit={handleSequenceEdit}
+                onRemove={handleSequenceRemove}
+                initialExpanded={collapseFlag}
               />
             ))}
           </div>
-        )}
-        <Modal
-          {...modal}
-          icon={
-            <Modal.Icon
-              icon={<Icon type="info" variant="bold" />}
-              className="text-white bg-info"
-            />
-          }
-        >
-          <Modal.Content title={`Details - ${modal.state?.sequenceName}`}>
-            <Typography variant="subtitle">
-              {modal.state?.apiCall?.operationId}
-            </Typography>
-            <div
-              style={{ height: "700px", overflowY: "auto" }}
-              className="scrollbar pt-4"
-            >
-              {modal.state ? (
+        }
+        condition={!loading || filteredSequences.length > 0}
+      />
+      <Modal
+        {...modal}
+        icon={
+          <Modal.Icon
+            icon={<Icon type="info" variant="bold" />}
+            className="text-white bg-info"
+          />
+        }
+      >
+        <Modal.Content title={`Details - ${modal.state?.sequenceName}`}>
+          <Typography variant="subtitle">
+            {modal.state?.apiCall?.operationId}
+          </Typography>
+          <div
+            style={{ height: "700px", overflowY: "auto" }}
+            className="scrollbar pt-4"
+          >
+            <ConditionalDisplay
+              componentToDisplay={
                 <ReactJson
-                  src={modal.state.apiCall as ApiCall}
+                  src={modal.state?.apiCall as ApiCall}
                   name={false}
                   collapsed={1}
                   style={{ backgroundColor: "#FFFF" }}
                 />
-              ) : (
-                <LoadingIcon size={6} />
-              )}
-            </div>
-          </Modal.Content>
+              }
+              condition={modal.state !== null}
+            />
+          </div>
+        </Modal.Content>
 
-          <Modal.Footer>
-            <Button
-              id="close-details-modal"
-              variant="text"
-              color="white"
-              onClick={modal.onClose}
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    </DndProvider>
+        <Modal.Footer>
+          <Button
+            id="close-details-modal"
+            variant="text"
+            color="white"
+            onClick={modal.onClose}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 }
