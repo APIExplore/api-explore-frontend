@@ -56,7 +56,6 @@ export default function LandingPage() {
   }, []);
 
   async function updateAvailableSchemas() {
-    console.log("updated schema list");
     try {
       const response = await axios.get(`${backendDomain}/apiSchema/fetch`); // Fetch all existing schemas
       setExistingApiSchemasNames(response.data);

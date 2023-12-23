@@ -12,7 +12,8 @@ import { backendDomain } from "../../constants/apiConstants";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { renderRemoveSequenceNotification } from "../../util/notificationUtils";
+import { renderRemoveSchemaNotification } from "../../util/notificationUtils";
+import ConditionalDisplay from "../ConditionalDisplay";
 
 export default function ExistingSchema({
   existingApiSchemasNames,
@@ -36,7 +37,10 @@ export default function ExistingSchema({
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
   const [removedApiSchema, setRemovedApiSchema] = useState("");
   const [title, setTitle] = useState("Choose a schema");
+
   const [isFetching, setIsFetching] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+
   const [isFetched, setIsFetched] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false);
   const [error, setError] = useState("");
@@ -92,27 +96,23 @@ export default function ExistingSchema({
   const removeSchema = async (item: any) => {
     try {
       setRemovedApiSchema(item.name);
-      setIsFetching(true);
-      setIsFetched(false);
+      setIsRemoving(true);
+      setIsRemoved(false);
       const response = await axios.delete(
         `${backendDomain}/apischema/delete/${item.name}`,
       );
       if (response.data.success) {
-        console.log("Schema removed successfully");
-        // existingApiSchemasNames = existingApiSchemasNames.filter(
-        //   (item) => item.name !== item.name,
-        // );
-        notification.push(renderRemoveSequenceNotification(item.name));
         setIsRemoved(true);
         await updateAvailableSchemas();
+        notification.push(renderRemoveSchemaNotification(item.name));
       } else {
         console.error(response.data.error);
       }
     } catch (error: any) {
       console.error("Network error:", error.message);
     } finally {
-      setIsFetching(false);
-      setIsFetched(false);
+      setIsRemoving(false);
+      setIsRemoved(false);
     }
   };
 
@@ -128,31 +128,55 @@ export default function ExistingSchema({
               title={title}
               id="dropdown-existing-schemas"
               onClick={() => setIsRemoved(false)}
+              visibleItemCount={13}
             >
               {existingApiSchemasNames.map((item, index) => (
-                <div className="flex flex-row items-center justify-between">
+                <div className="flex w-full justify-between" key="index">
                   <DropdownMenu.Item
                     key={index}
                     onSelect={() => {
                       selectApiSchema(item);
                     }}
-                    className="w-full"
                   >
-                    <div id={"schema-" + index} className="text-body w-full">
+                    <div
+                      id={"schema-" + index}
+                      className="text-left text-body w-full"
+                    >
                       {item.name}
                     </div>
                   </DropdownMenu.Item>
-                  <div className="pt-[7px]">
-                    <IconButton
-                      onClick={async () => {
-                        setIsFetched(false);
-                        await removeSchema(item);
-                      }}
-                      icon={<Icon type="trash" />}
-                      label="Delete"
-                      className={"text-red-600 hover:opacity-100 opacity-60"}
-                    />
-                  </div>
+                  <ConditionalDisplay
+                    componentToDisplay={
+                      <IconButton
+                        onClick={async () => {
+                          if (item.name !== selectedApiSchema) {
+                            setIsRemoved(false);
+                            await removeSchema(item);
+                          }
+                        }}
+                        icon={
+                          item.name === selectedApiSchema ? (
+                            <Icon
+                              type="trash"
+                              className="text-body-light pt-1"
+                            />
+                          ) : (
+                            <Icon type="trash" />
+                          )
+                        }
+                        className={`text-red-600 ${
+                          item.name !== selectedApiSchema
+                            ? "hover:opacity-100"
+                            : "cursor-not-allowed"
+                        } opacity-60`}
+                        showTooltip={item.name === selectedApiSchema}
+                        label="You cannot delete the currently active schema"
+                      />
+                    }
+                    condition={!(isRemoving && removedApiSchema === item.name)}
+                    spinnerSize={4}
+                    className="py-2 pr-0.5"
+                  />
                 </div>
               ))}
             </DropdownMenu>
@@ -167,7 +191,6 @@ export default function ExistingSchema({
               }-600 mt-2 text-base text-center h-2`}
             >
               {isFetched && "Schema " + selectedApiSchema + " fetched"}
-              {isRemoved && "Schema " + removedApiSchema + " removed"}
               {error?.length > 0 && error}
             </p>
           </div>
