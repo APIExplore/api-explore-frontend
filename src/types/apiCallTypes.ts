@@ -21,3 +21,13 @@ export type ParameterType = {
   name: string;
   value: string;
 };
+
+export type Metrics = {
+  numCalls: number;
+  successfulCalls: number;
+  unsuccessfulCalls: number;
+  totDuration: number;
+  avgDuration: number;
+  totSize: number;
+  avgSize: number;
+};

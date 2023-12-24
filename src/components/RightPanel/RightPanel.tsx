@@ -15,6 +15,7 @@ import { CallSequence } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import useApiCallsStore from "../../stores/apiCallsStore";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import { renderEditSequenceNotification } from "../../util/notificationUtils";
@@ -64,13 +65,14 @@ export default function RightPanel() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
-  const [callSequences, setCallSequences] = useState<CallSequence[]>([]);
+  const { fetchedCallSequences, setFetchedCallSequences } =
+    useCallSequenceCacheStore();
   const [existingSequenceFlag, setExistingSequenceFlag] =
     useState<boolean>(false);
 
   // Function to update callSequences in the parent component
   const updateCallSequences = (updatedCallSequences: CallSequence[]): void => {
-    setCallSequences(updatedCallSequences);
+    setFetchedCallSequences(updatedCallSequences);
   };
 
   /* Initial ref */
@@ -215,23 +217,25 @@ export default function RightPanel() {
       };
       reader.readAsText(file);
     }
+    setCallByCall(callByCall.enabled, 0);
   };
 
   const checkExistingSequences = (value?: string) => {
     if (inputError === "") {
       setExistingSequenceFlag(
-        callSequences.some((sequence) => sequence.name === value),
+        fetchedCallSequences.some((sequence) => sequence.name === value),
       );
     }
   };
 
   async function editSequence(sequenceName: string) {
+    setExistingSequenceFlag(true);
+
     try {
       await axios
         .get(`${backendDomain}/callsequence/fetch/${sequenceName}`)
         .then((response) => {
           setCallSequenceName(sequenceName);
-          console.log(selectedRequests); //this is how the selected requests currently look
           const newRequests = response.data.map((apiCall) => ({
             path: apiCall.endpoint,
             method: apiCall.method,
@@ -285,6 +289,7 @@ export default function RightPanel() {
                     name="params"
                     onChange={(e) => onParamChange(e, item.name)}
                     value={item.value}
+                    crossOrigin={undefined}
                   />
                 ))}
               </Modal.Content>
@@ -326,7 +331,7 @@ export default function RightPanel() {
             onClick={setActiveTab}
           >
             <div className="p-4">
-              <div className="flex justify-between">
+              <div className="flex justify-between mb-4">
                 <Typography variant="h5">Sequence Config</Typography>
                 <div className="mb-4">
                   <Toggle
@@ -403,6 +408,7 @@ export default function RightPanel() {
                   }}
                   onBlur={() => validateInputLength()}
                   error={inputError}
+                  crossOrigin={undefined}
                 />
               </div>
               <CheckboxGroup
@@ -487,6 +493,7 @@ export default function RightPanel() {
                   placeholder="Test placeholder"
                   name={"choose-seq"}
                   className="ml-2"
+                  crossOrigin={undefined}
                 />
               </div>
               <ConfigurationDataTable

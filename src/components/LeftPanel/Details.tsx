@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Tooltip, Typography } from "@tiller-ds/core";
 import { DataTable, DescriptionList } from "@tiller-ds/data-display";
 import { Icon } from "@tiller-ds/icons";
@@ -55,6 +57,9 @@ export default function Details() {
 
   return (
     <div className="w-full max-w-full h-full px-2">
+      <div className="py-4 pl-2">
+        <Typography variant="h5">Details</Typography>
+      </div>
       {selectedApiCalls.length > 0 && !fetching ? (
         <DataTable
           data={selectedApiCalls}
@@ -74,15 +79,14 @@ export default function Details() {
           </DataTable.Expander>
         </DataTable>
       ) : (
-        <span className="flex w-full justify-center p-4 group">
-          <Typography
-            variant="subtext"
-            icon={
-              <Tooltip label="Click on the API call(s) from the timeline to see their details here">
-                <Icon type="info" className="group-hover:text-slate-500" />
-              </Tooltip>
-            }
-          >
+        <span className="flex flex-col space-y-1 w-full justify-center items-center p-4 group">
+          <Tooltip label="Click on the API call(s) from the timeline to see their details here">
+            <Icon
+              type="info"
+              className="text-slate-400 group-hover:text-slate-500"
+            />
+          </Tooltip>
+          <Typography variant="subtext" className="cursor-default">
             <span className="group-hover:text-slate-800">
               Select an API call to see its details
             </span>

@@ -1,5 +1,6 @@
 import React from "react";
 
+import { useNotificationContext } from "@tiller-ds/alert";
 import { ButtonGroups, Tooltip } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
@@ -8,9 +9,13 @@ import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
+import { renderSimulationStartedNotification } from "../../util/notificationUtils";
 import { Request } from "../RightPanel/types/RightPanelTypes";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function SimulationControls() {
+  const notification = useNotificationContext();
+
   /* Get agent id and pid*/
   const agentPid = useAgentStore((store: any) => store.agentPid);
   const agentId = useAgentStore((store: any) => store.agentId);
@@ -20,7 +25,7 @@ export default function SimulationControls() {
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests
+    (store) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
   const logsStore = useLogsStore();
@@ -28,28 +33,33 @@ export default function SimulationControls() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const refreshSequenceDetailsCache = useCallSequenceCacheStore(
+    (store) => store.refreshSequenceDetailsCache,
+  );
 
   const simulateCallSequence = async () => {
+    notification.push(renderSimulationStartedNotification());
     if (callByCall.enabled) {
       if (callByCall.nextCallIndex === selectedRequests.length) {
         setCallByCall(callByCall.enabled, 0);
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore
+          logsStore,
         );
         setCallByCall(callByCall.enabled, 1);
       } else {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore
+          logsStore,
         );
         setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
       }
     } else {
       await fetchData(callSequenceName, selectedRequests, logsStore);
     }
+    refreshSequenceDetailsCache(callSequenceName);
   };
   const resetCallByCall = () => {
     setCallByCall(callByCall.enabled, 0);
@@ -57,19 +67,19 @@ export default function SimulationControls() {
   };
 
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
+    (store: RequestsStore) => store.setAllRequests,
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
+    (store: RequestsStore) => store.setDefinitions,
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
+    (store: RequestsStore) => store.setAllShownItems,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName
+    (store: RequestsStore) => store.setCallSequenceName,
   );
 
   const openLandingPage = () => {
@@ -83,7 +93,7 @@ export default function SimulationControls() {
 
   return (
     <div className="w-fit h-20 absolute right-0 top-0 mr-4 mt-4 z-40">
-      <ButtonGroups tokens={{ base: "" }}>
+      <ButtonGroups>
         <ButtonGroups.Button
           id="choose-schema"
           variant="text"
