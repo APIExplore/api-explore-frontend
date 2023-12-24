@@ -40,6 +40,9 @@ export const defaultComponentConfig: ThemeConfigFactory = {
           fontSize: "text-base",
         },
       },
+      footer: {
+        padding: "pt-4",
+      },
     },
     Toggle: {
       master: "flex items-center space-x-2",

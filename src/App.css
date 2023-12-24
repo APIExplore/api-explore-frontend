@@ -116,3 +116,11 @@ body {
 [id^="move-down-"] {
   padding: 0;
 }
+
+[data-reach-menu-item] {
+  width: 100%;
+}
+
+[data-reach-popover] {
+  z-index: 50 !important;
+}
