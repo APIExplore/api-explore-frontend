@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { Typography } from "@tiller-ds/core";
 import { DescriptionList } from "@tiller-ds/data-display";
 
 import { CallSequence } from "./types/RightPanelTypes";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
 
@@ -14,6 +15,16 @@ export function SequenceDetails({
   sequence: CallSequence;
   selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
 }) {
+  const cachedSequenceDetails = useCallSequenceCacheStore(
+    (state) => state.cachedSequenceDetails,
+  );
+  const apiSequence = useMemo(
+    () =>
+      Array.from(cachedSequenceDetails).find(
+        (entry) => entry.sequenceName === sequence.name,
+      ),
+    [cachedSequenceDetails, sequence.name],
+  );
   return (
     <>
       <div className="mt-2 flex flex-col w-full">
@@ -23,7 +34,7 @@ export function SequenceDetails({
         <ConditionalDisplay
           componentToDisplay={
             <DescriptionList type="default">
-              {sequence.details?.map((apiCall, apiIndex) => (
+              {apiSequence?.details?.map((apiCall, apiIndex) => (
                 <DescriptionList.Item
                   key={apiIndex}
                   label={
@@ -45,7 +56,7 @@ export function SequenceDetails({
             </DescriptionList>
           }
           condition={
-            sequence.details !== undefined && sequence.details.length > 0
+            apiSequence !== undefined && apiSequence.details.length > 0
           }
           className="self-center p-2"
         />

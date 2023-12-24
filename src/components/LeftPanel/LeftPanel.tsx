@@ -4,16 +4,17 @@ import { Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import Details from "./Details";
+import Metrics from "./Metrics";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function LeftPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height
+    (store) => store.panels.container.height,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
+    (store) => store.panels.bottom.height,
   );
   const ref = useResizeObserver("left", setDimensions);
   return (
@@ -38,9 +39,9 @@ export default function LeftPanel() {
           <Tabs.Tab
             className="metrics-tab"
             label="Metrics"
-            icon={<Icon type="list" variant="fill" />}
+            icon={<Icon type="gauge" variant="fill" />}
           >
-            Metrics
+            <Metrics />
           </Tabs.Tab>
         </Tabs>
       </div>

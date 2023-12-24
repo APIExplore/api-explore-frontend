@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { LogsStore } from "./logsStore";
 import { Request } from "../components/RightPanel/types/RightPanelTypes";
 import { backendDomain } from "../constants/apiConstants";
-import { ApiCall } from "../types/apiCallTypes";
+import { ApiCall, Metrics } from "../types/apiCallTypes";
 
 type ApiStore = {
   schemaName: string;
@@ -24,14 +24,17 @@ type ApiStore = {
     nextCallIndex: number;
   };
   setCallByCallMode: (enabled?: boolean, nextCallIndex?: number) => void;
+  metrics: Metrics | null;
 };
 
 const useApiCallsStore = create<ApiStore>((set, get) => ({
   apiCalls: [],
+  selectedApiCalls: [],
   schemaName: "",
+  callByCallMode: { enabled: false, nextCallIndex: 0 },
+  metrics: null,
   setSchemaName: (name: string) => set({ schemaName: name }),
   setApiCalls: (callSequence) => set({ apiCalls: callSequence }),
-  selectedApiCalls: [],
   setSelectedApiCalls: (apiCalls) => set({ selectedApiCalls: apiCalls }),
   fetching: false,
   fetchData: async (callSequenceName, selectedRequests, logs) => {
@@ -49,6 +52,7 @@ const useApiCallsStore = create<ApiStore>((set, get) => ({
       set({ apiCalls: response.data.callSequence });
       set({ selectedApiCalls: [] });
       set({ fetching: false });
+      set({ metrics: response.data.metrics });
 
       if (response.data.warnings) {
         logs.addWarnings(response.data.warnings);
@@ -60,7 +64,6 @@ const useApiCallsStore = create<ApiStore>((set, get) => ({
       }
     }
   },
-  callByCallMode: { enabled: false, nextCallIndex: 0 },
   setCallByCallMode: (mode, nextCallIndex) =>
     set((state) => ({
       callByCallMode: {

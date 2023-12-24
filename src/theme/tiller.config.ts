@@ -47,6 +47,9 @@ export const defaultComponentConfig: ThemeConfigFactory = {
     Toggle: {
       master: "flex items-center space-x-2",
     },
+    ButtonGroups: {
+      base: "",
+    },
   },
 };
 

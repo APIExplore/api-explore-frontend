@@ -10,49 +10,48 @@ import { Icon, LoadingIcon } from "@tiller-ds/icons";
 import { SequenceDetails } from "./SequenceDetails";
 import { CallSequenceCardProps } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
+import useApiCallsStore from "../../stores/apiCallsStore";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { renderRemoveSchemaNotification } from "../../util/notificationUtils";
+import { renderRemoveSequenceNotification } from "../../util/notificationUtils";
 
 export default function CallSequenceCard({
   sequence,
   toggleFavorite,
   selectApiCall,
-  toggleDetails,
   onEdit,
   onRemove,
-  initialExpanded,
 }: CallSequenceCardProps) {
   const notification = useNotificationContext();
   const [loading, setLoading] = useState(false);
-  const [isExpanded, setIsExpanded] = useState<boolean>(
-    initialExpanded as boolean,
-  );
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+  const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
-  console.log("FINAL", initialExpanded);
+  const retrieveSequenceDetails = useCallSequenceCacheStore(
+    (store) => store.retrieveSequenceDetails,
+  );
+  const collapseFlag = useCallSequenceCacheStore(
+    (state: { collapseFlag: any }) => state.collapseFlag,
+  );
 
-  useEffect(() => {
-    console.log("SETTING UP", sequence.name);
-    setIsExpanded(false);
-  }, [initialExpanded]);
-
-  const exportSequenceToJsonFile = (name) => {
+  const exportSequenceToJsonFile = (name: string) => {
     const jsonDataForExport = JSON.stringify(selectedRequests);
     const blob = new Blob([jsonDataForExport], { type: "application/json" });
     saveAs(blob, `${name}.json`);
   };
 
-  useEffect(() => {
-    setLoading(false);
-  }, [sequence]);
-
   const handleEditClick = async () => {
     await onEdit(sequence.name);
-    setIsExpanded(false);
     setLoading(false);
   };
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [collapseFlag]);
 
   const removeSequence = async () => {
     try {
@@ -63,9 +62,8 @@ export default function CallSequenceCard({
       );
       if (response.data.success) {
         // Successful deletion
-        console.log("Sequence removed successfully");
         await onRemove();
-        notification.push(renderRemoveSchemaNotification(sequence.name));
+        notification.push(renderRemoveSequenceNotification(sequence.name));
       } else {
         // Handle error
         console.error(response.data.error);
@@ -77,8 +75,6 @@ export default function CallSequenceCard({
       setLoading(false);
     }
   };
-
-  console.log(isExpanded);
 
   return (
     <Card className="p-4">
@@ -95,6 +91,7 @@ export default function CallSequenceCard({
               onClick={async () => {
                 setLoading(true);
                 await handleEditClick();
+                setApiCalls([]);
               }}
               icon={<Icon type="pencil-simple" />}
               label="Edit"
@@ -103,7 +100,8 @@ export default function CallSequenceCard({
             <IconButton
               onClick={async () => {
                 setLoading(true);
-                toggleFavorite(sequence.name);
+                await toggleFavorite(sequence.name);
+                setLoading(false);
               }}
               className={`text-yellow-500 ${
                 sequence.favorite
@@ -124,7 +122,7 @@ export default function CallSequenceCard({
               onClick={() => {
                 setIsExpanded(!isExpanded);
                 if (!isExpanded) {
-                  toggleDetails(sequence.name);
+                  retrieveSequenceDetails(sequence.name);
                 }
               }}
               icon={
@@ -151,7 +149,6 @@ export default function CallSequenceCard({
                 onClick={async () => {
                   setIsExpanded(false);
                   await removeSequence();
-                  setLoading(true);
                 }}
                 icon={<Icon type="trash" />}
                 label="Delete"
