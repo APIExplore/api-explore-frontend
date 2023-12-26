@@ -5,11 +5,6 @@ import { CallSequence } from "../components/RightPanel/types/RightPanelTypes";
 import { backendDomain } from "../constants/apiConstants";
 import { ApiCall } from "../types/apiCallTypes";
 
-type SequenceDetailsCache = {
-  sequenceName: string;
-  details: ApiCall[];
-};
-
 type CallSequenceCacheStore = {
   fetchedCallSequences: CallSequence[];
   refreshSequenceDetailsCache: (
@@ -20,15 +15,18 @@ type CallSequenceCacheStore = {
   toggleSequenceFavorite: (sequenceName: string) => void;
   setFetchedCallSequences: (sequences: CallSequence[]) => void;
   retrieveSequenceDetails: (sequenceName: string) => Promise<ApiCall[]>;
-  cachedSequenceDetails: Set<SequenceDetailsCache>;
+  cachedSequenceDetails: Map<string, ApiCall[]>;
   collapseFlag: boolean;
   setCollapseFlag: (flag: boolean) => void;
+  refreshStatus: { isRefreshing: boolean; refreshSequenceName: string | null };
+  setRefreshStatus: (flag: boolean, sequenceName: string | null) => void;
 };
 
 const useCallSequenceCacheStore = create<CallSequenceCacheStore>(
   (set, get) => ({
     fetchedCallSequences: [],
-    cachedSequenceDetails: new Set(),
+    refreshStatus: { isRefreshing: false, refreshSequenceName: null },
+    cachedSequenceDetails: new Map<string, ApiCall[]>(),
     toggleSequenceFavorite: (sequenceName) =>
       set((state) => ({
         fetchedCallSequences: state.fetchedCallSequences.map((sequence) =>
@@ -41,6 +39,12 @@ const useCallSequenceCacheStore = create<CallSequenceCacheStore>(
         ),
       })),
     refreshSequenceDetailsCache: (sequenceName, callSequences) => {
+      set({
+        refreshStatus: {
+          isRefreshing: true,
+          refreshSequenceName: sequenceName,
+        },
+      });
       const finalCallSequences = callSequences
         ? callSequences
         : get().fetchedCallSequences;
@@ -68,20 +72,16 @@ const useCallSequenceCacheStore = create<CallSequenceCacheStore>(
           );
           const details = response.data;
           set((state) => {
-            const newDetails = { sequenceName, details };
-            const updatedCache = new Set(state.cachedSequenceDetails);
-
-            const existingDetail = Array.from(updatedCache).find(
-              (entry) => entry.sequenceName === sequenceName,
+            const updatedCache = new Map<string, ApiCall[]>(
+              state.cachedSequenceDetails,
             );
 
-            if (existingDetail) {
-              updatedCache.delete(existingDetail);
-            }
-
-            updatedCache.add(newDetails);
+            updatedCache.set(sequenceName, details);
 
             return { cachedSequenceDetails: updatedCache };
+          });
+          set({
+            refreshStatus: { isRefreshing: false, refreshSequenceName: null },
           });
           return details;
         } catch (error: any) {
@@ -109,16 +109,18 @@ const useCallSequenceCacheStore = create<CallSequenceCacheStore>(
         }),
       })),
     retrieveSequenceDetails: async (sequenceName) => {
-      const cachedSequence = get().cachedSequenceDetails[sequenceName];
+      const cachedSequence = get().cachedSequenceDetails.get(sequenceName);
 
       if (cachedSequence) {
-        return cachedSequence.details;
+        return cachedSequence;
       } else {
         return await get().fetchSequenceDetails(sequenceName);
       }
     },
     collapseFlag: false,
     setCollapseFlag: (flag) => set({ collapseFlag: flag }),
+    setRefreshStatus: (isRefreshing, refreshSequenceName) =>
+      set({ refreshStatus: { isRefreshing, refreshSequenceName } }),
   }),
 );
 

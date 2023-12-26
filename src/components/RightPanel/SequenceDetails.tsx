@@ -8,23 +8,27 @@ import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
 
+type SequenceDetailsProps = {
+  sequence: CallSequence;
+  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
+};
+
 export function SequenceDetails({
   sequence,
   selectApiCall,
-}: {
-  sequence: CallSequence;
-  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
-}) {
+}: SequenceDetailsProps) {
   const cachedSequenceDetails = useCallSequenceCacheStore(
     (state) => state.cachedSequenceDetails,
   );
-  const apiSequence = useMemo(
-    () =>
-      Array.from(cachedSequenceDetails).find(
-        (entry) => entry.sequenceName === sequence.name,
-      ),
+  const { isRefreshing, refreshSequenceName } = useCallSequenceCacheStore(
+    (store) => store.refreshStatus,
+  );
+
+  const sequenceDetails = useMemo(
+    () => cachedSequenceDetails.get(sequence.name),
     [cachedSequenceDetails, sequence.name],
   );
+
   return (
     <>
       <div className="mt-2 flex flex-col w-full">
@@ -34,7 +38,7 @@ export function SequenceDetails({
         <ConditionalDisplay
           componentToDisplay={
             <DescriptionList type="default">
-              {apiSequence?.details?.map((apiCall, apiIndex) => (
+              {sequenceDetails?.map((apiCall, apiIndex) => (
                 <DescriptionList.Item
                   key={apiIndex}
                   label={
@@ -56,7 +60,9 @@ export function SequenceDetails({
             </DescriptionList>
           }
           condition={
-            apiSequence !== undefined && apiSequence.details.length > 0
+            sequenceDetails !== undefined &&
+            sequenceDetails.length > 0 &&
+            !(refreshSequenceName === sequence.name && isRefreshing)
           }
           className="self-center p-2"
         />

@@ -61,6 +61,9 @@ export default function RightPanel() {
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+  const refreshSequenceDetailsCache = useCallSequenceCacheStore(
+    (store) => store.refreshSequenceDetailsCache,
+  );
 
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
@@ -156,39 +159,18 @@ export default function RightPanel() {
     modal.onClose();
   };
 
-  /* Simulate initial load */
   useEffect(() => {
-    isMountingRef.current = true;
-  }, []);
-
-  /* Watch when item is selected */
-  useEffect(() => {
-    if (!isMountingRef.current) {
-      if (clickedItem != null) {
-        modal.onOpen(clickedItem);
-      }
-    } else {
+    if (isMountingRef.current) {
       isMountingRef.current = false;
+      return;
     }
-  }, [clickedItem]);
 
-  /* On change for methods checkboxes change filter items */
-  useEffect(() => {
-    if (!isMountingRef.current) {
-      filterRequests();
-    } else {
-      isMountingRef.current = false;
+    if (clickedItem != null) {
+      modal.onOpen(clickedItem);
     }
-  }, [selectedMethods]);
 
-  /* Filter requests on each selection so it filters out unwanted methods */
-  useEffect(() => {
-    if (!isMountingRef.current) {
-      filterRequests();
-    } else {
-      isMountingRef.current = false;
-    }
-  }, [selectedRequests]);
+    filterRequests();
+  }, [clickedItem, selectedMethods, selectedRequests]);
 
   const validateInputLength = (value?: string) => {
     if (
@@ -251,6 +233,18 @@ export default function RightPanel() {
       console.log("Problem with retrieving sequence by name.");
     }
   }
+
+  const shouldDisableInput =
+    callByCall.enabled &&
+    callByCall.nextCallIndex !== 0 &&
+    selectedRequests.length !== callByCall.nextCallIndex;
+
+  const shouldShowExistingTooltip =
+    existingSequenceFlag &&
+    (callByCall.enabled
+      ? callByCall.nextCallIndex === 0 ||
+        selectedRequests.length === callByCall.nextCallIndex
+      : true);
 
   return (
     <ResizableBox
@@ -328,7 +322,14 @@ export default function RightPanel() {
             icon={<Icon type="faders" variant="fill" />}
             label="Configuration"
             className="config-tab flex flex-row justify-center"
-            onClick={setActiveTab}
+            onClick={(index) => {
+              setActiveTab(index);
+              setExistingSequenceFlag(
+                fetchedCallSequences.some(
+                  (sequence) => sequence.name === callSequenceName,
+                ),
+              );
+            }}
           >
             <div className="p-4">
               <div className="flex justify-between mb-4">
@@ -375,42 +376,57 @@ export default function RightPanel() {
                   />
                 </div>
               </div>
-              <div className="">
-                <Input
-                  name="sequenceName"
-                  id="sequence-name-input"
-                  label="Call Sequence Name"
-                  placeholder="Call sequence to be stored in the Sequences tab"
-                  tooltip={
-                    existingSequenceFlag && (
-                      <Tooltip
-                        label={
-                          <span>
-                            The sequence with this name already exists in the
-                            history. <br />
-                            Running the simulation will overwrite the calls.
-                          </span>
-                        }
-                      >
-                        <span className="flex items-center bg-yellow-200 text-xs px-1.5 py-0.5 rounded-full hover:text-black">
-                          <Icon type="warning" size={1} className="mr-0.5" />
-                          Existing
+              <Input
+                name="sequenceName"
+                id="sequence-name-input"
+                label="Call Sequence Name"
+                placeholder="Call sequence to be stored in the Sequences tab"
+                tooltip={
+                  shouldShowExistingTooltip ? (
+                    <Tooltip
+                      label={
+                        <span>
+                          The sequence with this name already exists in the
+                          history. <br />
+                          Running the simulation will overwrite the calls.
                         </span>
-                      </Tooltip>
-                    )
-                  }
-                  value={callSequenceName}
-                  onChange={(event) => {
-                    setExistingSequenceFlag(false);
-                    setCallSequenceName(event.target.value);
-                    validateInputLength(event.target.value);
-                    checkExistingSequences(event.target.value);
-                  }}
-                  onBlur={() => validateInputLength()}
-                  error={inputError}
-                  crossOrigin={undefined}
-                />
-              </div>
+                      }
+                    >
+                      <span className="flex items-center bg-yellow-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
+                        <Icon type="warning" size={2} className="mr-0.5" />
+                        Existing
+                      </span>
+                    </Tooltip>
+                  ) : shouldDisableInput ? (
+                    <Tooltip
+                      label={
+                        <span>
+                          You cannot change the sequence name when at least one
+                          call in the call-by-call mode has been executed.{" "}
+                          <br />
+                          Stop the simulation to change the call sequence name.
+                        </span>
+                      }
+                    >
+                      <span className="flex items-center bg-primary-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
+                        <Icon type="info" size={2} className="mr-0.5" />
+                        Running
+                      </span>
+                    </Tooltip>
+                  ) : undefined
+                }
+                value={callSequenceName}
+                onChange={(event) => {
+                  setExistingSequenceFlag(false);
+                  setCallSequenceName(event.target.value);
+                  validateInputLength(event.target.value);
+                  checkExistingSequences(event.target.value);
+                }}
+                onBlur={() => validateInputLength()}
+                error={inputError}
+                disabled={shouldDisableInput}
+                crossOrigin={undefined}
+              />
               <CheckboxGroup
                 label={
                   <Typography className="mt-4 font-semibold">
@@ -509,7 +525,10 @@ export default function RightPanel() {
             label="Sequences"
             className="sequences-tab"
             icon={<Icon type="clock-counter-clockwise" variant="fill" />}
-            onClick={setActiveTab}
+            onClick={(index) => {
+              setActiveTab(index);
+              refreshSequenceDetailsCache(callSequenceName);
+            }}
           >
             <CallSequences
               fetchingTab={activeTab}

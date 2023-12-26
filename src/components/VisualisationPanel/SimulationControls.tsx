@@ -11,7 +11,6 @@ import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { renderSimulationStartedNotification } from "../../util/notificationUtils";
 import { Request } from "../RightPanel/types/RightPanelTypes";
-import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function SimulationControls() {
   const notification = useNotificationContext();
@@ -33,9 +32,6 @@ export default function SimulationControls() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
-  const refreshSequenceDetailsCache = useCallSequenceCacheStore(
-    (store) => store.refreshSequenceDetailsCache,
-  );
 
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
@@ -59,7 +55,6 @@ export default function SimulationControls() {
     } else {
       await fetchData(callSequenceName, selectedRequests, logsStore);
     }
-    refreshSequenceDetailsCache(callSequenceName);
   };
   const resetCallByCall = () => {
     setCallByCall(callByCall.enabled, 0);
@@ -128,7 +123,14 @@ export default function SimulationControls() {
               </div>
             </Tooltip>
           ) : (
-            <Icon type="play" />
+            <div className="flex flex-col relative">
+              <Icon type="play" />
+              {callByCall.enabled && (
+                <div className="absolute top-0 left-0 px-4 pt-3 rounded-lg text-xs">
+                  {callByCall.nextCallIndex}/{selectedRequests.length}
+                </div>
+              )}
+            </div>
           )}
         </ButtonGroups.Button>
         <ButtonGroups.Button

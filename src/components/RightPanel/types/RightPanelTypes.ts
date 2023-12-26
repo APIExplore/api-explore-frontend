@@ -56,4 +56,5 @@ export type CallSequenceCardProps = {
   onEdit: (sequenceName: string) => Promise<void>;
   onRemove: () => Promise<void>;
   collapseFlag?: boolean;
+  active?: boolean;
 };

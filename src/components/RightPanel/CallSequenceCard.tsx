@@ -4,7 +4,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { useNotificationContext } from "@tiller-ds/alert";
-import { Card, IconButton } from "@tiller-ds/core";
+import { Badge, Card, IconButton } from "@tiller-ds/core";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
 import { SequenceDetails } from "./SequenceDetails";
@@ -21,6 +21,7 @@ export default function CallSequenceCard({
   selectApiCall,
   onEdit,
   onRemove,
+  active,
 }: CallSequenceCardProps) {
   const notification = useNotificationContext();
   const [loading, setLoading] = useState(false);
@@ -29,8 +30,13 @@ export default function CallSequenceCard({
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+  const callSequenceName = useRequestsStore((store) => store.callSequenceName);
+
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
+  const refreshSequenceDetailsCache = useCallSequenceCacheStore(
+    (store) => store.refreshSequenceDetailsCache,
+  );
   const retrieveSequenceDetails = useCallSequenceCacheStore(
     (store) => store.retrieveSequenceDetails,
   );
@@ -76,10 +82,29 @@ export default function CallSequenceCard({
     }
   };
 
+  const reFetchDetails = () => {
+    refreshSequenceDetailsCache(callSequenceName);
+    setIsExpanded(true);
+  };
+
   return (
-    <Card className="p-4">
-      <Card.Header removeSpacing>
-        <Card.Header.Title>{sequence.name}</Card.Header.Title>
+    <Card>
+      <Card.Header>
+        <Card.Header.Title>
+          {sequence.name}
+          {active && (
+            <Badge small={true} className="ml-1">
+              Active
+              <IconButton
+                icon={
+                  <Icon type="arrows-clockwise" size={3} className="pl-1" />
+                }
+                label="Refresh details"
+                onClick={reFetchDetails}
+              />
+            </Badge>
+          )}
+        </Card.Header.Title>
         <Card.Header.Actions>
           <div className="flex space-x-2 ">
             {loading && (
@@ -126,24 +151,28 @@ export default function CallSequenceCard({
                 }
               }}
               icon={
-                <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
+                <Icon
+                  type={isExpanded ? "caret-up" : "caret-down"}
+                  size={2}
+                  className="pt-0.5"
+                />
               }
               // className={"text-black hover:opacity-100 opacity-60"}
               id="expand-sequence"
-              label="Expand details"
+              label={isExpanded ? "Collapse details" : "Expand details"}
             />
           </div>
         </Card.Header.Actions>
       </Card.Header>
       {isExpanded && (
         <>
-          <Card.Body removeSpacing>
+          <Card.Body>
             <SequenceDetails
               sequence={sequence}
               selectApiCall={selectApiCall}
             />
           </Card.Body>
-          <Card.Footer>
+          <Card.Footer className="p-3">
             <div className="flex justify-between items-center">
               <IconButton
                 onClick={async () => {

@@ -11,9 +11,9 @@ import { Icon } from "@tiller-ds/icons";
 import CallSequenceCard from "./CallSequenceCard";
 import { CallSequence } from "./types/RightPanelTypes";
 import { backendDomain } from "../../constants/apiConstants";
-import useApiCallsStore from "../../stores/apiCallsStore";
 import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import useLogsStore from "../../stores/logsStore";
+import useRequestsStore from "../../stores/requestsStore";
 import { ApiCall } from "../../types/apiCallTypes";
 import ConditionalDisplay from "../ConditionalDisplay";
 
@@ -29,13 +29,13 @@ export default function CallSequences({
   updateCallSequences,
 }: CallSequencesProps) {
   const logs = useLogsStore();
-  const apiCalls = useApiCallsStore((state) => state.apiCalls);
   const {
     fetchedCallSequences,
     setFetchedCallSequences,
     toggleSequenceFavorite,
   } = useCallSequenceCacheStore();
   const { collapseFlag, setCollapseFlag } = useCallSequenceCacheStore();
+  const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
   const modal = useModal<{ apiCall: ApiCall | null; sequenceName: string }>();
 
@@ -82,8 +82,10 @@ export default function CallSequences({
   };
 
   useEffect(() => {
-    fetchCallSequences();
-  }, [apiCalls, fetchingTab]);
+    if (fetchingTab === 1) {
+      fetchCallSequences();
+    }
+  }, [fetchingTab]);
 
   const handleSequenceRemove = async () => {
     await fetchCallSequences();
@@ -174,7 +176,7 @@ export default function CallSequences({
                 variant="text"
                 size="xs"
               >
-                <Tooltip label="Sort by Name Ascending">
+                <Tooltip label="Sort by name ascending">
                   <Icon type="sort-ascending" />
                 </Tooltip>
               </ButtonGroups.Button>
@@ -185,7 +187,7 @@ export default function CallSequences({
                 variant="text"
                 size="xs"
               >
-                <Tooltip label="Sort by Name Descending">
+                <Tooltip label="Sort by name descending">
                   <Icon type="sort-descending" />
                 </Tooltip>
               </ButtonGroups.Button>
@@ -195,7 +197,7 @@ export default function CallSequences({
       </div>
       <ConditionalDisplay
         componentToDisplay={
-          <div className="space-y-4 mt-4">
+          <div className="flex flex-col space-y-3 mt-4">
             {sortSequences(filteredSequences).map((sequence, index) => (
               <CallSequenceCard
                 key={index}
@@ -204,11 +206,13 @@ export default function CallSequences({
                 selectApiCall={selectApiCall}
                 onEdit={handleSequenceEdit}
                 onRemove={handleSequenceRemove}
+                active={sequence.name === callSequenceName}
               />
             ))}
           </div>
         }
         condition={!loading || filteredSequences.length > 0}
+        className="flex w-full justify-center"
       />
       <Modal
         {...modal}
