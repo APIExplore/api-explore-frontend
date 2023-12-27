@@ -35,14 +35,22 @@ export const defaultComponentConfig: ThemeConfigFactory = {
       },
     },
     Card: {
+      container: { borderRadius: "rounded-md" },
       header: {
+        padding: "p-3",
         title: {
           fontSize: "text-base",
         },
       },
+      footer: {
+        padding: "p-3",
+      },
     },
     Toggle: {
       master: "flex items-center space-x-2",
+    },
+    ButtonGroups: {
+      base: "",
     },
   },
 };

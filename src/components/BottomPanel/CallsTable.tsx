@@ -77,12 +77,15 @@ export default function CallsTable() {
           unselectRef.current &&
           unselectRef.current.some((c) => c.date === timestamp);
 
-        if (chart && isSelected && !isUnselected) {
-          chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
-        }
+        if (chart) {
+          if (isSelected && !isUnselected) {
+            chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
+          }
 
-        if (chart && !isSelected && isUnselected) {
-          chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
+          if (!isSelected && isUnselected) {
+            chart.toggleDataPointSelection(seriesIndex, dataPointIndex);
+            chart.resetSeries();
+          }
         }
       });
     });

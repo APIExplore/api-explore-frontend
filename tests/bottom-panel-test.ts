@@ -35,7 +35,7 @@ test("Test bottom panel", async (t) => {
   await t.click(".event-tab");
   await t
     .click("#endpoints")
-    .click("#option-2--menu--19")
+    .click("#option-2--menu--23")
     .typeText("#params-input-0", `Sequence upload`)
     .click("#submit-endpoint")
     .click("#edit-3")

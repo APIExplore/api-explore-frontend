@@ -2,6 +2,7 @@ import React from "react";
 
 import ReactDOM from "react-dom/client";
 
+import { NotificationProvider } from "@tiller-ds/alert";
 import { ThemeProvider } from "@tiller-ds/theme";
 
 import App from "./App";
@@ -14,11 +15,13 @@ import {
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider
-      themeConfig={defaultComponentConfig}
-      iconConfig={defaultIconConfig}
-    >
-      <App />
-    </ThemeProvider>
+    <NotificationProvider position="topCenter">
+      <ThemeProvider
+        themeConfig={defaultComponentConfig}
+        iconConfig={defaultIconConfig}
+      >
+        <App />
+      </ThemeProvider>
+    </NotificationProvider>
   </React.StrictMode>,
 );

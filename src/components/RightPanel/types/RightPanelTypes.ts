@@ -46,4 +46,15 @@ export type CallSequence = {
   details?: ApiCall[];
   expanded?: boolean;
   selectedApiCall?: ApiCall | null;
+  index: number;
+};
+
+export type CallSequenceCardProps = {
+  sequence: CallSequence;
+  toggleFavorite: (sequenceName: string) => Promise<void>;
+  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
+  onEdit: (sequenceName: string) => Promise<void>;
+  onRemove: () => Promise<void>;
+  collapseFlag?: boolean;
+  active?: boolean;
 };

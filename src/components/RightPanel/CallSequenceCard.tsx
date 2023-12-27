@@ -1,49 +1,110 @@
 import React, { useEffect, useState } from "react";
 
+import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { Card, IconButton, Typography } from "@tiller-ds/core";
-import { DescriptionList } from "@tiller-ds/data-display";
+import { useNotificationContext } from "@tiller-ds/alert";
+import { Badge, Card, IconButton } from "@tiller-ds/core";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
-import { CallSequence } from "./types/RightPanelTypes";
+import { SequenceDetails } from "./SequenceDetails";
+import { CallSequenceCardProps } from "./types/RightPanelTypes";
+import { backendDomain } from "../../constants/apiConstants";
+import useApiCallsStore from "../../stores/apiCallsStore";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { ApiCall } from "../../types/apiCallTypes";
-import ConditionalDisplay from "../ConditionalDisplay";
-
-type CallSequenceCardProps = {
-  sequence: CallSequence;
-  toggleFavorite: (sequenceName: string) => Promise<void>;
-  selectApiCall: (sequence: CallSequence, apiCall: ApiCall | null) => void;
-  toggleDetails: (sequenceName: string) => Promise<void>;
-};
+import { renderRemoveSequenceNotification } from "../../util/notificationUtils";
 
 export default function CallSequenceCard({
   sequence,
   toggleFavorite,
   selectApiCall,
-  toggleDetails,
+  onEdit,
+  onRemove,
+  active,
 }: CallSequenceCardProps) {
+  const notification = useNotificationContext();
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+  const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
-  const exportSequenceToJsonFile = (name) => {
+  const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+
+  const refreshSequenceDetailsCache = useCallSequenceCacheStore(
+    (store) => store.refreshSequenceDetailsCache,
+  );
+  const retrieveSequenceDetails = useCallSequenceCacheStore(
+    (store) => store.retrieveSequenceDetails,
+  );
+  const collapseFlag = useCallSequenceCacheStore(
+    (state: { collapseFlag: any }) => state.collapseFlag,
+  );
+
+  const exportSequenceToJsonFile = (name: string) => {
     const jsonDataForExport = JSON.stringify(selectedRequests);
     const blob = new Blob([jsonDataForExport], { type: "application/json" });
     saveAs(blob, `${name}.json`);
   };
 
-  useEffect(() => {
+  const handleEditClick = async () => {
+    await onEdit(sequence.name);
     setLoading(false);
-  }, [sequence]);
+  };
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [collapseFlag]);
+
+  const removeSequence = async () => {
+    try {
+      // Make an axios.delete API call
+      setLoading(true);
+      const response = await axios.delete(
+        `${backendDomain}/callsequence/delete/${sequence.name}`,
+      );
+      if (response.data.success) {
+        // Successful deletion
+        await onRemove();
+        notification.push(renderRemoveSequenceNotification(sequence.name));
+      } else {
+        // Handle error
+        console.error(response.data.error);
+      }
+    } catch (error: any) {
+      // Handle network error
+      console.error("Network error:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reFetchDetails = () => {
+    refreshSequenceDetailsCache(callSequenceName);
+    setIsExpanded(true);
+  };
 
   return (
-    <Card className="p-4">
-      <Card.Header removeSpacing>
-        <Card.Header.Title>{sequence.name}</Card.Header.Title>
+    <Card>
+      <Card.Header>
+        <Card.Header.Title>
+          {sequence.name}
+          {active && (
+            <Badge small={true} className="ml-1">
+              Active
+              <IconButton
+                icon={
+                  <Icon type="arrows-clockwise" size={3} className="pl-1" />
+                }
+                label="Refresh details"
+                onClick={reFetchDetails}
+              />
+            </Badge>
+          )}
+        </Card.Header.Title>
         <Card.Header.Actions>
           <div className="flex space-x-2 ">
             {loading && (
@@ -52,12 +113,25 @@ export default function CallSequenceCard({
               </span>
             )}
             <IconButton
-              onClick={() => {
+              onClick={async () => {
                 setLoading(true);
-                toggleFavorite(sequence.name);
+                await handleEditClick();
+                setApiCalls([]);
+              }}
+              icon={<Icon type="pencil-simple" />}
+              label="Edit"
+              className={"text-green-600 hover:opacity-100 opacity-60"}
+            />
+            <IconButton
+              onClick={async () => {
+                setLoading(true);
+                await toggleFavorite(sequence.name);
+                setLoading(false);
               }}
               className={`text-yellow-500 ${
-                sequence.favorite ? "opacity-100" : "opacity-50"
+                sequence.favorite
+                  ? "opacity-100"
+                  : "opacity-50 hover:opacity-100"
               } favourite-button`}
               icon={
                 <Icon
@@ -70,81 +144,60 @@ export default function CallSequenceCard({
               }
             />
             <IconButton
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={() => {
+                setIsExpanded(!isExpanded);
+                if (!isExpanded) {
+                  retrieveSequenceDetails(sequence.name);
+                }
+              }}
               icon={
-                <Icon type={isExpanded ? "caret-up" : "caret-down"} size={2} />
+                <Icon
+                  type={isExpanded ? "caret-up" : "caret-down"}
+                  size={2}
+                  className="pt-0.5"
+                />
               }
+              // className={"text-black hover:opacity-100 opacity-60"}
               id="expand-sequence"
-              label="Toggle Favorite"
+              label={isExpanded ? "Collapse details" : "Expand details"}
             />
           </div>
         </Card.Header.Actions>
       </Card.Header>
       {isExpanded && (
-        <Card.Body removeSpacing>
-          <SequenceDetails
-            sequence={sequence}
-            selectApiCall={selectApiCall}
-            toggleDetails={toggleDetails}
-          />
-          <IconButton
-            onClick={() => exportSequenceToJsonFile(sequence.name)}
-            icon={<Icon type={"export"} />}
-            id="export-to-json"
-            label="Export to JSON file"
-            className="float-right"
-          />
-        </Card.Body>
+        <>
+          <Card.Body>
+            <SequenceDetails
+              sequence={sequence}
+              selectApiCall={selectApiCall}
+            />
+          </Card.Body>
+          <Card.Footer className="p-3">
+            <div className="flex justify-between items-center">
+              <IconButton
+                onClick={async () => {
+                  setIsExpanded(false);
+                  await removeSequence();
+                }}
+                icon={<Icon type="trash" />}
+                label="Delete"
+                className={"text-red-600 hover:opacity-100 opacity-60"}
+              />
+              <IconButton
+                onClick={() => exportSequenceToJsonFile(sequence.name)}
+                icon={
+                  <Icon
+                    type={"export"}
+                    className="text-slate-500 hover:text-slate-700"
+                  />
+                }
+                id="export-to-json"
+                label="Export to JSON file"
+              />
+            </div>
+          </Card.Footer>
+        </>
       )}
     </Card>
-  );
-}
-
-function SequenceDetails({
-  sequence,
-  selectApiCall,
-  toggleDetails,
-}: Omit<CallSequenceCardProps, "toggleFavorite">) {
-  useEffect(() => {
-    toggleDetails(sequence.name);
-  }, [sequence]);
-
-  return (
-    <>
-      <div className="mt-2 flex flex-col w-full">
-        <Typography className="text-md font-semibold text-center">
-          Details / Calls:
-        </Typography>
-        <ConditionalDisplay
-          componentToDisplay={
-            <DescriptionList type="default">
-              {sequence.details?.map((apiCall, apiIndex) => (
-                <DescriptionList.Item
-                  key={apiIndex}
-                  label={
-                    <span className="break-all line-clamp-1">
-                      {apiCall.operationId}
-                    </span>
-                  }
-                  type="same-column"
-                >
-                  <button
-                    id="view-details"
-                    className="text-blue-500 hover:underline mr-2"
-                    onClick={() => selectApiCall(sequence, apiCall)}
-                  >
-                    View Details
-                  </button>
-                </DescriptionList.Item>
-              ))}
-            </DescriptionList>
-          }
-          condition={
-            sequence.details !== undefined && sequence.details.length > 0
-          }
-          className="self-center p-2"
-        />
-      </div>
-    </>
   );
 }

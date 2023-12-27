@@ -20,7 +20,7 @@ export default function NewSchema({
 
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json"
+    "http://localhost:8080/swagger.json",
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -101,6 +101,7 @@ export default function NewSchema({
           onChange={onApiSchemaNameChange}
           placeholder="API schema name"
           value={name}
+          crossOrigin={undefined}
         />
       </div>
       <hr />
@@ -116,6 +117,7 @@ export default function NewSchema({
           onChange={onApiSchemaInputChange}
           placeholder="API schema adress"
           value={apiSchema}
+          crossOrigin={undefined}
         />
         <StatusButton
           status={isFetched ? "success" : inputError ? "error" : "idle"}

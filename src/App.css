@@ -116,3 +116,15 @@ body {
 [id^="move-down-"] {
   padding: 0;
 }
+
+[data-reach-menu-item] {
+  width: 100%;
+}
+
+[data-reach-popover] {
+  z-index: 50 !important;
+}
+
+.inner-shadow-custom {
+  box-shadow: inset 0 8px 12px rgba(0, 0, 0, 0.1);
+}
