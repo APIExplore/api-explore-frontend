@@ -65,7 +65,6 @@ export default function Details({ modal, setClickedApiCall }: any) {
               typeof clickedApiCall.response.data === "string" ? (
                 <div> {clickedApiCall?.response.data} </div>
               ) : (
-                // ako je html, pustiti da se expanda
                 Array.isArray(clickedApiCall?.response.data) &&
                 clickedApiCall?.response.data.join(", ")
               )) || "-"}
