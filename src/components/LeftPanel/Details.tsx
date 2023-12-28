@@ -1,19 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { Tooltip, Typography } from "@tiller-ds/core";
+import { Button, Tooltip, Typography } from "@tiller-ds/core";
 import { DataTable, DescriptionList } from "@tiller-ds/data-display";
 import { Icon } from "@tiller-ds/icons";
+import { Modal, useModal } from "@tiller-ds/alert";
 
 import useApiCallsStore from "../../stores/apiCallsStore";
 
 export default function Details() {
   const selectedApiCalls = useApiCallsStore((state) => state.selectedApiCalls);
   const fetching = useApiCallsStore((state) => state.fetching);
+  const [isModalOpened, setIsModalOpened] = useState(false);
+  const modal = useModal();
+
+  console.log("Selected API calls > ", selectedApiCalls);
 
   const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
-      (elem) => elem.date === timestamp,
+      (elem) => elem.date === timestamp
     );
+
+    const parseResponse = ({ contentType }: { contentType: string }) => {
+      if (contentType?.includes("html")) {
+        return "HTML";
+      } else if (contentType?.includes("json")) {
+        return "JSON";
+      } else {
+        return contentType;
+      }
+    };
+
+    const closeModal = () => {
+      console.log("zatvaram modal...");
+      setIsModalOpened(false);
+    };
+
+    const viewDetails = (data: string | string[] | undefined) => {
+      console.log("details > ", data);
+      setIsModalOpened(true);
+      modal.onOpen(data);
+    };
 
     return (
       // Expanded ApiCall content goes here
@@ -31,6 +57,12 @@ export default function Details() {
           <DescriptionList.Item label="Status code">
             {clickedApiCall?.response.status}
           </DescriptionList.Item>
+          <DescriptionList.Item label="Duration">
+            {clickedApiCall?.duration}
+          </DescriptionList.Item>
+          <DescriptionList.Item label="Packet size">
+            {clickedApiCall?.response.size}
+          </DescriptionList.Item>
           {clickedApiCall?.parameters &&
             clickedApiCall?.parameters.length > 0 && (
               <DescriptionList.Item label="Parameters" type="same-column">
@@ -44,10 +76,47 @@ export default function Details() {
           <DescriptionList.Item label="Response body">
             <div className="line-clamp-3">
               {(clickedApiCall?.response.data &&
-              typeof clickedApiCall.response.data === "string"
-                ? clickedApiCall?.response.data
-                : Array.isArray(clickedApiCall?.response.data) &&
-                  clickedApiCall?.response.data.join(", ")) || "-"}
+              typeof clickedApiCall.response.data === "string" ? (
+                <div> {clickedApiCall?.response.data} </div>
+              ) : (
+                // ako je html, pustiti da se expanda
+                Array.isArray(clickedApiCall?.response.data) &&
+                clickedApiCall?.response.data.join(", ")
+              )) || "-"}
+            </div>
+            {clickedApiCall?.response.contentType.includes("html") && (
+              <button
+                id="view-details"
+                className="text-blue-500 hover:underline mr-2"
+                onClick={modal.onOpen}
+              >
+                View Details
+              </button>
+            )}
+          </DescriptionList.Item>
+          {isModalOpened ? (
+            <div style={{ height: "1000px", overflowY: "auto" }}>
+              <Modal {...modal} isOpen={isModalOpened}>
+                <Modal.Content title="Response body">
+                  {clickedApiCall?.response.data}
+                </Modal.Content>
+                <Modal.Footer>
+                  <Button
+                    id="close-landing-page"
+                    variant="filled"
+                    onClick={modal.onClose}
+                    trailingIcon={<Icon type="stop" />}
+                  >
+                    Enter
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            </div>
+          ) : null}
+          <DescriptionList.Item label="Response type">
+            <div>
+              {clickedApiCall?.response &&
+                parseResponse(clickedApiCall?.response)}
             </div>
           </DescriptionList.Item>
         </div>
