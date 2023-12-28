@@ -54,10 +54,10 @@ export default function LeftPanel() {
           <Modal.Content title="Response body">{clickedApiCall} </Modal.Content>
           <Modal.Footer>
             <Button
-              id="close-landing-page"
-              variant="filled"
+              id="close-details-modal"
+              variant="text"
+              color="white"
               onClick={modal.onClose}
-              trailingIcon={<Icon type="stop" />}
             >
               Close
             </Button>
