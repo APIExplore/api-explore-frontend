@@ -10,7 +10,6 @@ import useApiCallsStore from "../../stores/apiCallsStore";
 export default function Details({ modal, setClickedApiCall }: any) {
   const selectedApiCalls = useApiCallsStore((state) => state.selectedApiCalls);
   const fetching = useApiCallsStore((state) => state.fetching);
-  const [isModalOpened, setIsModalOpened] = useState(false);
 
   const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
@@ -26,17 +25,6 @@ export default function Details({ modal, setClickedApiCall }: any) {
       } else {
         return contentType;
       }
-    };
-
-    const closeModal = () => {
-      console.log("zatvaram modal...");
-      setIsModalOpened(false);
-    };
-
-    const viewDetails = (data: string | string[] | undefined) => {
-      console.log("details > ", data);
-      setIsModalOpened(true);
-      modal.onOpen(data);
     };
 
     return (
