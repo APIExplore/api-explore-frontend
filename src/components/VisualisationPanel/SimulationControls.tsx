@@ -24,7 +24,7 @@ export default function SimulationControls() {
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests,
+    (store) => store.selectedRequests
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
   const logsStore = useLogsStore();
@@ -41,14 +41,14 @@ export default function SimulationControls() {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, 1);
       } else {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
       }
@@ -62,19 +62,19 @@ export default function SimulationControls() {
   };
 
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests,
+    (store: RequestsStore) => store.setAllRequests
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests,
+    (store: RequestsStore) => store.setSelectedRequests
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions,
+    (store: RequestsStore) => store.setDefinitions
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems,
+    (store: RequestsStore) => store.setAllShownItems
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName,
+    (store: RequestsStore) => store.setCallSequenceName
   );
 
   const openLandingPage = () => {

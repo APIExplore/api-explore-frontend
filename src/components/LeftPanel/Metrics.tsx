@@ -36,10 +36,10 @@ export default function Metrics() {
     } = metrics;
 
     const successfulOperationIds = getFilteredOperationIds(
-      (status: number) => status >= 200 && status < 300,
+      (status: number) => status >= 200 && status < 300
     );
     const unsuccessfulOperationIds = getFilteredOperationIds(
-      (status: number) => !(status >= 200 && status < 300),
+      (status: number) => !(status >= 200 && status < 300)
     );
 
     const formatValueWithUnit = (value: string | number, unit: string) =>
@@ -48,7 +48,7 @@ export default function Metrics() {
     return (
       <div className="max-w-md mx-auto rounded overflow-hidden p-4">
         <Typography variant="h5">Performance Metrics</Typography>
-        <div className="flex flex-wrap justify-between mt-4">
+        <div className="flex flex-wrap justify-between mt-4" id="metrics">
           <MetricCard id="numCalls" title="Total Calls" value={numCalls} />
           <MetricCard
             id="successfulCalls"
@@ -128,11 +128,11 @@ function MetricCard({
   callsToDisplay,
 }: MetricCardProps) {
   const leftPanelWidth = usePanelDimensionsStore(
-    (state) => state.panels.left.width,
+    (state) => state.panels.left.width
   );
   const apiCalls = useApiCallsStore((state) => state.apiCalls);
   const setSelectedApiCalls = useApiCallsStore(
-    (state) => state.setSelectedApiCalls,
+    (state) => state.setSelectedApiCalls
   );
   const apexConfig = useApiConfigStore((store) => store.apexConfig);
 
@@ -155,7 +155,7 @@ function MetricCard({
 
   const selectApiCalls = (select: boolean) => {
     const selectedCalls: ApiCall[] = apiCalls.filter(
-      (call) => callsToDisplay?.includes(call.operationId),
+      (call) => callsToDisplay?.includes(call.operationId)
     );
 
     apexConfig?.config.series.forEach((series, seriesIndex) => {
@@ -203,14 +203,14 @@ function MetricCard({
     leftPanelWidth > 350 ? "w-[47%]" : "w-full",
     "border rounded shadow-sm hover:shadow-md ease-in-out duration-100",
     callsToDisplay && callsToDisplay.length > 0 && "cursor-pointer",
-    selected && "bg-primary-light",
+    selected && "bg-primary-light"
   );
 
   const titleClasses = cx("text-gray-600");
 
   const valueClasses = cx(
     "text-xl font-semibold",
-    color ? `text-${color}-600` : "text-body",
+    color ? `text-${color}-600` : "text-body"
   );
 
   return (

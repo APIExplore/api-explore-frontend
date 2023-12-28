@@ -29,10 +29,10 @@ export default function ExistingSchema({
   const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
   const logs = useLogsStore();
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests,
+    (store: RequestsStore) => store.allRequests
   );
   const definitions = useRequestsStore(
-    (store: RequestsStore) => store.definitions,
+    (store: RequestsStore) => store.definitions
   );
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
   const [removedApiSchema, setRemovedApiSchema] = useState("");
@@ -65,7 +65,7 @@ export default function ExistingSchema({
 
     try {
       const response = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name,
+        `${backendDomain}/apiSchema/fetch/` + item.name
       );
 
       setSchemaName(item.name);
@@ -99,7 +99,7 @@ export default function ExistingSchema({
       setIsRemoving(true);
       setIsRemoved(false);
       const response = await axios.delete(
-        `${backendDomain}/apischema/delete/${item.name}`,
+        `${backendDomain}/apischema/delete/${item.name}`
       );
       if (response.data.success) {
         setIsRemoved(true);
@@ -154,6 +154,7 @@ export default function ExistingSchema({
                             await removeSchema(item);
                           }
                         }}
+                        id={"remove-schema-" + index}
                         icon={
                           item.name === selectedApiSchema ? (
                             <Icon
