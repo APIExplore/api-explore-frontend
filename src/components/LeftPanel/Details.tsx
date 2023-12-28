@@ -1,24 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Button, Tooltip, Typography } from "@tiller-ds/core";
 import { DataTable, DescriptionList } from "@tiller-ds/data-display";
 import { Icon } from "@tiller-ds/icons";
-import { Modal, useModal } from "@tiller-ds/alert";
+import { Modal, UseModal, useModal } from "@tiller-ds/alert";
 
 import useApiCallsStore from "../../stores/apiCallsStore";
 
-export default function Details() {
+export default function Details({ modal, setClickedApiCall }: any) {
   const selectedApiCalls = useApiCallsStore((state) => state.selectedApiCalls);
   const fetching = useApiCallsStore((state) => state.fetching);
   const [isModalOpened, setIsModalOpened] = useState(false);
-  const modal = useModal();
-
-  console.log("Selected API calls > ", selectedApiCalls);
 
   const ExpandedApiCall = ({ timestamp }: { timestamp: string }) => {
     const clickedApiCall = selectedApiCalls.find(
       (elem) => elem.date === timestamp
     );
+    setClickedApiCall(clickedApiCall?.response.data);
 
     const parseResponse = ({ contentType }: { contentType: string }) => {
       if (contentType?.includes("html")) {
@@ -94,25 +92,7 @@ export default function Details() {
               </button>
             )}
           </DescriptionList.Item>
-          {isModalOpened ? (
-            <div style={{ height: "1000px", overflowY: "auto" }}>
-              <Modal {...modal} isOpen={isModalOpened}>
-                <Modal.Content title="Response body">
-                  {clickedApiCall?.response.data}
-                </Modal.Content>
-                <Modal.Footer>
-                  <Button
-                    id="close-landing-page"
-                    variant="filled"
-                    onClick={modal.onClose}
-                    trailingIcon={<Icon type="stop" />}
-                  >
-                    Enter
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </div>
-          ) : null}
+
           <DescriptionList.Item label="Response type">
             <div>
               {clickedApiCall?.response &&

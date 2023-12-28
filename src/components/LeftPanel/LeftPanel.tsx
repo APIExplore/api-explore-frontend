@@ -1,22 +1,28 @@
 import { ResizableBox } from "react-resizable";
 
-import { Tabs } from "@tiller-ds/core";
+import { Button, Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import Details from "./Details";
 import Metrics from "./Metrics";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
+import { Modal, useModal } from "@tiller-ds/alert";
+import useApiCallsStore from "../../stores/apiCallsStore";
+import { useState } from "react";
 
 export default function LeftPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
+  const modal = useModal();
+  const [clickedApiCall, setClickedApiCall] = useState();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height,
+    (store) => store.panels.container.height
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height,
+    (store) => store.panels.bottom.height
   );
   const ref = useResizeObserver("left", setDimensions);
+
   return (
     <ResizableBox
       width={400}
@@ -34,7 +40,7 @@ export default function LeftPanel() {
             className="details-tab"
             icon={<Icon type="magnifying-glass" variant="fill" />}
           >
-            <Details />
+            <Details modal={modal} setClickedApiCall={setClickedApiCall} />
           </Tabs.Tab>
           <Tabs.Tab
             className="metrics-tab"
@@ -44,6 +50,19 @@ export default function LeftPanel() {
             <Metrics />
           </Tabs.Tab>
         </Tabs>
+        <Modal {...modal}>
+          <Modal.Content title="Response body">{clickedApiCall} </Modal.Content>
+          <Modal.Footer>
+            <Button
+              id="close-landing-page"
+              variant="filled"
+              onClick={modal.onClose}
+              trailingIcon={<Icon type="stop" />}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </ResizableBox>
   );
