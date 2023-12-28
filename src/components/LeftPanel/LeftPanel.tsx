@@ -10,6 +10,7 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import { Modal, useModal } from "@tiller-ds/alert";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import { useState } from "react";
+import HtmlDetails from "./HtmlDetails";
 
 export default function LeftPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
@@ -50,19 +51,7 @@ export default function LeftPanel() {
             <Metrics />
           </Tabs.Tab>
         </Tabs>
-        <Modal {...modal}>
-          <Modal.Content title="Response body">{clickedApiCall} </Modal.Content>
-          <Modal.Footer>
-            <Button
-              id="close-details-modal"
-              variant="text"
-              color="white"
-              onClick={modal.onClose}
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <HtmlDetails modal={modal} clickedApiCall={clickedApiCall} />
       </div>
     </ResizableBox>
   );
