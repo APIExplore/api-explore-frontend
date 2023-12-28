@@ -13,6 +13,7 @@ export type ApiCall = {
     date: string;
     data: string[] | string;
     contentType: string;
+    size: number;
   };
   duration: number;
 };
