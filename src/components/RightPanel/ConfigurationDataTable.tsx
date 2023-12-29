@@ -106,6 +106,7 @@ export default function ConfigurationDataTable({
                 setClickedItem(JSON.parse(JSON.stringify({ ...item, index })));
               }}
               label="Edit"
+              disabled={callByCall.enabled && index < callByCall.nextCallIndex}
             />
             <IconButton
               id={"delete-" + String(index)}
@@ -114,6 +115,7 @@ export default function ConfigurationDataTable({
               }
               onClick={() => removeItem(index)}
               label="Delete"
+              disabled={callByCall.enabled && index < callByCall.nextCallIndex}
             />
             <div className="flex flex-col gap-0">
               <IconButton

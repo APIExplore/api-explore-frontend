@@ -2,23 +2,28 @@ import { useEffect, useState } from "react";
 
 import axios from "axios";
 
-import { Modal, useModal } from "@tiller-ds/alert";
+import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
 import { Button, Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import ExistingSchema from "./existingSchema";
 import NewSchema from "./newSchema";
 import { backendDomain } from "../../constants/apiConstants";
+import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
+import { renderChooseSchemaNotification } from "../../util/notificationUtils";
 import ConditionalDisplay from "../ConditionalDisplay";
 import { Definition } from "../RightPanel/types/RightPanelTypes";
 
 export default function LandingPage() {
+  const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
+  const notification = useNotificationContext();
+
+  const schemaName = useApiCallsStore((store) => store.schemaName);
   const modalOpened = useSchemaModalStore((store) => store.opened);
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
-  const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
   const setAllRequests = useRequestsStore(
     (store: RequestsStore) => store.setAllRequests,
   );
@@ -33,6 +38,7 @@ export default function LandingPage() {
   const modal = useModal();
   const close = () => {
     setModalOpened(false);
+    notification.push(renderChooseSchemaNotification(schemaName));
   };
 
   useEffect(() => {
@@ -54,6 +60,22 @@ export default function LandingPage() {
 
     fetchData();
   }, []);
+
+  async function updateAvailableSchemas() {
+    try {
+      const response = await axios.get(`${backendDomain}/apiSchema/fetch`); // Fetch all existing schemas
+      setExistingApiSchemasNames(response.data);
+
+      if (response.data.warnings) {
+        logs.addWarnings(response.data.warnings);
+      }
+    } catch (error: any) {
+      console.error("Error fetching API schemas from the backend:", error);
+      if (error.response.data) {
+        logs.addError(error.response.data);
+      }
+    }
+  }
 
   /* Set all requests and shown items after initial fetch */
   function convertSchemaPathsToList(schema: any) {
@@ -141,6 +163,7 @@ export default function LandingPage() {
                     convertSchemaDefinitionsToList={
                       convertSchemaDefinitionsToList
                     }
+                    onSchemaRemoval={updateAvailableSchemas}
                   />
                 }
                 condition={existingApiSchemasNames?.length > 0}

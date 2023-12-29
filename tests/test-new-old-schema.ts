@@ -12,6 +12,17 @@ test("Test sequence upload", async (t) => {
     .exists;
   if (schemaDropDownExists) {
     await t.click("#dropdown-existing-schemas");
+
+    const secondSchemaExists = await Selector("#schema-1").exists;
+    if (secondSchemaExists) {
+      const schemaName = await Selector("#schema-1").innerText;
+
+      await t.click("#remove-schema-1");
+
+      await t
+        .expect(Selector(".schema-removed").innerText)
+        .eql(`You have removed the schema ${schemaName}`);
+    }
     await t.click("#schema-0");
     /* Wait for existing schema load */
     await t.expect(Selector("#schema-fetched").exists).ok();
@@ -23,7 +34,7 @@ test("Test sequence upload", async (t) => {
     /* See if endpoints exist */
     await t
       .click("#endpoints")
-      .click("#option-0--menu--19")
+      .click("#option-0--menu--23")
       .click("#cancel-params");
   }
 
@@ -44,6 +55,6 @@ test("Test sequence upload", async (t) => {
   /* Check if schema endpoints are fetched */
   await t
     .click("#endpoints")
-    .click("#option-0--menu--19")
+    .click("#option-0--menu--23")
     .click("#cancel-params");
 }).skipJsErrors();

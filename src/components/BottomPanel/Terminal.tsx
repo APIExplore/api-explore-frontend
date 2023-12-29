@@ -90,10 +90,12 @@ export default function Terminal() {
             checked={categorized}
             onClick={() => setCategorized(!categorized)}
             tokens={{
+              gray: "bg-black",
               toggle:
-                "inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+                "inline-block h-5 w-5 rounded-full bg-slate-100 shadow transform transition ease-in-out duration-200 flex align-center toggle-favorite",
+              base: "w-11 h-6 relative inline-flex rounded-full border-2 border-transparent shrink-0 cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring focus:ring-primary-dark",
             }}
-            className="absolute right-4 top-1 z-50 text-slate-800"
+            className="absolute right-4 top-1.5 z-50 text-slate-800"
           />
         </div>
         <div
