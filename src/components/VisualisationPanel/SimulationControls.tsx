@@ -11,6 +11,7 @@ import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { renderSimulationStartedNotification } from "../../util/notificationUtils";
 import { Request } from "../RightPanel/types/RightPanelTypes";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function SimulationControls() {
   const notification = useNotificationContext();
@@ -24,7 +25,7 @@ export default function SimulationControls() {
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests,
+    (store) => store.selectedRequests
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
   const logsStore = useLogsStore();
@@ -32,6 +33,12 @@ export default function SimulationControls() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const setSelectedApiCalls = useApiCallsStore(
+    (store) => store.setSelectedApiCalls
+  );
+  const setFetchedCallSequences = useCallSequenceCacheStore(
+    (store) => store.setFetchedCallSequences
+  );
 
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
@@ -41,14 +48,14 @@ export default function SimulationControls() {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, 1);
       } else {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
       }
@@ -62,19 +69,19 @@ export default function SimulationControls() {
   };
 
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests,
+    (store: RequestsStore) => store.setAllRequests
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests,
+    (store: RequestsStore) => store.setSelectedRequests
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions,
+    (store: RequestsStore) => store.setDefinitions
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems,
+    (store: RequestsStore) => store.setAllShownItems
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName,
+    (store: RequestsStore) => store.setCallSequenceName
   );
 
   const openLandingPage = () => {
@@ -84,6 +91,9 @@ export default function SimulationControls() {
     setDefinitions([]);
     setAllShownItems([]);
     setCallSequenceName("");
+    setApiCalls([]);
+    setSelectedApiCalls([]);
+    setFetchedCallSequences([]);
   };
 
   return (
