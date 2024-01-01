@@ -24,7 +24,7 @@ export function renderRemoveSequenceNotification(sequenceName: string) {
   return {
     title: "Sequence Removed",
     content: (
-      <Typography className="text-body-light">
+      <Typography className="sequence-removed text-body-light">
         You have removed the sequence <i>{sequenceName}</i>
       </Typography>
     ),
@@ -38,7 +38,7 @@ export function renderRemoveSchemaNotification(schemaName: string) {
   return {
     title: "Schema Removed",
     content: (
-      <Typography className="text-body-light">
+      <Typography className="schema-removed text-body-light">
         You have removed the schema <i>{schemaName}</i>
       </Typography>
     ),

@@ -12,6 +12,17 @@ test("Test sequence upload", async (t) => {
     .exists;
   if (schemaDropDownExists) {
     await t.click("#dropdown-existing-schemas");
+
+    const secondSchemaExists = await Selector("#schema-1").exists;
+    if (secondSchemaExists) {
+      const schemaName = await Selector("#schema-1").innerText;
+
+      await t.click("#remove-schema-1");
+
+      await t
+        .expect(Selector(".schema-removed").innerText)
+        .eql(`You have removed the schema ${schemaName}`);
+    }
     await t.click("#schema-0");
     /* Wait for existing schema load */
     await t.expect(Selector("#schema-fetched").exists).ok();

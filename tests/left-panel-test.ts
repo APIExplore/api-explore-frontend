@@ -45,5 +45,9 @@ test("Test details", async (t) => {
   );
 
   await t.click(".metrics-tab");
+  if (!(await Selector("#metrics").exists)) {
+    throw Error("Metrics tab is missing values");
+  }
+
   await t.click(".details-tab");
 }).skipJsErrors();

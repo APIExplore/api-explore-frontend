@@ -28,20 +28,20 @@ export default function CallSequenceCard({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests,
+    (store: RequestsStore) => store.selectedRequests
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
   const refreshSequenceDetailsCache = useCallSequenceCacheStore(
-    (store) => store.refreshSequenceDetailsCache,
+    (store) => store.refreshSequenceDetailsCache
   );
   const retrieveSequenceDetails = useCallSequenceCacheStore(
-    (store) => store.retrieveSequenceDetails,
+    (store) => store.retrieveSequenceDetails
   );
   const collapseFlag = useCallSequenceCacheStore(
-    (state: { collapseFlag: any }) => state.collapseFlag,
+    (state: { collapseFlag: any }) => state.collapseFlag
   );
 
   const exportSequenceToJsonFile = (name: string) => {
@@ -64,7 +64,7 @@ export default function CallSequenceCard({
       // Make an axios.delete API call
       setLoading(true);
       const response = await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequence.name}`,
+        `${backendDomain}/callsequence/delete/${sequence.name}`
       );
       if (response.data.success) {
         // Successful deletion
@@ -119,6 +119,7 @@ export default function CallSequenceCard({
                 setApiCalls([]);
               }}
               icon={<Icon type="pencil-simple" />}
+              id="edit-sequence"
               label="Edit"
               className={"text-green-600 hover:opacity-100 opacity-60"}
             />
@@ -180,6 +181,7 @@ export default function CallSequenceCard({
                   await removeSequence();
                 }}
                 icon={<Icon type="trash" />}
+                id="delete-sequence"
                 label="Delete"
                 className={"text-red-600 hover:opacity-100 opacity-60"}
               />

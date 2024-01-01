@@ -56,7 +56,7 @@ export default function CallSequences({
           details: [],
           expanded: false,
           selectedApiCall: null,
-        }),
+        })
       );
 
       setFetchedCallSequences(sequencesFromApi);
@@ -71,7 +71,7 @@ export default function CallSequences({
     } catch (error: any) {
       console.error(
         "Error fetching call sequences:",
-        error.response?.data?.error || "Unknown error",
+        error.response?.data?.error || "Unknown error"
       );
       setLoading(false);
 
@@ -108,7 +108,7 @@ export default function CallSequences({
 
   const toggleFavorite = async (sequenceName: string) => {
     await axios.put(
-      `${backendDomain}/callsequence/toggle-favorite/${sequenceName}`,
+      `${backendDomain}/callsequence/toggle-favorite/${sequenceName}`
     );
     toggleSequenceFavorite(sequenceName);
   };
@@ -117,8 +117,8 @@ export default function CallSequences({
     modal.onOpen({ apiCall: apiCall, sequenceName: sequence.name });
     setFetchedCallSequences(
       fetchedCallSequences.map((seq) =>
-        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq,
-      ),
+        seq.name === sequence.name ? { ...seq, selectedApiCall: apiCall } : seq
+      )
     );
   };
 
@@ -172,6 +172,7 @@ export default function CallSequences({
               <ButtonGroups.Button
                 color="secondary"
                 onClick={() => toggleSortOrder("asc")}
+                id="asc"
                 className={sortOrder === "asc" ? "inner-shadow-custom" : ""}
                 variant="text"
                 size="xs"
@@ -182,6 +183,7 @@ export default function CallSequences({
               </ButtonGroups.Button>
               <ButtonGroups.Button
                 color="secondary"
+                id="desc"
                 onClick={() => toggleSortOrder("desc")}
                 className={sortOrder === "desc" ? "inner-shadow-custom" : ""}
                 variant="text"
