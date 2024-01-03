@@ -36,6 +36,7 @@ export const mockApiCalls: ApiCall[] = [
       size: 0,
     },
     duration: 10,
+    relationships: {},
   },
   {
     url: "http://example.com/users",
@@ -72,6 +73,7 @@ export const mockApiCalls: ApiCall[] = [
       size: 0,
     },
     duration: 11,
+    relationships: {},
   },
   {
     url: "http://example.com/orders",
@@ -109,6 +111,7 @@ export const mockApiCalls: ApiCall[] = [
       size: 0,
     },
     duration: 9,
+    relationships: {},
   },
   {
     url: "http://example.com/products",
@@ -129,6 +132,7 @@ export const mockApiCalls: ApiCall[] = [
       size: 0,
     },
     duration: 6,
+    relationships: {},
   },
   {
     url: "http://example.com/customers",
@@ -149,5 +153,6 @@ export const mockApiCalls: ApiCall[] = [
       size: 0,
     },
     duration: 7,
+    relationships: {},
   },
 ];

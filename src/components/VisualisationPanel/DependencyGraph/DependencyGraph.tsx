@@ -12,7 +12,7 @@ import {
   ReactFlow,
 } from "reactflow";
 
-import CustomNode from "./CustomNode";
+import CustomDependencyNode from "./CustomDependencyNode";
 import { InitialSchema } from "./depGraphTypes";
 import {
   generateDiagramSchema,
@@ -23,7 +23,7 @@ import useRequestsStore, { RequestsStore } from "../../../stores/requestsStore";
 import "reactflow/dist/base.css";
 import { Request } from "../../RightPanel/types/RightPanelTypes";
 
-function DependencyGraph() {
+function DependencyGraph({ isOpened }: { isOpened: boolean }) {
   const definitions = useRequestsStore(
     (store: RequestsStore) => store.definitions,
   );
@@ -45,7 +45,7 @@ function DependencyGraph() {
   return (
     <div className="flex w-full h-full">
       {diagramSchema.initialNodes.length > 0 && (
-        <ReactFlowGraph initialSchema={diagramSchema} />
+        <ReactFlowGraph initialSchema={diagramSchema} isOpened={isOpened} />
       )}
     </div>
   );
@@ -63,10 +63,16 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 const nodeTypes: NodeTypes = {
-  custom: CustomNode,
+  custom: CustomDependencyNode,
 };
 
-function ReactFlowGraph({ initialSchema }: { initialSchema: InitialSchema }) {
+function ReactFlowGraph({
+  initialSchema,
+  isOpened,
+}: {
+  initialSchema: InitialSchema;
+  isOpened: boolean;
+}) {
   const [nodes, setNodes] = useState<Node[]>(initialSchema.initialNodes);
 
   const onNodesChange: OnNodesChange = useCallback(
@@ -91,7 +97,7 @@ function ReactFlowGraph({ initialSchema }: { initialSchema: InitialSchema }) {
       fitView
     >
       <Controls />
-      <Background />
+      {isOpened && <Background />}
     </ReactFlow>
   );
 }

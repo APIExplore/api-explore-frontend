@@ -23,37 +23,29 @@ import { renderEditSequenceNotification } from "../../util/notificationUtils";
 export default function RightPanel() {
   const notification = useNotificationContext();
   const modal = useModal();
+
   const containerHeight = usePanelDimensionsStore(
     (store) => store.panels.container.height,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
     (store) => store.panels.bottom.height,
   );
-
-  const [clickedItem, setClickedItem]: any = useState(null);
-
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
 
   const allShownItems = useRequestsStore((store: any) => store.allShownItems);
   const setAllShownItems = useRequestsStore(
     (store: any) => store.setAllShownItems,
   );
-
   const callSequenceName = useRequestsStore(
     (store: any) => store.callSequenceName,
   );
   const setCallSequenceName = useRequestsStore(
     (store: any) => store.setCallSequenceName,
   );
-  const [inputError, setInputError] = useState("");
-
   /* Set currently selected requests */
   const setSelectedRequests = useRequestsStore(
     (store: RequestsStore) => store.setSelectedRequests,
   );
-  /* Modal operation */
-  const [modalOperation, setModalOperation] = useState("");
-  /* Array of all requests */
   const allRequests = useRequestsStore(
     (store: RequestsStore) => store.allRequests,
   );
@@ -61,6 +53,8 @@ export default function RightPanel() {
   const selectedRequests = useRequestsStore(
     (store: RequestsStore) => store.selectedRequests,
   );
+
+  /* Array of all requests */
   const refreshSequenceDetailsCache = useCallSequenceCacheStore(
     (store) => store.refreshSequenceDetailsCache,
   );
@@ -70,6 +64,11 @@ export default function RightPanel() {
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
   const { fetchedCallSequences, setFetchedCallSequences } =
     useCallSequenceCacheStore();
+
+  const [clickedItem, setClickedItem]: any = useState(null);
+  const [inputError, setInputError] = useState("");
+  /* Modal operation */
+  const [modalOperation, setModalOperation] = useState("");
   const [existingSequenceFlag, setExistingSequenceFlag] =
     useState<boolean>(false);
 
@@ -496,7 +495,7 @@ export default function RightPanel() {
                         setClickedItem(JSON.parse(JSON.stringify(item)));
                       }}
                     >
-                      <div className="text-body">
+                      <div className="text-body truncate">
                         {item.method.toUpperCase()} {item.operationId}
                       </div>
                     </DropdownMenu.Item>

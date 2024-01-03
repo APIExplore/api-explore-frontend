@@ -2,6 +2,7 @@ import axios from "axios";
 import { create } from "zustand";
 
 import { LogsStore } from "./logsStore";
+import useRelationshipsStore from "./relationshipsStore";
 import { Request } from "../components/RightPanel/types/RightPanelTypes";
 import { backendDomain } from "../constants/apiConstants";
 import { ApiCall, Metrics } from "../types/apiCallTypes";
@@ -53,6 +54,11 @@ const useApiCallsStore = create<ApiStore>((set, get) => ({
       set({ selectedApiCalls: [] });
       set({ fetching: false });
       set({ metrics: response.data.metrics });
+
+      useRelationshipsStore
+        .getState()
+        .setCallsToDisplay(response.data.callSequence, true);
+      useRelationshipsStore.getState().setCurrentRelationship(null);
 
       if (response.data.warnings) {
         logs.addWarnings(response.data.warnings);
