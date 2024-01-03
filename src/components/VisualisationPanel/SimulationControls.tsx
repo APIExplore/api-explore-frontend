@@ -1,9 +1,12 @@
 import React from "react";
 
+import axios from "axios";
+
 import { useNotificationContext } from "@tiller-ds/alert";
 import { ButtonGroups, Tooltip } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
+import { agentDomain } from "../../constants/apiConstants";
 import useAgentStore from "../../stores/agentStore";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
@@ -24,7 +27,7 @@ export default function SimulationControls() {
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests
+    (store) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
   const logsStore = useLogsStore();
@@ -32,6 +35,9 @@ export default function SimulationControls() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+
+  const currentAgentId = useAgentStore((state) => state.agentId);
+  const currentAgentPid = useAgentStore((state) => state.agentPid);
 
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
@@ -41,14 +47,14 @@ export default function SimulationControls() {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore
+          logsStore,
         );
         setCallByCall(callByCall.enabled, 1);
       } else {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore
+          logsStore,
         );
         setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
       }
@@ -61,20 +67,29 @@ export default function SimulationControls() {
     setApiCalls([]);
   };
 
+  const stopAgent = async () => {
+    if (currentAgentId && currentAgentPid) {
+      await axios.post(`${agentDomain}/stop-agent/${currentAgentId}`, {
+        id: currentAgentId,
+        pid: currentAgentId,
+      });
+    }
+  };
+
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
+    (store: RequestsStore) => store.setAllRequests,
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
+    (store: RequestsStore) => store.setDefinitions,
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
+    (store: RequestsStore) => store.setAllShownItems,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName
+    (store: RequestsStore) => store.setCallSequenceName,
   );
 
   const openLandingPage = () => {
@@ -136,7 +151,10 @@ export default function SimulationControls() {
         <ButtonGroups.Button
           variant="text"
           id="stop-button"
-          onClick={resetCallByCall}
+          onClick={async () => {
+            resetCallByCall();
+            await stopAgent();
+          }}
           disabled={!callByCall.enabled}
         >
           {!callByCall.enabled ? (
