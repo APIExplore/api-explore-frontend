@@ -23,6 +23,9 @@ test("Test sequence upload", async (t) => {
         .expect(Selector(".schema-removed").innerText)
         .eql(`You have removed the schema ${schemaName}`);
     }
+
+    // find-schema
+    await t.typeText("#find-schema", `dise`);
     await t.click("#schema-0");
     /* Wait for existing schema load */
     await t.expect(Selector("#schema-fetched").exists).ok();

@@ -12,16 +12,16 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function VisualisationPanel() {
   const leftPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.left.width,
+    (store) => store.panels.left.width
   );
   const rightPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.right.width,
+    (store) => store.panels.right.width
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height,
+    (store) => store.panels.bottom.height
   );
   const containerDimensions = usePanelDimensionsStore(
-    (store) => store.panels.container,
+    (store) => store.panels.container
   );
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
 
@@ -63,7 +63,7 @@ export default function VisualisationPanel() {
           <DependencyGraph isOpened={activeTab === 1} />
         </Tabs.Tab>
         <Tabs.Tab
-          className="dependency-graph-tab"
+          className="relationship-tab"
           label="Relationships"
           icon={<Icon type="swap" variant="light" />}
           onClick={setActiveTab}

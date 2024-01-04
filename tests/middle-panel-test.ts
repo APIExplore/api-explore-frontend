@@ -31,7 +31,9 @@ test("Test timeline and dependency graph visualisation", async (t) => {
   ]);
 
   await t.click(".dependency-graph-tab");
+  await t.click(".relationship-tab");
   await t.click("#play-button").wait(2000);
+  await t.click(".dependency-graph-tab");
   await t.click(".timeline-tab");
   await t
     .click("#endpoints")

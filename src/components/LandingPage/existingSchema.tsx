@@ -32,10 +32,10 @@ export default function ExistingSchema({
   const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
   const logs = useLogsStore();
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests,
+    (store: RequestsStore) => store.allRequests
   );
   const definitions = useRequestsStore(
-    (store: RequestsStore) => store.definitions,
+    (store: RequestsStore) => store.definitions
   );
   const [schemaInputValue, setSchemaInputValue] = useState("");
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
@@ -70,7 +70,7 @@ export default function ExistingSchema({
 
     try {
       const response = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name,
+        `${backendDomain}/apiSchema/fetch/` + item.name
       );
 
       setSchemaName(item.name);
@@ -103,7 +103,7 @@ export default function ExistingSchema({
       setRemovedApiSchema(item.name);
       setIsRemoving(true);
       const response = await axios.delete(
-        `${backendDomain}/apischema/delete/${item.name}`,
+        `${backendDomain}/apischema/delete/${item.name}`
       );
       if (response.data.success) {
         await updateAvailableSchemas();
@@ -121,12 +121,12 @@ export default function ExistingSchema({
   const finalSchemaOptions = useMemo(() => {
     // Filter the options based on schemaInputValue and maintain the original length
     const filteredOptions = existingApiSchemasNames.filter((option) =>
-      option.name.toLowerCase().includes(schemaInputValue.toLowerCase()),
+      option.name.toLowerCase().includes(schemaInputValue.toLowerCase())
     );
 
     // Create an array of null values with the remaining length
     const remainingNulls = new Array(
-      existingApiSchemasNames.length - filteredOptions.length,
+      existingApiSchemasNames.length - filteredOptions.length
     ).fill(null);
 
     // Concatenate the filtered options with null values to maintain the original length
@@ -157,6 +157,7 @@ export default function ExistingSchema({
                       <div className="sticky top-0 bg-white z-50 shadow-b">
                         <Input
                           name="find-schema"
+                          id="find-schema"
                           placeholder="Search schema by name"
                           aria-autocomplete="none"
                           value={schemaInputValue}
@@ -171,7 +172,7 @@ export default function ExistingSchema({
                         />
                       </div>
                       {finalSchemaOptions.every(
-                        (option) => option === null,
+                        (option) => option === null
                       ) && (
                         <div className="w-full text-center text-body text-sm">
                           No results
