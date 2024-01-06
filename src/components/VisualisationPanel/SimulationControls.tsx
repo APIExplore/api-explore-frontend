@@ -3,7 +3,6 @@ import React from "react";
 import { useNotificationContext } from "@tiller-ds/alert";
 import { ButtonGroups, Tooltip } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
-
 import useAgentStore from "../../stores/agentStore";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
@@ -11,7 +10,6 @@ import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { renderSimulationStartedNotification } from "../../util/notificationUtils";
 import { Request } from "../RightPanel/types/RightPanelTypes";
-import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function SimulationControls() {
   const notification = useNotificationContext();
@@ -33,12 +31,6 @@ export default function SimulationControls() {
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
-  const setSelectedApiCalls = useApiCallsStore(
-    (store) => store.setSelectedApiCalls
-  );
-  const setFetchedCallSequences = useCallSequenceCacheStore(
-    (store) => store.setFetchedCallSequences
-  );
 
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
@@ -68,32 +60,8 @@ export default function SimulationControls() {
     setApiCalls([]);
   };
 
-  const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
-  );
-  const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
-  );
-  const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
-  );
-  const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
-  );
-  const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName
-  );
-
   const openLandingPage = () => {
     setModalOpened(true);
-    setAllRequests([]);
-    setSelectedRequests([]);
-    setDefinitions([]);
-    setAllShownItems([]);
-    setCallSequenceName("");
-    setApiCalls([]);
-    setSelectedApiCalls([]);
-    setFetchedCallSequences([]);
   };
 
   return (

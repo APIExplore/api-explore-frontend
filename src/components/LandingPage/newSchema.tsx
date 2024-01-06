@@ -12,15 +12,17 @@ import DragDrop from "../RightPanel/DragDrop";
 export default function NewSchema({
   convertSchemaPathsToList,
   convertSchemaDefinitionsToList,
+  resetVisualiserState,
 }: {
   convertSchemaPathsToList: (data: any) => void;
   convertSchemaDefinitionsToList: (data: any) => void;
+  resetVisualiserState: () => void;
 }) {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json",
+    "http://localhost:8080/swagger.json"
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -56,6 +58,7 @@ export default function NewSchema({
         }
         return;
       }
+      resetVisualiserState();
 
       const backendData = await axios.post(`${backendDomain}/apiSchema/fetch`, {
         address: apiSchema,

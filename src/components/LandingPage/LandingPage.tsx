@@ -16,6 +16,7 @@ import useSchemaModalStore from "../../stores/schemaModalStore";
 import { renderChooseSchemaNotification } from "../../util/notificationUtils";
 import ConditionalDisplay from "../ConditionalDisplay";
 import { Definition } from "../RightPanel/types/RightPanelTypes";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function LandingPage() {
   const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
@@ -25,13 +26,26 @@ export default function LandingPage() {
   const modalOpened = useSchemaModalStore((store) => store.opened);
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests,
+    (store: RequestsStore) => store.setAllRequests
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions,
+    (store: RequestsStore) => store.setDefinitions
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems,
+    (store: RequestsStore) => store.setAllShownItems
+  );
+  const setSelectedRequests = useRequestsStore(
+    (store: RequestsStore) => store.setSelectedRequests
+  );
+  const setCallSequenceName = useRequestsStore(
+    (store: RequestsStore) => store.setCallSequenceName
+  );
+  const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const setSelectedApiCalls = useApiCallsStore(
+    (store) => store.setSelectedApiCalls
+  );
+  const setFetchedCallSequences = useCallSequenceCacheStore(
+    (store) => store.setFetchedCallSequences
   );
   const logs = useLogsStore();
 
@@ -98,7 +112,7 @@ export default function LandingPage() {
                   in: param.in,
                   value: "",
                 };
-              },
+              }
             );
           }
 
@@ -129,6 +143,17 @@ export default function LandingPage() {
     setDefinitions(items);
   }
 
+  function resetVisualiserState() {
+    setAllRequests([]);
+    setSelectedRequests([]);
+    setDefinitions([]);
+    setAllShownItems([]);
+    setCallSequenceName("");
+    setApiCalls([]);
+    setSelectedApiCalls([]);
+    setFetchedCallSequences([]);
+  }
+
   return (
     <Modal
       {...modal}
@@ -148,6 +173,7 @@ export default function LandingPage() {
               <NewSchema
                 convertSchemaPathsToList={convertSchemaPathsToList}
                 convertSchemaDefinitionsToList={convertSchemaDefinitionsToList}
+                resetVisualiserState={resetVisualiserState}
               />
             </Tabs.Tab>
             <Tabs.Tab
@@ -164,6 +190,7 @@ export default function LandingPage() {
                       convertSchemaDefinitionsToList
                     }
                     onSchemaRemoval={updateAvailableSchemas}
+                    resetVisualiserState={resetVisualiserState}
                   />
                 }
                 condition={existingApiSchemasNames?.length > 0}

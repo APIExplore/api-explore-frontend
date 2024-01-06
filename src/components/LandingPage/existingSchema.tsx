@@ -20,11 +20,13 @@ export default function ExistingSchema({
   convertSchemaPathsToList,
   convertSchemaDefinitionsToList,
   onSchemaRemoval,
+  resetVisualiserState,
 }: {
   existingApiSchemasNames: Array<any>;
   convertSchemaPathsToList: (data: any) => void;
   convertSchemaDefinitionsToList: (data: any) => void;
   onSchemaRemoval: () => Promise<void>;
+  resetVisualiserState: () => void;
 }) {
   const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
   const logs = useLogsStore();
@@ -62,6 +64,7 @@ export default function ExistingSchema({
     setIsFetching(true);
     setIsFetched(false); // Reset isFetched when a new schema is selected
     setError("");
+    resetVisualiserState();
 
     try {
       const response = await axios.get(
