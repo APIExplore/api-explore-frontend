@@ -180,8 +180,8 @@ export default function LandingPage() {
           <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
             <Tabs.Tab
               className="api-list-tab"
-              label="Choose API"
-              icon={<Icon type="list" variant="fill" />}
+              label="Start API"
+              icon={<Icon type="queue" variant="fill" />}
             >
               <ApiList apiList={apiList} />
             </Tabs.Tab>
@@ -231,6 +231,7 @@ export default function LandingPage() {
           id="close-landing-page"
           variant="filled"
           onClick={close}
+          disabled={!schemaName}
           trailingIcon={<Icon type="sign-in" />}
         >
           Enter
