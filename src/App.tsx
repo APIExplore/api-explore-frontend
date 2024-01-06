@@ -1,17 +1,19 @@
 import React, { useEffect } from "react";
 
+import { Typography } from "@tiller-ds/core";
+import { Icon } from "@tiller-ds/icons";
+
 import BottomPanel from "./components/BottomPanel/BottomPanel";
 import LandingPage from "./components/LandingPage/LandingPage";
 import LeftPanel from "./components/LeftPanel/LeftPanel";
 import RightPanel from "./components/RightPanel/RightPanel";
 import VisualisationPanel from "./components/VisualisationPanel/VisualisationPanel";
-import usePanelDimensionsStore from "./stores/panelDimensionsStore";
-import { LoadingIcon } from "@tiller-ds/icons";
 import useAgentStore from "./stores/agentStore";
+import usePanelDimensionsStore from "./stores/panelDimensionsStore";
 
 function App() {
   const setContainerDimensions = usePanelDimensionsStore(
-    (store) => store.setDimensions
+    (store) => store.setDimensions,
   );
 
   const agentLoading = useAgentStore((store: any) => store.agentLoading);
@@ -20,12 +22,12 @@ function App() {
     setContainerDimensions(
       "container",
       "width",
-      Number(document.getElementById("container")?.clientWidth)
+      Number(document.getElementById("container")?.clientWidth),
     );
     setContainerDimensions(
       "container",
       "height",
-      Number(document.getElementById("container")?.clientHeight)
+      Number(document.getElementById("container")?.clientHeight),
     );
   }, []);
 
@@ -36,7 +38,12 @@ function App() {
           className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-50 flex justify-center items-center"
           id="loading-screen"
         >
-          <LoadingIcon size={6} className="text-white" />
+          <div className="flex flex-col mb-12 items-center animate-pulse space-y-4">
+            <Icon type="coffee" size={10} className=" text-white" />
+            <Typography variant="h4" className="text-white pb-4">
+              Starting the API...
+            </Typography>
+          </div>
         </div>
       )}
       <LandingPage />

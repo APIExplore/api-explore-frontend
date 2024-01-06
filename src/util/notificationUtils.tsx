@@ -79,3 +79,35 @@ export function renderSimulationStartedNotification() {
     ),
   } as NotificationProps;
 }
+
+export function renderApiStoppedNotification(apiName: string) {
+  return {
+    title: "API stopped",
+    content: (
+      <Typography className="text-body-light">
+        API <i>{apiName}</i> has been stopped
+      </Typography>
+    ),
+    icon: (
+      <Icon type="stop-circle" className="text-primary opacity-60" size={7} />
+    ),
+  } as NotificationProps;
+}
+
+export function renderApiRestartedNotification(apiName: string) {
+  return {
+    title: "API restarted",
+    content: (
+      <Typography className="text-body-light">
+        API <i>{apiName}</i> has been restarted
+      </Typography>
+    ),
+    icon: (
+      <Icon
+        type="arrow-counter-clockwise"
+        className="text-primary opacity-60"
+        size={7}
+      />
+    ),
+  } as NotificationProps;
+}

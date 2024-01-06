@@ -94,12 +94,12 @@ export default function NewSchema({
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col mt-2 mb-4 h-36">
         <div className="py-3 mt-6 text-center">
-          <Typography variant="h6">Api Schema Name:</Typography>
+          <Typography variant="h6">API Schema Name:</Typography>
         </div>
         <Input
           id="schema-name-input"
           error={nameError}
-          className="py-2"
+          className="py-2 px-4"
           name="test"
           onChange={onApiSchemaNameChange}
           placeholder="API schema name"
@@ -110,12 +110,12 @@ export default function NewSchema({
       <hr />
       <div className="flex flex-col mb-2">
         <div className="py-3 mt-6 text-center">
-          <Typography variant="h6">Api Schema Address:</Typography>
+          <Typography variant="h6">API Schema Address:</Typography>
         </div>
         <Input
           id="schema-adress-input"
           error={inputError}
-          className="py-2"
+          className="py-2 px-4"
           name="test"
           onChange={onApiSchemaInputChange}
           placeholder="API schema adress"
@@ -125,7 +125,7 @@ export default function NewSchema({
         <StatusButton
           status={isFetched ? "success" : inputError ? "error" : "idle"}
           id="submit-adress-button"
-          className="my-2 w-full h-50"
+          className="my-2 mx-4 h-50"
           variant="outlined"
           onClick={submitApiAdress}
         >

@@ -6,9 +6,10 @@ import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
 import { Button, Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
+import ApiList from "./ApiList";
 import ExistingSchema from "./existingSchema";
 import NewSchema from "./newSchema";
-import { backendDomain } from "../../constants/apiConstants";
+import { agentDomain, backendDomain } from "../../constants/apiConstants";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
@@ -21,6 +22,8 @@ import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 export default function LandingPage() {
   const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
   const notification = useNotificationContext();
+
+  const [apiList, setApiList] = useState([]);
 
   const schemaName = useApiCallsStore((store) => store.schemaName);
   const modalOpened = useSchemaModalStore((store) => store.opened);
@@ -64,6 +67,16 @@ export default function LandingPage() {
         if (response.data.warnings) {
           logs.addWarnings(response.data.warnings);
         }
+
+        axios
+          .get(`${agentDomain}/api`)
+          .then((response) => {
+            // Assuming the response data is an array of objects with id and name properties
+            setApiList(response.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching API list:", error);
+          });
       } catch (error: any) {
         console.error("Error fetching API schemas from the backend:", error);
         if (error.response.data) {
@@ -166,6 +179,13 @@ export default function LandingPage() {
         <Modal.Content title="">
           <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
             <Tabs.Tab
+              className="api-list-tab"
+              label="Start API"
+              icon={<Icon type="queue" variant="fill" />}
+            >
+              <ApiList apiList={apiList} />
+            </Tabs.Tab>
+            <Tabs.Tab
               className="new-schema-tab"
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
@@ -211,6 +231,7 @@ export default function LandingPage() {
           id="close-landing-page"
           variant="filled"
           onClick={close}
+          disabled={!schemaName}
           trailingIcon={<Icon type="sign-in" />}
         >
           Enter
