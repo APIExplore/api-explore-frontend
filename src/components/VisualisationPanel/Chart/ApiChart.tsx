@@ -21,12 +21,13 @@ import { ApiCall } from "../../../types/apiCallTypes";
 import { prettifyTimestamp } from "../../../util/dateUtils";
 
 export default function ApiChart() {
-  const schemaName = useApiCallsStore((store) => store.schemaName);
-  const apiCalls = useApiCallsStore((state) => state.apiCalls);
-  const fetching = useApiCallsStore((state) => state.fetching);
-  const setSelectedApiCalls = useApiCallsStore(
-    (state) => state.setSelectedApiCalls,
-  );
+  const {
+    schemaName,
+    apiCalls,
+    fetching,
+    setSelectedApiCalls,
+    callByCallMode,
+  } = useApiCallsStore();
   const visualisationPanelHeight = usePanelDimensionsStore(
     (store) => store.panels.middle.height,
   );
@@ -35,18 +36,47 @@ export default function ApiChart() {
   const [apexData, setApexData] = useState<ApexData[]>([]);
 
   useEffect(() => {
-    const apexData: ApexData[] = [];
-    apiCalls.forEach((call: ApiCall) => {
-      const timestampMs = new Date(call.date).getTime();
-      apexData.push({
-        timestamp: call.date,
-        url: call.url,
-        operationId: call.operationId,
-        x: call.method.toUpperCase(),
-        y: [timestampMs, timestampMs + call.duration],
-      });
+    const apexDataCopy: ApexData[] = [];
+
+    apiCalls.forEach((call: ApiCall, index) => {
+      if (callByCallMode.enabled) {
+        const previousCall =
+          index - 1 !== -1 ? apiCalls.at(index - 1) : undefined;
+        const previousTimestampMs =
+          index - 1 !== -1 ? apexData.at(index - 1)?.y[1] : undefined;
+
+        if (previousCall && previousTimestampMs) {
+          const currentTimestamp = Number(previousTimestampMs);
+          apexDataCopy.push({
+            timestamp: call.date,
+            url: call.url,
+            operationId: call.operationId,
+            x: call.method.toUpperCase(),
+            y: [currentTimestamp, currentTimestamp + call.duration],
+          });
+        } else {
+          const timestampMs = new Date().setHours(0, 0, 0, 0);
+          apexDataCopy.push({
+            timestamp: call.date,
+            url: call.url,
+            operationId: call.operationId,
+            x: call.method.toUpperCase(),
+            y: [timestampMs, timestampMs + call.duration],
+          });
+        }
+      } else {
+        const timestampMs = new Date(call.date).getTime();
+        apexDataCopy.push({
+          timestamp: call.date,
+          url: call.url,
+          operationId: call.operationId,
+          x: call.method.toUpperCase(),
+          y: [timestampMs, timestampMs + call.duration],
+        });
+      }
     });
-    setApexData(apexData);
+
+    setApexData(apexDataCopy);
   }, [apiCalls]);
 
   const selectDataPoints = (event, chartContext, config) => {

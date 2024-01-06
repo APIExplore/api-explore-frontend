@@ -16,6 +16,7 @@ export type ApiCall = {
     size: number;
   };
   duration: number;
+  relationships: Relationships;
 };
 
 export type ParameterType = {
@@ -32,4 +33,22 @@ export type Metrics = {
   avgDuration: number;
   totSize: number;
   avgSize: number;
+};
+
+export type RelationshipType = "start" | "end" | "mid";
+
+type Relationships = {
+  responseEquality?: RelationshipType[];
+  responseInequality?: RelationshipType[];
+  stateMutation?: RelationshipType[];
+  stateIdentity?: RelationshipType[];
+  fuzz?: RelationshipType[];
+};
+
+export type RelationshipMapping = {
+  responseEquality?: Record<number, RelationshipType[]>;
+  responseInequality?: Record<number, RelationshipType[]>;
+  stateMutation?: Record<number, RelationshipType[]>;
+  stateIdentity?: Record<number, RelationshipType[]>;
+  fuzz?: Record<number, RelationshipType[]>;
 };

@@ -7,6 +7,7 @@ import { Icon } from "@tiller-ds/icons";
 import useAgentStore from "../../stores/agentStore";
 import useApiCallsStore from "../../stores/apiCallsStore";
 import useLogsStore from "../../stores/logsStore";
+import useRelationshipsStore from "../../stores/relationshipsStore";
 import useRequestsStore from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import {
@@ -22,25 +23,32 @@ export default function SimulationControls() {
   /* Get agent id and pid*/
   const agentPid = useAgentStore((store: any) => store.agentPid);
   const agentId = useAgentStore((store: any) => store.agentId);
-
   /* Function for setting new agent pid */
   const restoreAgent = useAgentStore((store: any) => store.restoreAgent);
   const stopAgent = useAgentStore((state) => state.stopAgent);
   const startedApi = useAgentStore((state) => state.startedApi);
 
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
+
   const selectedRequests: Request[] = useRequestsStore(
     (store) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
+
   const logsStore = useLogsStore();
+
   const fetchData = useApiCallsStore((store) => store.fetchData);
   const callByCall = useApiCallsStore((store) => store.callByCallMode);
   const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
+  const clearRelationshipMappings = useRelationshipsStore(
+    (store) => store.clearMappings,
+  );
+
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
+    clearRelationshipMappings();
     if (callByCall.enabled) {
       if (callByCall.nextCallIndex === selectedRequests.length) {
         setCallByCall(callByCall.enabled, 0);
@@ -54,7 +62,7 @@ export default function SimulationControls() {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
       }

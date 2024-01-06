@@ -121,6 +121,10 @@ body {
   width: 100%;
 }
 
+[data-reach-menu] {
+  width: 350px;
+}
+
 [data-reach-popover] {
   z-index: 50 !important;
 }

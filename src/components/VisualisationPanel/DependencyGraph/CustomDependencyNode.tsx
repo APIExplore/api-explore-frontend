@@ -4,7 +4,7 @@ import { Handle, Position } from "reactflow";
 
 import MethodBadge from "../../MethodBadge";
 
-const CustomNode = ({
+const CustomDependencyNode = ({
   data,
 }: {
   data: {
@@ -39,4 +39,4 @@ const CustomNode = ({
   );
 };
 
-export default CustomNode;
+export default CustomDependencyNode;

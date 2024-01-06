@@ -52,6 +52,11 @@ export const defaultComponentConfig: ThemeConfigFactory = {
     ButtonGroups: {
       base: "",
     },
+    DropdownMenu: {
+      MenuInnerContainer: {
+        borderRadius: "rounded-md overflow-x-hidden",
+      },
+    },
   },
 };
 
