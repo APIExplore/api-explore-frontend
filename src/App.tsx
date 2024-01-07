@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Typography } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
@@ -16,20 +16,32 @@ function App() {
     (store) => store.setDimensions,
   );
 
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
   const agentLoading = useAgentStore((store: any) => store.agentLoading);
 
   useEffect(() => {
-    setContainerDimensions(
-      "container",
-      "width",
-      Number(document.getElementById("container")?.clientWidth),
-    );
-    setContainerDimensions(
-      "container",
-      "height",
-      Number(document.getElementById("container")?.clientHeight),
-    );
+    function updateContainerDimensions() {
+      const container = document.getElementById("container");
+      if (container) {
+        setContainerWidth(container.clientWidth);
+        setContainerHeight(container.clientHeight);
+      }
+    }
+
+    updateContainerDimensions();
+
+    window.addEventListener("resize", updateContainerDimensions);
+
+    return () => {
+      window.removeEventListener("resize", updateContainerDimensions);
+    };
   }, []);
+
+  useEffect(() => {
+    setContainerDimensions("container", "width", containerWidth);
+    setContainerDimensions("container", "height", containerHeight);
+  }, [containerWidth, containerHeight, setContainerDimensions]);
 
   return (
     <div className="flex flex-col w-full h-full" id="container">

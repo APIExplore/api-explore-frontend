@@ -1,26 +1,26 @@
+import { useState } from "react";
+
 import { ResizableBox } from "react-resizable";
 
-import { Button, Tabs } from "@tiller-ds/core";
+import { useModal } from "@tiller-ds/alert";
+import { Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import Details from "./Details";
+import HtmlDetails from "./HtmlDetails";
 import Metrics from "./Metrics";
 import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
-import { Modal, useModal } from "@tiller-ds/alert";
-import useApiCallsStore from "../../stores/apiCallsStore";
-import { useState } from "react";
-import HtmlDetails from "./HtmlDetails";
 
 export default function LeftPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const modal = useModal();
   const [clickedApiCall, setClickedApiCall] = useState();
   const containerHeight = usePanelDimensionsStore(
-    (store) => store.panels.container.height
+    (store) => store.panels.container.height,
   );
   const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
+    (store) => store.panels.bottom.height,
   );
   const ref = useResizeObserver("left", setDimensions);
 

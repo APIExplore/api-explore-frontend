@@ -26,8 +26,8 @@ export default function ApiList({ apiList }: ApiListProps) {
     try {
       await startAgent(
         api.id,
-        currentAgentId,
-        currentAgentPid,
+        currentAgentId as string,
+        currentAgentPid as string,
         javaPath.length > 0 ? javaPath : undefined,
       );
       setIsStarted(true);
@@ -49,7 +49,7 @@ export default function ApiList({ apiList }: ApiListProps) {
         <div className="flex flex-col">
           <div className="pb-3 mt-6 text-center">
             <DropdownMenu
-              title="Available APIs"
+              title={startedApi ? startedApi : "Available APIs"}
               id="dropdown-available-apis"
               visibleItemCount={13}
             >

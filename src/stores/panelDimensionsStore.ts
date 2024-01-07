@@ -23,24 +23,26 @@ export type PanelDimensionsStore = {
 const usePanelDimensionsStore = create<PanelDimensionsStore>((set) => ({
   panels: {
     left: {
-      width: Number(document.getElementById("left-panel")?.clientWidth),
-      height: Number(document.getElementById("left-panel")?.clientHeight),
+      width: Number(document.getElementById("left-panel")?.clientWidth) || 0,
+      height: Number(document.getElementById("left-panel")?.clientHeight) || 0,
     },
     middle: {
-      width: Number(document.getElementById("middle-panel")?.clientWidth),
-      height: Number(document.getElementById("middle-panel")?.clientHeight),
+      width: Number(document.getElementById("middle-panel")?.clientWidth) || 0,
+      height:
+        Number(document.getElementById("middle-panel")?.clientHeight) || 0,
     },
     right: {
-      width: Number(document.getElementById("right-panel")?.clientWidth),
-      height: Number(document.getElementById("right-panel")?.clientHeight),
+      width: Number(document.getElementById("right-panel")?.clientWidth) || 0,
+      height: Number(document.getElementById("right-panel")?.clientHeight) || 0,
     },
     bottom: {
-      width: Number(document.getElementById("bottom-panel")?.clientWidth),
-      height: Number(document.getElementById("bottom-panel")?.clientHeight),
+      width: Number(document.getElementById("bottom-panel")?.clientWidth) || 0,
+      height:
+        Number(document.getElementById("bottom-panel")?.clientHeight) || 0,
     },
     container: {
-      width: Number(document.getElementById("container")?.clientWidth),
-      height: Number(document.getElementById("container")?.clientHeight),
+      width: Number(document.getElementById("container")?.clientWidth) || 0,
+      height: Number(document.getElementById("container")?.clientHeight) || 0,
     },
   },
   setDimensions: (panel, dimensionType, amount) => {

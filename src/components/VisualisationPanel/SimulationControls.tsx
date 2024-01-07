@@ -17,7 +17,11 @@ import {
 } from "../../util/notificationUtils";
 import { Request } from "../RightPanel/types/RightPanelTypes";
 
-export default function SimulationControls() {
+export default function SimulationControls({
+  shouldReposition,
+}: {
+  shouldReposition: boolean;
+}) {
   const notification = useNotificationContext();
 
   /* Get agent id and pid*/
@@ -31,47 +35,55 @@ export default function SimulationControls() {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests
+    (store) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
   const logsStore = useLogsStore();
 
-  const fetchData = useApiCallsStore((store) => store.fetchData);
-  const callByCall = useApiCallsStore((store) => store.callByCallMode);
-  const setCallByCall = useApiCallsStore((store) => store.setCallByCallMode);
-  const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
+  const {
+    fetchData,
+    callByCallMode,
+    setCallByCallMode,
+    setApiCalls,
+    setSchemaName,
+  } = useApiCallsStore();
 
   const clearRelationshipMappings = useRelationshipsStore(
-    (store) => store.clearMappings
+    (store) => store.clearMappings,
   );
 
   const simulateCallSequence = async () => {
     notification.push(renderSimulationStartedNotification());
     clearRelationshipMappings();
-    if (callByCall.enabled) {
-      if (callByCall.nextCallIndex === selectedRequests.length) {
-        setCallByCall(callByCall.enabled, 0);
+    if (callByCallMode.enabled) {
+      if (callByCallMode.nextCallIndex === selectedRequests.length) {
+        setCallByCallMode(callByCallMode.enabled, 0);
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore
+          logsStore,
         );
-        setCallByCall(callByCall.enabled, 1);
+        setCallByCallMode(callByCallMode.enabled, 1);
       } else {
         await fetchData(
           callSequenceName,
-          Array.of(selectedRequests.at(callByCall.nextCallIndex) as Request),
-          logsStore
+          Array.of(
+            selectedRequests.at(callByCallMode.nextCallIndex) as Request,
+          ),
+          logsStore,
         );
-        setCallByCall(callByCall.enabled, callByCall.nextCallIndex + 1);
+        setCallByCallMode(
+          callByCallMode.enabled,
+          callByCallMode.nextCallIndex + 1,
+        );
       }
     } else {
       await fetchData(callSequenceName, selectedRequests, logsStore);
     }
   };
   const resetCallByCall = () => {
-    setCallByCall(callByCall.enabled, 0);
+    setCallByCallMode(callByCallMode.enabled, 0);
     setApiCalls([]);
   };
 
@@ -79,8 +91,19 @@ export default function SimulationControls() {
     setModalOpened(true);
   };
 
+  const stopApi = () => {
+    notification.push(renderApiStoppedNotification(startedApi as string));
+    stopAgent();
+    openLandingPage();
+    setSchemaName(null);
+  };
+
   return (
-    <div className="w-fit h-9 flex absolute right-0 top-0 mr-4 mt-4 z-40">
+    <div
+      className={`w-fit h-9 flex absolute right-0 ${
+        shouldReposition ? "bottom-2" : "top-0"
+      } mr-4 mt-4 z-40`}
+    >
       <Button
         id="choose-schema"
         variant="text"
@@ -109,9 +132,9 @@ export default function SimulationControls() {
             ) : (
               <div className="flex flex-col relative">
                 <Icon type="play" />
-                {callByCall.enabled && (
+                {callByCallMode.enabled && (
                   <div className="absolute top-0 left-0 px-4 pt-3 rounded-lg text-xs">
-                    {callByCall.nextCallIndex}/{selectedRequests.length}
+                    {callByCallMode.nextCallIndex}/{selectedRequests.length}
                   </div>
                 )}
               </div>
@@ -121,9 +144,9 @@ export default function SimulationControls() {
             variant="text"
             id="stop-button"
             onClick={resetCallByCall}
-            disabled={!callByCall.enabled}
+            disabled={!callByCallMode.enabled}
           >
-            {!callByCall.enabled ? (
+            {!callByCallMode.enabled ? (
               <Tooltip label="You can stop the simulation only in the Call-by-call mode">
                 <div className="flex items-center justify-center">
                   <Icon type="stop" className="text-primary-dark" />
@@ -141,18 +164,20 @@ export default function SimulationControls() {
             variant="text"
             id="agent-stop-button"
             disabled={!agentPid}
-            onClick={() => {
-              notification.push(
-                renderApiStoppedNotification(startedApi as string)
-              );
-              stopAgent();
-            }}
+            onClick={stopApi}
           >
-            <Tooltip label="Stop API">
-              <div className="flex items-center justify-center">
-                <Icon type="stop-circle" className="text-primary-dark" />
-              </div>
-            </Tooltip>
+            <div className="flex flex-col relative">
+              <Tooltip label="Stop active API">
+                <div className="flex items-center justify-center">
+                  <Icon type="stop-circle" className="text-primary-dark" />
+                </div>
+                {agentPid && (
+                  <div className="absolute top-1 left-0 px-4 pt-3 rounded-lg text-xs">
+                    <div className="bg-success w-1.5 h-1.5 rounded-full" />
+                  </div>
+                )}
+              </Tooltip>
+            </div>
           </ButtonGroups.Button>
           <ButtonGroups.Button
             variant="text"
@@ -160,12 +185,12 @@ export default function SimulationControls() {
             disabled={!agentPid}
             onClick={() => {
               notification.push(
-                renderApiRestartedNotification(startedApi as string)
+                renderApiRestartedNotification(startedApi as string),
               );
               restoreAgent(agentId, agentPid);
             }}
           >
-            <Tooltip label="Restart API">
+            <Tooltip label="Restart active API">
               <div className="flex items-center justify-center">
                 <Icon
                   type="arrow-counter-clockwise"

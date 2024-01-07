@@ -4,8 +4,8 @@ import { create, SetState } from "zustand";
 import { agentDomain } from "../constants/apiConstants";
 
 type AgentStore = {
-  agentId: string;
-  agentPid: string;
+  agentId: string | null;
+  agentPid: string | null;
   agentLoading: boolean;
   startedApi: string | null;
   setStartedApi: (api: string | null) => void;
@@ -22,8 +22,8 @@ type AgentStore = {
 };
 
 const useAgentStore = create<AgentStore>((set: SetState<AgentStore>, get) => ({
-  agentId: "",
-  agentPid: "",
+  agentId: null,
+  agentPid: null,
   agentLoading: false,
   startedApi: null,
   setStartedApi: (api: string | null) => set({ startedApi: api }),
@@ -101,6 +101,8 @@ const useAgentStore = create<AgentStore>((set: SetState<AgentStore>, get) => ({
         });
       }
       set({ startedApi: null });
+      set({ agentId: null });
+      set({ agentPid: null });
     } catch (error) {
       console.error("Error stopping agent:", error);
       throw error;

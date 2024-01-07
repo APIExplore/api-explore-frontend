@@ -8,8 +8,8 @@ import { backendDomain } from "../constants/apiConstants";
 import { ApiCall, Metrics } from "../types/apiCallTypes";
 
 type ApiStore = {
-  schemaName: string;
-  setSchemaName: (name: string) => void;
+  schemaName: string | null;
+  setSchemaName: (name: string | null) => void;
   apiCalls: ApiCall[];
   setApiCalls: (callSequence: ApiCall[]) => void;
   selectedApiCalls: ApiCall[];
@@ -31,10 +31,10 @@ type ApiStore = {
 const useApiCallsStore = create<ApiStore>((set, get) => ({
   apiCalls: [],
   selectedApiCalls: [],
-  schemaName: "",
+  schemaName: null,
   callByCallMode: { enabled: false, nextCallIndex: 0 },
   metrics: null,
-  setSchemaName: (name: string) => set({ schemaName: name }),
+  setSchemaName: (name: string | null) => set({ schemaName: name }),
   setApiCalls: (callSequence) => set({ apiCalls: callSequence }),
   setSelectedApiCalls: (apiCalls) => set({ selectedApiCalls: apiCalls }),
   fetching: false,

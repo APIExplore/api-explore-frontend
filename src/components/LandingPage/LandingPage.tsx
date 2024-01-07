@@ -3,59 +3,64 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import { Modal, useModal, useNotificationContext } from "@tiller-ds/alert";
-import { Button, Tabs } from "@tiller-ds/core";
+import { Button, ProgressBar, Tabs, Typography } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import ApiList from "./ApiList";
 import ExistingSchema from "./existingSchema";
 import NewSchema from "./newSchema";
 import { agentDomain, backendDomain } from "../../constants/apiConstants";
+import useAgentStore from "../../stores/agentStore";
 import useApiCallsStore from "../../stores/apiCallsStore";
+import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import useLogsStore from "../../stores/logsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import { renderChooseSchemaNotification } from "../../util/notificationUtils";
 import ConditionalDisplay from "../ConditionalDisplay";
 import { Definition } from "../RightPanel/types/RightPanelTypes";
-import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 
 export default function LandingPage() {
   const [existingApiSchemasNames, setExistingApiSchemasNames] = useState([]);
   const notification = useNotificationContext();
 
   const [apiList, setApiList] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   const schemaName = useApiCallsStore((store) => store.schemaName);
   const modalOpened = useSchemaModalStore((store) => store.opened);
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
   const setAllRequests = useRequestsStore(
-    (store: RequestsStore) => store.setAllRequests
+    (store: RequestsStore) => store.setAllRequests,
   );
   const setDefinitions = useRequestsStore(
-    (store: RequestsStore) => store.setDefinitions
+    (store: RequestsStore) => store.setDefinitions,
   );
   const setAllShownItems = useRequestsStore(
-    (store: RequestsStore) => store.setAllShownItems
+    (store: RequestsStore) => store.setAllShownItems,
   );
   const setSelectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.setSelectedRequests
+    (store: RequestsStore) => store.setSelectedRequests,
   );
   const setCallSequenceName = useRequestsStore(
-    (store: RequestsStore) => store.setCallSequenceName
+    (store: RequestsStore) => store.setCallSequenceName,
   );
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
   const setSelectedApiCalls = useApiCallsStore(
-    (store) => store.setSelectedApiCalls
+    (store) => store.setSelectedApiCalls,
   );
   const setFetchedCallSequences = useCallSequenceCacheStore(
-    (store) => store.setFetchedCallSequences
+    (store) => store.setFetchedCallSequences,
   );
   const logs = useLogsStore();
+
+  const { agentId, startedApi } = useAgentStore();
 
   const modal = useModal();
   const close = () => {
     setModalOpened(false);
-    notification.push(renderChooseSchemaNotification(schemaName));
+    setActiveTab(0);
+    notification.push(renderChooseSchemaNotification(schemaName as string));
   };
 
   useEffect(() => {
@@ -125,7 +130,7 @@ export default function LandingPage() {
                   in: param.in,
                   value: "",
                 };
-              }
+              },
             );
           }
 
@@ -175,9 +180,40 @@ export default function LandingPage() {
       canDismiss={false}
       onClose={() => setModalOpened(false)}
     >
-      <div style={{ height: "700px", overflowY: "auto" }}>
+      <ProgressBar
+        completed={
+          agentId !== null && schemaName !== null && schemaName.length > 0
+        }
+      >
+        <ProgressBar.Step>
+          <span>Started API service</span>
+          <Typography variant="subtext" className="string-value line-clamp-2">
+            {startedApi}
+          </Typography>
+        </ProgressBar.Step>
+        <ProgressBar.Step active={agentId !== null}>
+          <span>Chosen API schema</span>
+          <Typography variant="subtext" className="string-value line-clamp-2">
+            {schemaName}
+          </Typography>
+        </ProgressBar.Step>
+      </ProgressBar>
+      <div style={{ height: "650px", overflowY: "auto" }}>
         <Modal.Content title="">
-          <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
+          <Tabs
+            iconPlacement="trailing"
+            fullWidth={true}
+            className="w-full"
+            index={activeTab}
+            defaultIndex={activeTab}
+            onTabChange={(tabIndex) => {
+              if ((tabIndex === 1 || tabIndex === 2) && !startedApi) {
+                setActiveTab(0);
+              } else {
+                setActiveTab(tabIndex);
+              }
+            }}
+          >
             <Tabs.Tab
               className="api-list-tab"
               label="Start API"
@@ -186,7 +222,7 @@ export default function LandingPage() {
               <ApiList apiList={apiList} />
             </Tabs.Tab>
             <Tabs.Tab
-              className="new-schema-tab"
+              className={`new-schema-tab ${!startedApi && "opacity-50"}`}
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
             >
@@ -197,7 +233,7 @@ export default function LandingPage() {
               />
             </Tabs.Tab>
             <Tabs.Tab
-              className="existing-schema-tab"
+              className={`existing-schema-tab ${!startedApi && "opacity-50"}`}
               label="Existing schema"
               icon={<Icon type="list" variant="fill" />}
             >
@@ -231,7 +267,7 @@ export default function LandingPage() {
           id="close-landing-page"
           variant="filled"
           onClick={close}
-          disabled={!schemaName}
+          disabled={!schemaName && !startedApi}
           trailingIcon={<Icon type="sign-in" />}
         >
           Enter

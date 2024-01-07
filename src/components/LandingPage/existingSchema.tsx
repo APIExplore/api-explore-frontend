@@ -30,12 +30,14 @@ export default function ExistingSchema({
   resetVisualiserState: () => void;
 }) {
   const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
+  const schemaName = useApiCallsStore((store) => store.schemaName);
+
   const logs = useLogsStore();
   const allRequests = useRequestsStore(
-    (store: RequestsStore) => store.allRequests
+    (store: RequestsStore) => store.allRequests,
   );
   const definitions = useRequestsStore(
-    (store: RequestsStore) => store.definitions
+    (store: RequestsStore) => store.definitions,
   );
   const [schemaInputValue, setSchemaInputValue] = useState("");
   const [selectedApiSchema, setSelectedApiSchema] = useState(null);
@@ -70,7 +72,7 @@ export default function ExistingSchema({
 
     try {
       const response = await axios.get(
-        `${backendDomain}/apiSchema/fetch/` + item.name
+        `${backendDomain}/apiSchema/fetch/` + item.name,
       );
 
       setSchemaName(item.name);
@@ -103,7 +105,7 @@ export default function ExistingSchema({
       setRemovedApiSchema(item.name);
       setIsRemoving(true);
       const response = await axios.delete(
-        `${backendDomain}/apischema/delete/${item.name}`
+        `${backendDomain}/apischema/delete/${item.name}`,
       );
       if (response.data.success) {
         await updateAvailableSchemas();
@@ -121,12 +123,12 @@ export default function ExistingSchema({
   const finalSchemaOptions = useMemo(() => {
     // Filter the options based on schemaInputValue and maintain the original length
     const filteredOptions = existingApiSchemasNames.filter((option) =>
-      option.name.toLowerCase().includes(schemaInputValue.toLowerCase())
+      option.name.toLowerCase().includes(schemaInputValue.toLowerCase()),
     );
 
     // Create an array of null values with the remaining length
     const remainingNulls = new Array(
-      existingApiSchemasNames.length - filteredOptions.length
+      existingApiSchemasNames.length - filteredOptions.length,
     ).fill(null);
 
     // Concatenate the filtered options with null values to maintain the original length
@@ -142,7 +144,7 @@ export default function ExistingSchema({
         <div className="flex flex-col">
           <div className="pb-3 mt-6 text-center">
             <DropdownMenu
-              title={title}
+              title={schemaName ? schemaName : title}
               id="dropdown-existing-schemas"
               onClick={() => {
                 setIsExpanded(!isExpanded);
@@ -150,36 +152,30 @@ export default function ExistingSchema({
               }}
               visibleItemCount={13}
             >
+              <div className="relative mb-2 top-0 bg-white z-50 shadow-b">
+                <Input
+                  name="find-schema"
+                  id="find-schema"
+                  placeholder="Search schema by name"
+                  aria-autocomplete="none"
+                  value={schemaInputValue}
+                  onChange={(e) => {
+                    setSchemaInputValue(e.target.value);
+                  }}
+                  onReset={() => setSchemaInputValue("")}
+                  crossOrigin={undefined}
+                  allowClear={true}
+                  className="p-3"
+                  autoComplete="false"
+                />
+              </div>
+              {finalSchemaOptions.every((option) => option === null) && (
+                <div className="w-full text-center text-body text-sm">
+                  No results
+                </div>
+              )}
               {finalSchemaOptions.map((item, index) => (
-                <>
-                  {index === 0 && (
-                    <>
-                      <div className="sticky top-0 bg-white z-50 shadow-b">
-                        <Input
-                          name="find-schema"
-                          id="find-schema"
-                          placeholder="Search schema by name"
-                          aria-autocomplete="none"
-                          value={schemaInputValue}
-                          onChange={(e) => {
-                            setSchemaInputValue(e.target.value);
-                          }}
-                          onReset={() => setSchemaInputValue("")}
-                          crossOrigin={undefined}
-                          allowClear={true}
-                          className="p-3"
-                          autoComplete="false"
-                        />
-                      </div>
-                      {finalSchemaOptions.every(
-                        (option) => option === null
-                      ) && (
-                        <div className="w-full text-center text-body text-sm">
-                          No results
-                        </div>
-                      )}
-                    </>
-                  )}
+                <div key={index}>
                   {item && (
                     <div className="flex w-full justify-between" key="index">
                       <div className="w-11/12">
@@ -189,6 +185,7 @@ export default function ExistingSchema({
                             selectApiSchema(item);
                             setSchemaInputValue("");
                           }}
+                          disabled={schemaName === item.name}
                         >
                           <div
                             id={"schema-" + index}
@@ -234,7 +231,7 @@ export default function ExistingSchema({
                       />
                     </div>
                   )}
-                </>
+                </div>
               ))}
             </DropdownMenu>
             <p

@@ -15,7 +15,7 @@ import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 export default function BottomPanel() {
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
   const containerWidth = usePanelDimensionsStore(
-    (store) => store.panels.container.width
+    (store) => store.panels.container.width,
   );
 
   const ref = useResizeObserver("bottom", setDimensions);

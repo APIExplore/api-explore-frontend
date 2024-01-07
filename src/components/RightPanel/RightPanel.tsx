@@ -251,292 +251,298 @@ export default function RightPanel() {
       height={containerHeight - bottomPanelHeight - 8}
       resizeHandles={["w"]}
     >
-      <Modal
-        {...modal}
-        icon={
-          <Modal.Icon
-            icon={<Icon type="lock-open" variant="bold" />}
-            tokens={{
-              Icon: {
-                backgroundColor: "bg-primary",
-              },
-            }}
-            className="text-white"
-          />
-        }
-      >
-        {(state: any) => {
-          return (
-            <>
-              <Modal.Content title={"Endpoint name: " + state.operationId}>
-                {"Edit params"}
-                {state.params?.length === 0 && (
-                  <p>No params for this endpoint</p>
-                )}
-                {state.params?.map((item, index) => (
-                  <Input
-                    key={index}
-                    id={"params-input-" + String(index)}
-                    label={<p className="font-semibold">{item.name}</p>}
-                    className="py-2"
-                    name="params"
-                    onChange={(e) => onParamChange(e, item.name)}
-                    value={item.value}
-                    crossOrigin={undefined}
-                  />
-                ))}
-              </Modal.Content>
+      <>
+        <Modal
+          {...modal}
+          icon={
+            <Modal.Icon
+              icon={<Icon type="lock-open" variant="bold" />}
+              tokens={{
+                Icon: {
+                  backgroundColor: "bg-primary",
+                },
+              }}
+              className="text-white"
+            />
+          }
+        >
+          {(state: any) => {
+            return (
+              <>
+                <Modal.Content title={"Endpoint name: " + state.operationId}>
+                  {"Edit params"}
+                  {state.params?.length === 0 && (
+                    <p>No params for this endpoint</p>
+                  )}
+                  {state.params?.map((item, index) => (
+                    <Input
+                      key={index}
+                      id={"params-input-" + String(index)}
+                      label={<p className="font-semibold">{item.name}</p>}
+                      className="py-2"
+                      name="params"
+                      onChange={(e) => onParamChange(e, item.name)}
+                      value={item.value}
+                      crossOrigin={undefined}
+                    />
+                  ))}
+                </Modal.Content>
 
-              <Modal.Footer>
-                <Button
-                  id="submit-endpoint"
-                  variant="filled"
-                  color="success"
-                  onClick={() => {
-                    selectItem();
-                  }}
-                >
-                  Submit Endpoint
-                </Button>
-                <Button
-                  id="cancel-params"
-                  variant="text"
-                  color="white"
-                  onClick={() => closeModal()}
-                >
-                  Cancel
-                </Button>
-              </Modal.Footer>
-            </>
-          );
-        }}
-      </Modal>
-      <div
-        className="flex h-full m-1 p-2 bg-white drop-shadow-md"
-        ref={ref}
-        id="right-panel"
-      >
-        <Tabs iconPlacement="trailing" fullWidth={true} index={activeTab}>
-          <Tabs.Tab
-            icon={<Icon type="faders" variant="fill" />}
-            label="Configuration"
-            className="config-tab flex flex-row justify-center"
-            onClick={(index) => {
-              setActiveTab(index);
+                <Modal.Footer>
+                  <Button
+                    id="submit-endpoint"
+                    variant="filled"
+                    color="success"
+                    onClick={() => {
+                      selectItem();
+                    }}
+                  >
+                    Submit Endpoint
+                  </Button>
+                  <Button
+                    id="cancel-params"
+                    variant="text"
+                    color="white"
+                    onClick={() => closeModal()}
+                  >
+                    Cancel
+                  </Button>
+                </Modal.Footer>
+              </>
+            );
+          }}
+        </Modal>
+        <div
+          className="flex h-full m-1 p-2 bg-white drop-shadow-md"
+          ref={ref}
+          id="right-panel"
+        >
+          <Tabs
+            iconPlacement="trailing"
+            fullWidth={true}
+            onTabChange={(tabIndex) => {
+              setActiveTab(tabIndex);
               setExistingSequenceFlag(
                 fetchedCallSequences.some(
                   (sequence) => sequence.name === callSequenceName,
                 ),
               );
             }}
+            index={activeTab}
           >
-            <div className="p-4">
-              <div className="flex justify-between mb-4">
-                <Typography variant="h5">Sequence Config</Typography>
-                <div className="mb-4">
-                  <Toggle
-                    label={
-                      <span className="text-sm leading-5 font-medium text-gray-900">
-                        <div className="flex">
-                          <Tooltip
-                            label={
-                              <span>
-                                When starting the simulation execute only one
-                                call from the sequence <br />
-                                <div className="flex">
-                                  <div className="w-4 h-4 bg-success-light" /> -
-                                  executed call
-                                </div>
-                                <div className="flex">
-                                  <div className="w-4 h-4 bg-info-light" /> -
-                                  next call to be executed
-                                </div>
-                              </span>
-                            }
-                          >
-                            <div className="flex items-center justify-center pr-1">
-                              <Icon
-                                type="info"
-                                size={4}
-                                className="text-slate-500"
-                              />
-                            </div>
-                          </Tooltip>
-                          Call-by-call
-                        </div>
-                      </span>
-                    }
-                    reverse={true}
-                    checked={callByCall.enabled}
-                    onClick={() => {
-                      setCallByCall(!callByCall.enabled, 0);
-                      setApiCalls([]);
-                    }}
-                  />
-                </div>
-              </div>
-              <Input
-                name="sequenceName"
-                id="sequence-name-input"
-                label="Call Sequence Name"
-                placeholder="Call sequence to be stored in the Sequences tab"
-                tooltip={
-                  shouldShowExistingTooltip ? (
-                    <Tooltip
+            <Tabs.Tab
+              icon={<Icon type="faders" variant="fill" />}
+              label="Configuration"
+              className="config-tab flex flex-row justify-center"
+            >
+              <div className="p-4">
+                <div className="flex justify-between mb-4">
+                  <Typography variant="h5">Sequence Config</Typography>
+                  <div className="mb-4">
+                    <Toggle
                       label={
-                        <span>
-                          The sequence with this name already exists in the
-                          history. <br />
-                          Running the simulation will overwrite the calls.
+                        <span className="text-sm leading-5 font-medium text-gray-900">
+                          <div className="flex">
+                            <Tooltip
+                              label={
+                                <span>
+                                  When starting the simulation execute only one
+                                  call from the sequence <br />
+                                  <div className="flex">
+                                    <div className="w-4 h-4 bg-success-light" />{" "}
+                                    - executed call
+                                  </div>
+                                  <div className="flex">
+                                    <div className="w-4 h-4 bg-info-light" /> -
+                                    next call to be executed
+                                  </div>
+                                </span>
+                              }
+                            >
+                              <div className="flex items-center justify-center pr-1">
+                                <Icon
+                                  type="info"
+                                  size={4}
+                                  className="text-slate-500"
+                                />
+                              </div>
+                            </Tooltip>
+                            Call-by-call
+                          </div>
                         </span>
                       }
-                    >
-                      <span className="flex items-center bg-yellow-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
-                        <Icon type="warning" size={2} className="mr-0.5" />
-                        Existing
-                      </span>
-                    </Tooltip>
-                  ) : shouldDisableInput ? (
-                    <Tooltip
-                      label={
-                        <span>
-                          You cannot change the sequence name when at least one
-                          call in the call-by-call mode has been executed.{" "}
-                          <br />
-                          Stop the simulation to change the call sequence name.
-                        </span>
-                      }
-                    >
-                      <span className="flex items-center bg-primary-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
-                        <Icon type="info" size={2} className="mr-0.5" />
-                        Running
-                      </span>
-                    </Tooltip>
-                  ) : undefined
-                }
-                value={callSequenceName}
-                onChange={(event) => {
-                  setExistingSequenceFlag(false);
-                  setCallSequenceName(event.target.value);
-                  validateInputLength(event.target.value);
-                  checkExistingSequences(event.target.value);
-                }}
-                onBlur={() => validateInputLength()}
-                error={inputError}
-                disabled={shouldDisableInput}
-                crossOrigin={undefined}
-              />
-              <CheckboxGroup
-                label={
-                  <Typography className="mt-4 font-semibold">
-                    Filter by method:
-                  </Typography>
-                }
-                name="methods"
-                className="-mt-0.5"
-                onChange={onCheckboxChange}
-                value={selectedMethods}
-                vertical
-              >
-                <div className="inline-grid grid-cols-2 gap-2">
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="GET"
-                    tokens={{
-                      GroupItem: {
-                        content: "static h-5 flex items-center",
-                      },
-                    }}
-                    value="get"
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="POST"
-                    value="post"
-                    tokens={{
-                      GroupItem: {
-                        content: "static h-5 flex items-center",
-                      },
-                    }}
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="PUT"
-                    value="put"
-                    tokens={{
-                      GroupItem: {
-                        content: "static h-5 flex items-center",
-                      },
-                    }}
-                  />
-                  <CheckboxGroup.Item
-                    className="col-span-1"
-                    label="DELETE"
-                    value="delete"
-                    tokens={{
-                      GroupItem: {
-                        content: "static h-5 flex items-center",
-                      },
-                    }}
-                  />
-                </div>
-              </CheckboxGroup>
-              <div className="my-5 flex items-center">
-                <DropdownMenu
-                  title="Endpoints"
-                  id="endpoints"
-                  visibleItemCount={5}
-                >
-                  {allShownItems.map((item, index) => (
-                    <DropdownMenu.Item
-                      key={index}
-                      onSelect={() => {
-                        setModalOperation("add");
-                        setClickedItem(JSON.parse(JSON.stringify(item)));
+                      reverse={true}
+                      checked={callByCall.enabled}
+                      onClick={() => {
+                        setCallByCall(!callByCall.enabled, 0);
+                        setApiCalls([]);
                       }}
-                    >
-                      <div className="text-body truncate">
-                        {item.method.toUpperCase()} {item.operationId}
-                      </div>
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu>
+                    />
+                  </div>
+                </div>
                 <Input
-                  type="file"
-                  accept=".json"
-                  onChange={extractDataFromCallSequence}
-                  placeholder="Test placeholder"
-                  name={"choose-seq"}
-                  className="ml-2"
+                  name="sequenceName"
+                  id="sequence-name-input"
+                  label="Call Sequence Name"
+                  placeholder="Call sequence to be stored in the Sequences tab"
+                  tooltip={
+                    shouldShowExistingTooltip ? (
+                      <Tooltip
+                        label={
+                          <span>
+                            The sequence with this name already exists in the
+                            history. <br />
+                            Running the simulation will overwrite the calls.
+                          </span>
+                        }
+                      >
+                        <span className="flex items-center bg-yellow-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
+                          <Icon type="warning" size={2} className="mr-0.5" />
+                          Existing
+                        </span>
+                      </Tooltip>
+                    ) : shouldDisableInput ? (
+                      <Tooltip
+                        label={
+                          <span>
+                            You cannot change the sequence name when at least
+                            one call in the call-by-call mode has been executed.{" "}
+                            <br />
+                            Stop the simulation to change the call sequence
+                            name.
+                          </span>
+                        }
+                      >
+                        <span className="flex items-center bg-primary-200 text-xs px-1.5 py-0.5 ml-0.5 rounded-full hover:text-black">
+                          <Icon type="info" size={2} className="mr-0.5" />
+                          Running
+                        </span>
+                      </Tooltip>
+                    ) : undefined
+                  }
+                  value={callSequenceName}
+                  onChange={(event) => {
+                    setExistingSequenceFlag(false);
+                    setCallSequenceName(event.target.value);
+                    validateInputLength(event.target.value);
+                    checkExistingSequences(event.target.value);
+                  }}
+                  onBlur={() => validateInputLength()}
+                  error={inputError}
+                  disabled={shouldDisableInput}
                   crossOrigin={undefined}
                 />
+                <CheckboxGroup
+                  label={
+                    <Typography className="mt-4 font-semibold">
+                      Filter by method:
+                    </Typography>
+                  }
+                  name="methods"
+                  className="-mt-0.5"
+                  onChange={onCheckboxChange}
+                  value={selectedMethods}
+                  vertical
+                >
+                  <div className="inline-grid grid-cols-2 gap-2">
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="GET"
+                      tokens={{
+                        GroupItem: {
+                          content: "static h-5 flex items-center",
+                        },
+                      }}
+                      value="get"
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="POST"
+                      value="post"
+                      tokens={{
+                        GroupItem: {
+                          content: "static h-5 flex items-center",
+                        },
+                      }}
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="PUT"
+                      value="put"
+                      tokens={{
+                        GroupItem: {
+                          content: "static h-5 flex items-center",
+                        },
+                      }}
+                    />
+                    <CheckboxGroup.Item
+                      className="col-span-1"
+                      label="DELETE"
+                      value="delete"
+                      tokens={{
+                        GroupItem: {
+                          content: "static h-5 flex items-center",
+                        },
+                      }}
+                    />
+                  </div>
+                </CheckboxGroup>
+                <div className="my-5 flex items-center">
+                  <DropdownMenu
+                    title="Endpoints"
+                    id="endpoints"
+                    visibleItemCount={5}
+                  >
+                    {allShownItems.map((item, index) => (
+                      <DropdownMenu.Item
+                        key={index}
+                        onSelect={() => {
+                          setModalOperation("add");
+                          setClickedItem(JSON.parse(JSON.stringify(item)));
+                        }}
+                      >
+                        <div className="text-body truncate">
+                          {item.method.toUpperCase()} {item.operationId}
+                        </div>
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu>
+                  <Input
+                    type="file"
+                    accept=".json"
+                    onChange={extractDataFromCallSequence}
+                    placeholder="Test placeholder"
+                    name={"choose-seq"}
+                    className="ml-2"
+                    crossOrigin={undefined}
+                  />
+                </div>
+                <ConfigurationDataTable
+                  selectedRequests={selectedRequests}
+                  setSelectedRequests={setSelectedRequests}
+                  setModalOperation={setModalOperation}
+                  setClickedItem={setClickedItem}
+                  removeItem={removeItem}
+                />
               </div>
-              <ConfigurationDataTable
-                selectedRequests={selectedRequests}
-                setSelectedRequests={setSelectedRequests}
-                setModalOperation={setModalOperation}
-                setClickedItem={setClickedItem}
-                removeItem={removeItem}
+            </Tabs.Tab>
+            <Tabs.Tab
+              label="Sequences"
+              className="sequences-tab"
+              icon={<Icon type="clock-counter-clockwise" variant="fill" />}
+              onClick={() => {
+                refreshSequenceDetailsCache(callSequenceName);
+              }}
+            >
+              <CallSequences
+                fetchingTab={activeTab}
+                onEditSequence={editSequence}
+                updateCallSequences={updateCallSequences}
               />
-            </div>
-          </Tabs.Tab>
-          <Tabs.Tab
-            label="Sequences"
-            className="sequences-tab"
-            icon={<Icon type="clock-counter-clockwise" variant="fill" />}
-            onClick={(index) => {
-              setActiveTab(index);
-              refreshSequenceDetailsCache(callSequenceName);
-            }}
-          >
-            <CallSequences
-              fetchingTab={activeTab}
-              onEditSequence={editSequence}
-              updateCallSequences={updateCallSequences}
-            />
-          </Tabs.Tab>
-        </Tabs>
-      </div>
+            </Tabs.Tab>
+          </Tabs>
+        </div>
+      </>
     </ResizableBox>
   );
 }

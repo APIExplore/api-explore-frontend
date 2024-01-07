@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Tabs } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
@@ -11,35 +11,29 @@ import { useResizeObserver } from "../../hooks/useResizeObserver";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 
 export default function VisualisationPanel() {
-  const leftPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.left.width
-  );
-  const rightPanelWidth = usePanelDimensionsStore(
-    (store) => store.panels.right.width
-  );
-  const bottomPanelHeight = usePanelDimensionsStore(
-    (store) => store.panels.bottom.height
-  );
-  const containerDimensions = usePanelDimensionsStore(
-    (store) => store.panels.container
+  const { left, right, middle, bottom, container } = usePanelDimensionsStore(
+    (store) => store.panels,
   );
   const setDimensions = usePanelDimensionsStore((store) => store.setDimensions);
 
   const [activeTab, setActiveTab] = useState(0);
-  const [position, setPosition] = useState<number>(leftPanelWidth);
+  const [position, setPosition] = useState<number>(left.width);
   const ref = useResizeObserver("middle", setDimensions);
 
   useEffect(() => {
-    setPosition(leftPanelWidth + 24);
-  }, [leftPanelWidth]);
+    setPosition(left.width + 24);
+  }, [left.width]);
+
+  const controlsOverlapping: boolean = useMemo(() => {
+    return middle.width < 780;
+  }, [middle.width]);
 
   return (
     <div
       style={{
         left: `${position}px`,
-        width:
-          containerDimensions.width - leftPanelWidth - rightPanelWidth - 24,
-        height: containerDimensions.height - bottomPanelHeight - 8,
+        width: container.width - left.width - right.width - 24,
+        height: container.height - bottom.height - 8,
       }}
       className="absolute col-span-6 p-2 m-1 bg-white drop-shadow-md h-full"
       ref={ref}
@@ -71,7 +65,7 @@ export default function VisualisationPanel() {
           <RelationshipVisualizer />
         </Tabs.Tab>
       </Tabs>
-      <SimulationControls />
+      <SimulationControls shouldReposition={controlsOverlapping} />
     </div>
   );
 }
