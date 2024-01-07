@@ -12,7 +12,7 @@ fixture("Test sequence upload")
     }
   });
 
-test("Test sequence upload", async (t) => {
+test("Test various schemas", async (t) => {
   await t.click(".new-schema-tab");
 
   await t
@@ -57,9 +57,9 @@ test("Test sequence upload", async (t) => {
       .click("#cancel-params");
     /* Create new schema*/
     await t.click("#choose-schema");
-  } else {
-    await t.click(".new-schema-tab");
   }
+
+  await t.click(".new-schema-tab");
 
   schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;
 
