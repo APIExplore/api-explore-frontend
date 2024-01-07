@@ -1,24 +1,41 @@
 import { fixture, Selector } from "testcafe";
+import axios from "axios";
+import { backendDomain } from "../src/constants/apiConstants";
 
-fixture("Bottom panel test").page("http://localhost:5173/");
+let schemaName;
+let sequenceName;
+
+fixture("Bottom panel test")
+  .page("http://localhost:5173/")
+  .afterEach(async () => {
+    if (schemaName) {
+      await axios.delete(
+        `${backendDomain}/callsequence/delete/${sequenceName}`
+      );
+      await axios.delete(`${backendDomain}/apischema/delete/${schemaName}`);
+    }
+  });
 
 async function schemaUpload(t) {
+  /* Start api over agent */
+  await t.click("#dropdown-available-apis");
+  await t.click("#schema-0").wait(9000);
+
+  await t.click(".new-schema-tab");
+
+  schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;
+  sequenceName = `Test sequence + ${Math.random() * (999 - 1 + 1) + 1}`;
+
   /* Test schema adress submit */
   await t
-    .typeText(
-      "#schema-name-input",
-      `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`
-    )
+    .typeText("#schema-name-input", schemaName)
     .setFilesToUpload("#input-file-upload", ["../assets/testSchema.json"]);
 
   /* Wait for schema submit */
   await t.expect(Selector("#file-uploaded").innerText).eql("File Uploaded");
 
   /* Create name and upload sequence */
-  await t.typeText(
-    "#sequence-name-input",
-    `Test sequence + ${Math.random() * (999 - 1 + 1) + 1}`
-  );
+  await t.typeText("#sequence-name-input", sequenceName);
 }
 
 test("Test bottom panel", async (t) => {
@@ -35,7 +52,7 @@ test("Test bottom panel", async (t) => {
   await t.click(".event-tab");
   await t
     .click("#endpoints")
-    .click("#option-2--menu--23")
+    .click("#option-2--menu--27")
     .typeText("#params-input-0", `Sequence upload`)
     .click("#submit-endpoint")
     .click("#edit-3")

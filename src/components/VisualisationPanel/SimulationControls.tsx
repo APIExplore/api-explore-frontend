@@ -31,7 +31,7 @@ export default function SimulationControls() {
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
   const selectedRequests: Request[] = useRequestsStore(
-    (store) => store.selectedRequests,
+    (store) => store.selectedRequests
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
@@ -43,7 +43,7 @@ export default function SimulationControls() {
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
   const clearRelationshipMappings = useRelationshipsStore(
-    (store) => store.clearMappings,
+    (store) => store.clearMappings
   );
 
   const simulateCallSequence = async () => {
@@ -55,7 +55,7 @@ export default function SimulationControls() {
         await fetchData(
           callSequenceName,
           Array.of(selectedRequests.at(0) as Request),
-          logsStore,
+          logsStore
         );
         setCallByCall(callByCall.enabled, 1);
       } else {
@@ -139,11 +139,11 @@ export default function SimulationControls() {
         <ButtonGroups>
           <ButtonGroups.Button
             variant="text"
-            id="stop-button"
+            id="agent-stop-button"
             disabled={!agentPid}
             onClick={() => {
               notification.push(
-                renderApiStoppedNotification(startedApi as string),
+                renderApiStoppedNotification(startedApi as string)
               );
               stopAgent();
             }}
@@ -160,7 +160,7 @@ export default function SimulationControls() {
             disabled={!agentPid}
             onClick={() => {
               notification.push(
-                renderApiRestartedNotification(startedApi as string),
+                renderApiRestartedNotification(startedApi as string)
               );
               restoreAgent(agentId, agentPid);
             }}

@@ -12,12 +12,12 @@ try {
       "./tests/middle-panel-test.ts",
       "./tests/right-panel-test.ts",
       "./tests/test-new-old-schema.ts",
-      "./tests/agent-test.ts",
       "./tests/test-all.ts",
+      "./tests/agent-test.ts",
     ])
     .browsers(["chrome --start-fullscreen"])
     .useProxy("localhost:5173")
-    .run({ speed: 0.9 });
+    .run({ speed: 1 });
 
   console.log("Tests failed: " + failed);
 } finally {

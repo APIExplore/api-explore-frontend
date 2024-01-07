@@ -1,16 +1,32 @@
 import { fixture, Selector } from "testcafe";
+import axios from "axios";
+import { backendDomain } from "../src/constants/apiConstants";
 
-fixture("Test schema fetch and endpoint selection").page(
-  "http://localhost:5173/"
-);
+let schemaName;
+let sequenceName;
+fixture("Test schema fetch and endpoint selection")
+  .page("http://localhost:5173/")
+  .afterEach(async () => {
+    if (schemaName) {
+      await axios.delete(
+        `${backendDomain}/callsequence/delete/${sequenceName}`
+      );
+      await axios.delete(
+        `${backendDomain}/callsequence/delete/${sequenceName + " New one"}`
+      );
+      await axios.delete(`${backendDomain}/apischema/delete/${schemaName}`);
+    }
+  });
 
 test("Test api schema adress submit and endpoints", async (t) => {
+  await t.click(".new-schema-tab");
+
+  schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;
+  sequenceName = `Test sequence + ${Math.random() * (999 - 1 + 1) + 1}`;
+
   /* Test schema adress submit */
   await t
-    .typeText(
-      "#schema-name-input",
-      `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`
-    )
+    .typeText("#schema-name-input", schemaName)
     .setFilesToUpload("#input-file-upload", ["../assets/testSchema.json"]);
 
   /* Wait for schema submit */
@@ -29,37 +45,34 @@ test("Test api schema adress submit and endpoints", async (t) => {
     /* Open endpoints and select some */
     .click("#endpoints")
     /* Select endpoint under index 2 and write under its params something (DELETE) */
-    .click("#option-2--menu--23")
+    .click("#option-2--menu--27")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 1 and write under its params something (POST) */
-    .click("#option-1--menu--23")
+    .click("#option-1--menu--27")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select endpoint under index 0 and write under its params something (GET) */
-    .click("#option-0--menu--23")
+    .click("#option-0--menu--27")
     .typeText("#params-input-0", `Item`)
     .click("#submit-endpoint")
     .click("#endpoints")
     /* Select random endpoint and show how to delete it */
-    .click("#option-3--menu--23")
+    .click("#option-3--menu--27")
     .click("#submit-endpoint")
     .click("#delete-3")
     /* Select random endpoint and show how to edit it if you forget to add params */
     .click("#endpoints")
-    .click("#option-1--menu--23")
+    .click("#option-1--menu--27")
     .click("#submit-endpoint")
     .click("#edit-3")
     .typeText("#params-input-0", `Item number 2`)
     .click("#submit-endpoint");
 
   /* Type sequence name */
-  await t.typeText(
-    "#sequence-name-input",
-    `Test sequence + ${Math.random() * (999 - 1 + 1) + 1}`
-  );
+  await t.typeText("#sequence-name-input", sequenceName);
 
   /* Submit sequence */
   await t.click("#play-button");
