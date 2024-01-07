@@ -296,7 +296,6 @@ export default function LandingPage() {
           id="close-landing-page"
           variant="filled"
           onClick={close}
-          disabled={!schemaName || !startedApi}
           trailingIcon={<Icon type="sign-in" />}
         >
           Enter
