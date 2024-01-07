@@ -25,7 +25,6 @@ export default function LandingPage() {
   const notification = useNotificationContext();
 
   const [apiList, setApiList] = useState([]);
-  const [activeTab, setActiveTab] = useState(0);
 
   const schemaName = useApiCallsStore((store) => store.schemaName);
   const modalOpened = useSchemaModalStore((store) => store.opened);
@@ -59,7 +58,6 @@ export default function LandingPage() {
   const modal = useModal();
   const close = () => {
     setModalOpened(false);
-    setActiveTab(0);
     notification.push(renderChooseSchemaNotification(schemaName as string));
   };
 
@@ -180,40 +178,71 @@ export default function LandingPage() {
       canDismiss={false}
       onClose={() => setModalOpened(false)}
     >
-      <ProgressBar
-        completed={
-          agentId !== null && schemaName !== null && schemaName.length > 0
-        }
-      >
-        <ProgressBar.Step>
-          <span>Started API service</span>
-          <Typography variant="subtext" className="string-value line-clamp-2">
-            {startedApi}
-          </Typography>
+      <ProgressBar tokens={{ indexIcon: { master: "hidden" } }}>
+        <ProgressBar.Step
+          tokens={{
+            indexIcon: {
+              master: "hidden",
+            },
+          }}
+        >
+          <span className="flex items-center">
+            <Icon
+              type={agentId !== null ? "check-circle" : "minus-circle"}
+              variant="light"
+              className={`-ml-4 pr-1 opacity-70 ${
+                agentId !== null && "text-primary"
+              }`}
+              size={8}
+            />
+            <div
+              className={agentId !== null ? "text-primary" : "text-secondary"}
+            >
+              Started API service
+              <Typography
+                variant="subtext"
+                className="string-value line-clamp-2"
+              >
+                {startedApi}
+              </Typography>
+            </div>
+          </span>
         </ProgressBar.Step>
-        <ProgressBar.Step active={agentId !== null}>
-          <span>Chosen API schema</span>
-          <Typography variant="subtext" className="string-value line-clamp-2">
-            {schemaName}
-          </Typography>
+        <ProgressBar.Step
+          tokens={{
+            indexIcon: {
+              master: "hidden",
+            },
+          }}
+        >
+          <span className="flex items-center">
+            <Icon
+              type={schemaName !== null ? "check-circle" : "minus-circle"}
+              variant="light"
+              className={`-ml-4 pr-1 opacity-70 ${
+                schemaName !== null && "text-primary"
+              }`}
+              size={8}
+            />
+            <div
+              className={
+                schemaName !== null ? "text-primary" : "text-secondary"
+              }
+            >
+              Chosen API schema
+              <Typography
+                variant="subtext"
+                className="string-value line-clamp-2"
+              >
+                {schemaName}
+              </Typography>
+            </div>
+          </span>
         </ProgressBar.Step>
       </ProgressBar>
       <div style={{ height: "650px", overflowY: "auto" }}>
         <Modal.Content title="">
-          <Tabs
-            iconPlacement="trailing"
-            fullWidth={true}
-            className="w-full"
-            index={activeTab}
-            defaultIndex={activeTab}
-            onTabChange={(tabIndex) => {
-              if ((tabIndex === 1 || tabIndex === 2) && !startedApi) {
-                setActiveTab(0);
-              } else {
-                setActiveTab(tabIndex);
-              }
-            }}
-          >
+          <Tabs iconPlacement="trailing" fullWidth={true} className="w-full">
             <Tabs.Tab
               className="api-list-tab"
               label="Start API"
@@ -222,7 +251,7 @@ export default function LandingPage() {
               <ApiList apiList={apiList} />
             </Tabs.Tab>
             <Tabs.Tab
-              className={`new-schema-tab ${!startedApi && "opacity-50"}`}
+              className="new-schema-tab"
               label="New schema"
               icon={<Icon type="magnifying-glass" variant="fill" />}
             >
@@ -233,7 +262,7 @@ export default function LandingPage() {
               />
             </Tabs.Tab>
             <Tabs.Tab
-              className={`existing-schema-tab ${!startedApi && "opacity-50"}`}
+              className="existing-schema-tab"
               label="Existing schema"
               icon={<Icon type="list" variant="fill" />}
             >
@@ -267,7 +296,7 @@ export default function LandingPage() {
           id="close-landing-page"
           variant="filled"
           onClick={close}
-          disabled={!schemaName && !startedApi}
+          disabled={!schemaName || !startedApi}
           trailingIcon={<Icon type="sign-in" />}
         >
           Enter

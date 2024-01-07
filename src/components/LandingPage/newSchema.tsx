@@ -22,7 +22,7 @@ export default function NewSchema({
 
   const [inputError, setInputError] = useState("");
   const [apiSchema, setApiSchema] = useState(
-    "http://localhost:8080/swagger.json"
+    "http://localhost:8080/swagger.json",
   );
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -93,7 +93,7 @@ export default function NewSchema({
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col mt-2 mb-4 h-36">
-        <div className="py-3 mt-6 text-center">
+        <div className="mt-6 text-center">
           <Typography variant="h6">API Schema Name:</Typography>
         </div>
         <Input

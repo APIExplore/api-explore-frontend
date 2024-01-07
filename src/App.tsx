@@ -47,7 +47,7 @@ function App() {
     <div className="flex flex-col w-full h-full" id="container">
       {agentLoading && (
         <div
-          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-50 flex justify-center items-center"
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-40 flex justify-center items-center"
           id="loading-screen"
         >
           <div className="flex flex-col mb-12 items-center animate-pulse space-y-4">
