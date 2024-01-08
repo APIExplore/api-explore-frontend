@@ -111,3 +111,17 @@ export function renderApiRestartedNotification(apiName: string) {
     ),
   } as NotificationProps;
 }
+
+export function renderSequenceUploaded(sequenceName: string) {
+  return {
+    title: "Sequence uploaded",
+    content: (
+      <Typography className="text-body-light">
+        Call sequence <i>{sequenceName}</i> has been uploaded and its calls have
+        populated the table
+      </Typography>
+    ),
+    icon: <Icon type="rows" className="text-primary opacity-60" size={7} />,
+    timeout: 4000,
+  } as NotificationProps;
+}

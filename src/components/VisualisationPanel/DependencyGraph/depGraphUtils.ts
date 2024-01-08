@@ -63,7 +63,7 @@ export function generateSequenceDependencies(calls): Dependency[] {
       dependencies: [],
     };
     // Check if this call has parameters
-    if (params) {
+    if (params.length > 0) {
       params.forEach((param) => {
         const paramName = param.name;
 
@@ -98,6 +98,18 @@ export function generateSequenceDependencies(calls): Dependency[] {
           }
         });
       });
+    } else {
+      calls.forEach((otherCall, otherIndex) => {
+        if (index !== otherIndex) {
+          const { path: otherPath, operationId: otherOperationId } = otherCall;
+          if (
+            otherPath.startsWith(path) &&
+            otherPath.replace(path, "").startsWith("/{")
+          ) {
+            dependencyMap[operationId].dependencies.push(otherOperationId);
+          }
+        }
+      });
     }
   });
   return dependencyMap as Dependency[];
@@ -127,12 +139,15 @@ export function generateDiagramSchema(
       if (method === "GET") {
         endpointKeys.forEach((childEndpoint, childIndex) => {
           if (index !== childIndex) {
-            const { dependencies: childDependencies } =
+            const { method: childMethod, dependencies: childDependencies } =
               dependencies[childEndpoint];
             const commonDependencies = endpointDependencies.filter((dep) =>
               childDependencies.includes(dep),
             );
-            if (commonDependencies.length > 0) {
+            if (
+              commonDependencies.length > 0 &&
+              !(method === "GET" && childMethod === "GET")
+            ) {
               endpointLinks.push({
                 id: `node_${childIndex} -> node_${index}`,
                 source: `node_${childIndex}`,

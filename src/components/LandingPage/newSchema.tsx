@@ -8,6 +8,7 @@ import { Input } from "@tiller-ds/form-elements";
 import { backendDomain } from "../../constants/apiConstants";
 import useSchemaModalStore from "../../stores/schemaModalStore";
 import DragDrop from "../RightPanel/DragDrop";
+import useApiCallsStore from "../../stores/apiCallsStore";
 
 export default function NewSchema({
   convertSchemaPathsToList,
@@ -18,6 +19,8 @@ export default function NewSchema({
   convertSchemaDefinitionsToList: (data: any) => void;
   resetVisualiserState: () => void;
 }) {
+  const setSchemaName = useApiCallsStore((store) => store.setSchemaName);
+
   const setModalOpened = useSchemaModalStore((store) => store.setOpened);
 
   const [inputError, setInputError] = useState("");
@@ -47,8 +50,8 @@ export default function NewSchema({
     }
   }
 
-  // Submit api adress to backend
-  async function submitApiAdress() {
+  // Submit api address to backend
+  async function submitApiAddress() {
     try {
       if (name.trim().length == 0 || apiSchema.trim().length == 0) {
         if (name.length == 0) {
@@ -65,6 +68,7 @@ export default function NewSchema({
         name: name,
       });
 
+      setSchemaName(name);
       extractDataFromSchema(backendData.data);
 
       // Show confirmation message
@@ -127,7 +131,7 @@ export default function NewSchema({
           id="submit-adress-button"
           className="my-2 mx-4 h-50"
           variant="outlined"
-          onClick={submitApiAdress}
+          onClick={submitApiAddress}
         >
           Submit schema
         </StatusButton>

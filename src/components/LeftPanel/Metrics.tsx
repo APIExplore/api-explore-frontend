@@ -89,7 +89,6 @@ export default function Metrics() {
   return (
     <div className="w-full max-w-full h-full px-2 text-center">
       <div className="flex items-center space-x-2 py-4 px-2">
-        <Icon type="gauge" />
         <Typography variant="h5">Performance Metrics</Typography>
       </div>
       <span className="flex flex-col space-y-1 w-full justify-center items-center p-4 group">

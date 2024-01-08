@@ -4,7 +4,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { useNotificationContext } from "@tiller-ds/alert";
-import { Badge, Card, IconButton } from "@tiller-ds/core";
+import { Badge, Card, IconButton, Tooltip } from "@tiller-ds/core";
 import { Icon, LoadingIcon } from "@tiller-ds/icons";
 
 import { SequenceDetails } from "./SequenceDetails";
@@ -28,20 +28,20 @@ export default function CallSequenceCard({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const selectedRequests = useRequestsStore(
-    (store: RequestsStore) => store.selectedRequests
+    (store: RequestsStore) => store.selectedRequests,
   );
   const callSequenceName = useRequestsStore((store) => store.callSequenceName);
 
   const setApiCalls = useApiCallsStore((store) => store.setApiCalls);
 
   const refreshSequenceDetailsCache = useCallSequenceCacheStore(
-    (store) => store.refreshSequenceDetailsCache
+    (store) => store.refreshSequenceDetailsCache,
   );
   const retrieveSequenceDetails = useCallSequenceCacheStore(
-    (store) => store.retrieveSequenceDetails
+    (store) => store.retrieveSequenceDetails,
   );
   const collapseFlag = useCallSequenceCacheStore(
-    (state: { collapseFlag: any }) => state.collapseFlag
+    (state: { collapseFlag: any }) => state.collapseFlag,
   );
 
   const exportSequenceToJsonFile = (name: string) => {
@@ -51,8 +51,10 @@ export default function CallSequenceCard({
   };
 
   const handleEditClick = async () => {
+    setLoading(true);
     await onEdit(sequence.name);
     setLoading(false);
+    setApiCalls([]);
   };
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function CallSequenceCard({
       // Make an axios.delete API call
       setLoading(true);
       const response = await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequence.name}`
+        `${backendDomain}/callsequence/delete/${sequence.name}`,
       );
       if (response.data.success) {
         // Successful deletion
@@ -91,19 +93,28 @@ export default function CallSequenceCard({
     <Card>
       <Card.Header>
         <Card.Header.Title>
-          {sequence.name}
-          {active && (
-            <Badge small={true} className="ml-1">
-              Active
-              <IconButton
-                icon={
-                  <Icon type="arrows-clockwise" size={3} className="pl-1" />
-                }
-                label="Refresh details"
-                onClick={reFetchDetails}
-              />
-            </Badge>
-          )}
+          <div className="flex space-x-1">
+            <div
+              className={!active ? "cursor-pointer" : ""}
+              onClick={() => !active && handleEditClick()}
+            >
+              <Tooltip label={active ? "Active sequence" : "Set as active"}>
+                {sequence.name}
+              </Tooltip>
+            </div>
+            {active && (
+              <Badge small={true} className="ml-1">
+                Active
+                <IconButton
+                  icon={
+                    <Icon type="arrows-clockwise" size={3} className="pl-1" />
+                  }
+                  label="Refresh details"
+                  onClick={reFetchDetails}
+                />
+              </Badge>
+            )}
+          </div>
         </Card.Header.Title>
         <Card.Header.Actions>
           <div className="flex space-x-2 ">
@@ -112,17 +123,15 @@ export default function CallSequenceCard({
                 <LoadingIcon size={3} />
               </span>
             )}
-            <IconButton
-              onClick={async () => {
-                setLoading(true);
-                await handleEditClick();
-                setApiCalls([]);
-              }}
-              icon={<Icon type="pencil-simple" />}
-              id="edit-sequence"
-              label="Edit"
-              className={"text-green-600 hover:opacity-100 opacity-60"}
-            />
+            {!active && (
+              <IconButton
+                onClick={handleEditClick}
+                icon={<Icon type="arrow-arc-left" />}
+                id="edit-sequence"
+                label="Set as active"
+                className="text-primary hover:opacity-100 opacity-60"
+              />
+            )}
             <IconButton
               onClick={async () => {
                 setLoading(true);
@@ -183,7 +192,7 @@ export default function CallSequenceCard({
                 icon={<Icon type="trash" />}
                 id="delete-sequence"
                 label="Delete"
-                className={"text-red-600 hover:opacity-100 opacity-60"}
+                className="text-red-600 hover:opacity-100 opacity-60"
               />
               <IconButton
                 onClick={() => exportSequenceToJsonFile(sequence.name)}

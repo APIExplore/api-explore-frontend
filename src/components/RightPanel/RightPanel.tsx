@@ -18,7 +18,10 @@ import useApiCallsStore from "../../stores/apiCallsStore";
 import useCallSequenceCacheStore from "../../stores/callSequenceCacheStore";
 import usePanelDimensionsStore from "../../stores/panelDimensionsStore";
 import useRequestsStore, { RequestsStore } from "../../stores/requestsStore";
-import { renderEditSequenceNotification } from "../../util/notificationUtils";
+import {
+  renderEditSequenceNotification,
+  renderSequenceUploaded,
+} from "../../util/notificationUtils";
 
 export default function RightPanel() {
   const notification = useNotificationContext();
@@ -199,6 +202,7 @@ export default function RightPanel() {
       reader.readAsText(file);
     }
     setCallByCall(callByCall.enabled, 0);
+    notification.push(renderSequenceUploaded(file.name));
   };
 
   const checkExistingSequences = (value?: string) => {
