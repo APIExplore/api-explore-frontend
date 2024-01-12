@@ -10,7 +10,7 @@ fixture("Bottom panel test")
   .afterEach(async () => {
     if (schemaName) {
       await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequenceName}`
+        `${backendDomain}/callsequence/delete/${sequenceName}`,
       );
       await axios.delete(`${backendDomain}/apischema/delete/${schemaName}`);
     }
@@ -18,6 +18,7 @@ fixture("Bottom panel test")
 
 async function schemaUpload(t) {
   /* Start api over agent */
+  await t.click("#close-introduction-page");
   await t.click("#dropdown-available-apis");
   await t.click("#schema-0").wait(9000);
 

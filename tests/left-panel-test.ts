@@ -9,13 +9,14 @@ fixture("Left panel test")
   .afterEach(async () => {
     if (schemaName) {
       await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequenceName}`
+        `${backendDomain}/callsequence/delete/${sequenceName}`,
       );
       await axios.delete(`${backendDomain}/apischema/delete/${schemaName}`);
     }
   });
 
 async function schemaUpload(t) {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;
@@ -50,10 +51,10 @@ test("Test details", async (t) => {
 
   /* Show those details for both endpoints */
   await t.click(
-    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(0)
+    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(0),
   );
   await t.click(
-    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(1)
+    Selector("button").withAttribute("title", "Toggle Row Expanded").nth(1),
   );
 
   await t.click(".metrics-tab");

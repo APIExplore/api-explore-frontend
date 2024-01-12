@@ -13,6 +13,7 @@ fixture("Test sequence upload")
   });
 
 test("Test various schemas", async (t) => {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   await t

@@ -12,6 +12,7 @@ fixture("Test agent")
   });
 // C:/Program Files/Java/jre-1.8/bin/java.exe
 test("Test agent", async (t) => {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;

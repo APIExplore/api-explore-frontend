@@ -4,6 +4,7 @@ import { Typography } from "@tiller-ds/core";
 import { Icon } from "@tiller-ds/icons";
 
 import BottomPanel from "./components/BottomPanel/BottomPanel";
+import IntroductionPage from "./components/LandingPage/IntroductionPage";
 import LandingPage from "./components/LandingPage/LandingPage";
 import LeftPanel from "./components/LeftPanel/LeftPanel";
 import RightPanel from "./components/RightPanel/RightPanel";
@@ -58,6 +59,7 @@ function App() {
           </div>
         </div>
       )}
+      <IntroductionPage />
       <LandingPage />
       <div className="flex justify-between w-full h-full">
         <LeftPanel />

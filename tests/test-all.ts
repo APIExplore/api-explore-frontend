@@ -9,16 +9,17 @@ fixture("Test schema fetch and endpoint selection")
   .afterEach(async () => {
     if (schemaName) {
       await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequenceName}`
+        `${backendDomain}/callsequence/delete/${sequenceName}`,
       );
       await axios.delete(
-        `${backendDomain}/callsequence/delete/${sequenceName + " New one"}`
+        `${backendDomain}/callsequence/delete/${sequenceName + " New one"}`,
       );
       await axios.delete(`${backendDomain}/apischema/delete/${schemaName}`);
     }
   });
 
 test("Test api schema adress submit and endpoints", async (t) => {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;

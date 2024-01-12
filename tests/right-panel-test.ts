@@ -15,6 +15,7 @@ fixture("Right panel test")
   });
 
 async function schemaUpload(t) {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   const sequenceName = String(Math.random() * (999 - 1 + 1) + 1);

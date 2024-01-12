@@ -6,7 +6,7 @@ type ModalStore = {
 };
 
 const useSchemaModalStore = create<ModalStore>((set) => ({
-  opened: true,
+  opened: false,
   setOpened: (isOpened) => set({ opened: isOpened }),
 }));
 

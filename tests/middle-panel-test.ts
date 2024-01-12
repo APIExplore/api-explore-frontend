@@ -1,6 +1,7 @@
 import { fixture, Selector } from "testcafe";
 import axios from "axios";
 import { backendDomain } from "../src/constants/apiConstants";
+
 let schemaName;
 let sequenceName;
 fixture("Middle panel test")
@@ -12,6 +13,7 @@ fixture("Middle panel test")
   });
 
 async function schemaUpload(t) {
+  await t.click("#close-introduction-page");
   await t.click(".new-schema-tab");
 
   schemaName = `Test schema + ${Math.random() * (999 - 1 + 1) + 1}`;
